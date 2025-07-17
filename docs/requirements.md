@@ -68,6 +68,9 @@
 
 ## 4. 기술 스택 (제안)
 
+### 모노레포
+- pnpm workspaces
+
 ### 프론트엔드
 - **프레임워크**: React.js
 - **UI Kit**: Shadcn/ui

@@ -12,6 +12,7 @@
 - 2단계: 백엔드 연동 확장 (AWS 서버리스)
 
 ### 1.3 기술 스택
+- **모노레포 관리**: pnpm workspaces
 - **프론트엔드**: React 18 + TypeScript + Tailwind CSS
 - **UI Kit**: Shadcn/ui
 - **빌드 도구**: Vite
@@ -496,22 +497,34 @@ class APIRepository implements TodoRepository { ... }
 
 ### 12.3 폴더 구조
 ```
-src/
-├── components/           # 재사용 가능한 컴포넌트
-│   ├── ui/              # 기본 UI 컴포넌트
-│   └── todo/            # Todo 관련 컴포넌트
-├── hooks/               # 커스텀 훅
-├── contexts/            # React Context
-├── services/            # 데이터 서비스
-├── types/               # TypeScript 타입 정의
-├── utils/               # 유틸리티 함수
-├── __tests__/           # 테스트 파일
-└── assets/              # 정적 자원
+/ (root)
+├── apps/
+│   ├── client/             # React 프론트엔드 (Vite)
+│   │   ├── src/
+│   │   │   ├── components/   # 클라이언트 전용 컴포넌트
+│   │   │   ├── contexts/
+│   │   │   └── App.tsx
+│   │   ├── package.json
+│   │   └── vite.config.ts
+│   └── server/             # 백엔드 (AWS Lambda)
+│       ├── src/
+│       │   ├── functions/  # Lambda 핸들러 (예: get-todos.ts)
+│       │   └── utils/
+│       └── package.json
+├── packages/
+│   ├── ui/                 # 공유 UI 컴포넌트 (Shadcn/ui)
+│   │   ├── button.tsx      # 예: packages/ui/button.tsx
+│   │   └── card.tsx
+│   └── types/              # 공유 TypeScript 타입
+│       └── index.ts        # 예: export interface Todo { ... }
+├── node_modules/
+├── package.json            # 전체 프로젝트 관리 (pnpm-workspace)
+└── pnpm-workspace.yaml     # pnpm 워크스페이스 설정
 ```
 
 ---
 
-**작성일**: 2025년 01월 15일  
+**작성일**: 2025년 07월 18일  
 **작성자**: 개발팀  
 **버전**: 1.0  
 **검토자**: - 
