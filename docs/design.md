@@ -13,6 +13,7 @@
 
 ### 1.3 기술 스택
 - **프론트엔드**: React 18 + TypeScript + Tailwind CSS
+- **UI Kit**: Shadcn/ui
 - **빌드 도구**: Vite
 - **상태 관리**: React Context + useReducer
 - **테스트**: Jest + React Testing Library
@@ -365,43 +366,18 @@ class APIRepository implements TodoRepository { ... }
 
 ## 7. UI/UX 설계
 
-### 7.1 디자인 시스템
-
-#### 7.1.1 색상 팔레트
-```css
-:root {
-  /* Primary Colors */
-  --color-primary-50: #eff6ff;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  
-  /* Gray Scale */
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-500: #6b7280;
-  --color-gray-900: #111827;
-  
-  /* Status Colors */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-}
-```
-
-#### 7.1.2 타이포그래피
-```css
-.text-heading-1 { @apply text-2xl font-bold; }
-.text-heading-2 { @apply text-xl font-semibold; }
-.text-body { @apply text-base; }
-.text-caption { @apply text-sm text-gray-500; }
-```
-
-#### 7.1.3 우선순위 스타일
-```css
-.priority-high { @apply bg-red-100 text-red-800 border-red-200; }
-.priority-medium { @apply bg-yellow-100 text-yellow-800 border-yellow-200; }
-.priority-low { @apply bg-green-100 text-green-800 border-green-200; }
-```
+### 7.1 UI Kit 활용
+- **UI Kit**: Shadcn/ui
+- **설치 및 설정**: `npx shadcn-ui@latest init` 명령어를 통해 프로젝트에 통합.
+- **컴포넌트 활용**:
+  - `Button`: 핵심 액션 버튼 (추가, 수정, 삭제)
+  - `Input`: 할 일 텍스트 입력
+  - `Checkbox`: 할 일 완료 상태 토글
+  - `Select` / `RadioGroup`: 우선순위, 필터 선택
+  - `Dialog`: 삭제 확인 등 모달 창
+  - `Card`: Todo 항목 컨테이너
+  - `Tooltip`: 아이콘 버튼 설명
+- **테마**: `theme.css` 파일을 통해 프로젝트의 디자인 시스템에 맞게 색상, 폰트, 스타일을 커스터마이징하여 일관성을 유지.
 
 ### 7.2 반응형 브레이크포인트
 

@@ -70,6 +70,7 @@
 
 ### 프론트엔드
 - **프레임워크**: React.js
+- **UI Kit**: Shadcn/ui
 - **스타일링**: Tailwind CSS
 - **빌드 도구**: Vite
 - 상태관리 : React Context + useReducer
