@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .browser-frame { 
+        fill: #f3f4f6; 
+        stroke: #d1d5db; 
+        stroke-width: 1; 
+        rx: 8;
+      }
+      .browser-header { 
+        fill: #ffffff; 
+        stroke: #e5e7eb; 
+        stroke-width: 1; 
+        rx: 8;
+      }
+      .browser-controls { 
+        fill: #ef4444; 
+        rx: 50;
+      }
+      .browser-controls-yellow { 
+        fill: #f59e0b; 
+        rx: 50;
+      }
+      .browser-controls-green { 
+        fill: #10b981; 
+        rx: 50;
+      }
+      .main-content { 
+        fill: #ffffff; 
+        rx: 0;
+      }
+      .header { 
+        fill: #3b82f6; 
+        rx: 0;
+      }
+      .sidebar { 
+        fill: #f9fafb; 
+        stroke: #e5e7eb; 
+        stroke-width: 1; 
+        rx: 8;
+      }
+      .input-field { 
+        fill: #ffffff; 
+        stroke: #d1d5db; 
+        stroke-width: 1; 
+        rx: 8;
+      }
+      .button { 
+        fill: #3b82f6; 
+        rx: 6;
+      }
+      .button-secondary { 
+        fill: #f3f4f6; 
+        stroke: #d1d5db; 
+        stroke-width: 1; 
+        rx: 6;
+      }
+      .button-active { 
+        fill: #dbeafe; 
+        stroke: #3b82f6; 
+        stroke-width: 1; 
+        rx: 6;
+      }
+      .todo-item { 
+        fill: #ffffff; 
+        stroke: #e5e7eb; 
+        stroke-width: 1; 
+        rx: 8;
+      }
+      .todo-completed { 
+        fill: #f0f9ff; 
+        stroke: #bfdbfe; 
+        stroke-width: 1; 
+        rx: 8;
+      }
+      .priority-high { 
+        fill: #fee2e2; 
+        stroke: #fca5a5; 
+        stroke-width: 1; 
+        rx: 4;
+      }
+      .priority-medium { 
+        fill: #fef3c7; 
+        stroke: #fcd34d; 
+        stroke-width: 1; 
+        rx: 4;
+      }
+      .priority-low { 
+        fill: #dcfce7; 
+        stroke: #86efac; 
+        stroke-width: 1; 
+        rx: 4;
+      }
+      .text-header { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        font-size: 24px; 
+        font-weight: 600;
+        fill: #ffffff; 
+        text-anchor: middle; 
+        dominant-baseline: middle;
+      }
+      .text-button { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        font-size: 14px; 
+        font-weight: 500;
+        fill: #ffffff; 
+        text-anchor: middle; 
+        dominant-baseline: middle;
+      }
+      .text-button-secondary { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        font-size: 14px; 
+        font-weight: 500;
+        fill: #374151; 
+        text-anchor: middle; 
+        dominant-baseline: middle;
+      }
+      .text-button-active { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        font-size: 14px; 
+        font-weight: 500;
+        fill: #3b82f6; 
+        text-anchor: middle; 
+        dominant-baseline: middle;
+      }
+      .text-todo { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        font-size: 14px; 
+        font-weight: 400;
+        fill: #111827; 
+        text-anchor: start; 
+        dominant-baseline: middle;
+      }
+      .text-todo-completed { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        font-size: 14px; 
+        font-weight: 400;
+        fill: #6b7280; 
+        text-anchor: start; 
+        dominant-baseline: middle;
+        text-decoration: line-through;
+      }
+      .text-placeholder { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        font-size: 14px; 
+        font-weight: 400;
+        fill: #9ca3af; 
+        text-anchor: start; 
+        dominant-baseline: middle;
+      }
+      .text-stats { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        font-size: 16px; 
+        font-weight: 500;
+        fill: #374151; 
+        text-anchor: middle; 
+        dominant-baseline: middle;
+      }
+      .text-url { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        font-size: 12px; 
+        font-weight: 400;
+        fill: #6b7280; 
+        text-anchor: start; 
+        dominant-baseline: middle;
+      }
+      .icon { 
+        fill: #6b7280; 
+      }
+      .icon-white { 
+        fill: #ffffff; 
+      }
+      .checkbox { 
+        fill: #ffffff; 
+        stroke: #d1d5db; 
+        stroke-width: 2; 
+        rx: 3;
+      }
+      .checkbox-checked { 
+        fill: #3b82f6; 
+        stroke: #3b82f6; 
+        stroke-width: 2; 
+        rx: 3;
+      }
+    </style>
+  </defs>
+  
+  <!-- Browser Frame -->
+  <rect class="browser-frame" x="20" y="20" width="1160" height="660"/>
+  
+  <!-- Browser Header -->
+  <rect class="browser-header" x="20" y="20" width="1160" height="40"/>
+  
+  <!-- Browser Controls -->
+  <circle class="browser-controls" cx="40" cy="40" r="6"/>
+  <circle class="browser-controls-yellow" cx="60" cy="40" r="6"/>
+  <circle class="browser-controls-green" cx="80" cy="40" r="6"/>
+  
+  <!-- URL Bar -->
+  <rect class="input-field" x="120" y="30" width="400" height="20"/>
+  <text x="130" y="40" class="text-url">localhost:3000/todos</text>
+  
+  <!-- Main Content Area -->
+  <rect class="main-content" x="20" y="60" width="1160" height="620"/>
+  
+  <!-- Header -->
+  <rect class="header" x="20" y="60" width="1160" height="80"/>
+  <text x="600" y="100" class="text-header">할 일 관리 시스템</text>
+  
+  <!-- User Info -->
+  <circle cx="1120" cy="100" r="20" fill="#e5e7eb"/>
+  <text x="1120" y="100" class="text-button-secondary" style="font-size: 14px;">홍길동</text>
+  
+  <!-- Logo -->
+  <rect x="50" y="80" width="40" height="40" fill="#ffffff" rx="8"/>
+  <text x="70" y="100" class="text-button-secondary" style="font-size: 16px;">TODO</text>
+  
+  <!-- Left Sidebar -->
+  <rect class="sidebar" x="40" y="160" width="200" height="480"/>
+  
+  <!-- Filter Buttons -->
+  <rect class="button-active" x="60" y="180" width="160" height="40"/>
+  <text x="140" y="200" class="text-button-active">전체 보기</text>
+  
+  <rect class="button-secondary" x="60" y="230" width="160" height="40"/>
+  <text x="140" y="250" class="text-button-secondary">진행 중</text>
+  
+  <rect class="button-secondary" x="60" y="280" width="160" height="40"/>
+  <text x="140" y="300" class="text-button-secondary">완료됨</text>
+  
+  <!-- Sort Options -->
+  <text x="70" y="350" class="text-button-secondary" style="font-size: 12px; font-weight: 600;">정렬 옵션</text>
+  
+  <rect class="button-secondary" x="60" y="370" width="160" height="35"/>
+  <text x="140" y="387" class="text-button-secondary">생성일순</text>
+  
+  <rect class="button-secondary" x="60" y="415" width="160" height="35"/>
+  <text x="140" y="432" class="text-button-secondary">우선순위순</text>
+  
+  <!-- Statistics -->
+  <text x="70" y="480" class="text-button-secondary" style="font-size: 12px; font-weight: 600;">통계</text>
+  
+  <text x="70" y="500" class="text-button-secondary" style="font-size: 12px;">전체: 8개</text>
+  <text x="70" y="520" class="text-button-secondary" style="font-size: 12px;">진행중: 6개</text>
+  <text x="70" y="540" class="text-button-secondary" style="font-size: 12px;">완료: 2개</text>
+  
+  <!-- Progress Bar -->
+  <rect x="70" y="560" width="120" height="6" fill="#e5e7eb" rx="3"/>
+  <rect x="70" y="560" width="30" height="6" fill="#3b82f6" rx="3"/>
+  
+  <!-- Main Content Area -->
+  
+  <!-- Input Section -->
+  <rect class="input-field" x="260" y="180" width="600" height="50"/>
+  <text x="280" y="205" class="text-placeholder">새로운 할 일을 입력하세요...</text>
+  
+  <!-- Priority Dropdown -->
+  <rect class="button-secondary" x="880" y="180" width="120" height="50"/>
+  <text x="940" y="205" class="text-button-secondary">우선순위</text>
+  <polygon points="980,200 990,210 970,210" fill="#6b7280"/>
+  
+  <!-- Add Button -->
+  <rect class="button" x="1020" y="180" width="120" height="50"/>
+  <text x="1080" y="205" class="text-button">할 일 추가</text>
+  
+  <!-- Todo Grid -->
+  
+  <!-- Todo Item 1 -->
+  <rect class="todo-item" x="260" y="260" width="280" height="80"/>
+  <rect class="checkbox" x="280" y="280" width="20" height="20"/>
+  <text x="310" y="290" class="text-todo">프로젝트 기획서 작성</text>
+  <text x="310" y="310" class="text-todo" style="font-size: 12px; fill: #6b7280;">2024-01-15 생성</text>
+  <rect class="priority-high" x="480" y="280" width="50" height="20"/>
+  <text x="505" y="290" style="font-size: 10px; fill: #dc2626; text-anchor: middle;">HIGH</text>
+  
+  <!-- Todo Item 2 -->
+  <rect class="todo-item" x="560" y="260" width="280" height="80"/>
+  <rect class="checkbox" x="580" y="280" width="20" height="20"/>
+  <text x="610" y="290" class="text-todo">UI 디자인 시안 검토</text>
+  <text x="610" y="310" class="text-todo" style="font-size: 12px; fill: #6b7280;">2024-01-14 생성</text>
+  <rect class="priority-medium" x="780" y="280" width="50" height="20"/>
+  <text x="805" y="290" style="font-size: 10px; fill: #d97706; text-anchor: middle;">MID</text>
+  
+  <!-- Todo Item 3 -->
+  <rect class="todo-item" x="860" y="260" width="280" height="80"/>
+  <rect class="checkbox-checked" x="880" y="280" width="20" height="20"/>
+  <text x="910" y="290" class="text-todo-completed">회의록 정리</text>
+  <text x="910" y="310" class="text-todo" style="font-size: 12px; fill: #6b7280;">2024-01-13 생성</text>
+  <rect class="priority-low" x="1080" y="280" width="50" height="20"/>
+  <text x="1105" y="290" style="font-size: 10px; fill: #16a34a; text-anchor: middle;">LOW</text>
+  
+  <!-- Checkmark -->
+  <polyline points="885,285 890,290 895,280" stroke="#ffffff" stroke-width="2" fill="none"/>
+  
+  <!-- Todo Item 4 -->
+  <rect class="todo-item" x="260" y="360" width="280" height="80"/>
+  <rect class="checkbox" x="280" y="380" width="20" height="20"/>
+  <text x="310" y="390" class="text-todo">테스트 케이스 작성</text>
+  <text x="310" y="410" class="text-todo" style="font-size: 12px; fill: #6b7280;">2024-01-12 생성</text>
+  <rect class="priority-high" x="480" y="380" width="50" height="20"/>
+  <text x="505" y="390" style="font-size: 10px; fill: #dc2626; text-anchor: middle;">HIGH</text>
+  
+  <!-- Todo Item 5 -->
+  <rect class="todo-item" x="560" y="360" width="280" height="80"/>
+  <rect class="checkbox" x="580" y="380" width="20" height="20"/>
+  <text x="610" y="390" class="text-todo">API 문서 작성</text>
+  <text x="610" y="410" class="text-todo" style="font-size: 12px; fill: #6b7280;">2024-01-11 생성</text>
+  <rect class="priority-medium" x="780" y="380" width="50" height="20"/>
+  <text x="805" y="390" style="font-size: 10px; fill: #d97706; text-anchor: middle;">MID</text>
+  
+  <!-- Todo Item 6 -->
+  <rect class="todo-item" x="860" y="360" width="280" height="80"/>
+  <rect class="checkbox-checked" x="880" y="380" width="20" height="20"/>
+  <text x="910" y="390" class="text-todo-completed">코드 리뷰</text>
+  <text x="910" y="410" class="text-todo" style="font-size: 12px; fill: #6b7280;">2024-01-10 생성</text>
+  <rect class="priority-low" x="1080" y="380" width="50" height="20"/>
+  <text x="1105" y="390" style="font-size: 10px; fill: #16a34a; text-anchor: middle;">LOW</text>
+  
+  <!-- Checkmark -->
+  <polyline points="885,385 890,390 895,380" stroke="#ffffff" stroke-width="2" fill="none"/>
+  
+  <!-- More Items Indicator -->
+  <text x="720" y="480" class="text-button-secondary" style="text-anchor: middle;">더 많은 할 일이 있습니다...</text>
+  
+  <!-- Pagination -->
+  <rect class="button-secondary" x="560" y="500" width="40" height="30"/>
+  <text x="580" y="515" class="text-button-secondary">1</text>
+  
+  <rect class="button-active" x="610" y="500" width="40" height="30"/>
+  <text x="630" y="515" class="text-button-active">2</text>
+  
+  <rect class="button-secondary" x="660" y="500" width="40" height="30"/>
+  <text x="680" y="515" class="text-button-secondary">3</text>
+  
+  <!-- Footer Stats -->
+  <rect class="sidebar" x="260" y="580" width="880" height="60"/>
+  <text x="350" y="605" class="text-stats">전체 8개</text>
+  <text x="500" y="605" class="text-stats">진행중 6개</text>
+  <text x="650" y="605" class="text-stats">완료 2개</text>
+  <text x="800" y="605" class="text-stats">완료율 25%</text>
+  
+  <!-- Main Progress Bar -->
+  <rect x="950" y="598" width="160" height="8" fill="#e5e7eb" rx="4"/>
+  <rect x="950" y="598" width="40" height="8" fill="#3b82f6" rx="4"/>
+</svg>

@@ -1,0 +1,23 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+    <style>.label{font-size:13px;}.participant{stroke:black;stroke-width:1.5;}.arrow{marker-end:url(#h);fill:none;stroke:black;}.arrow-dash{marker-end:url(#h);fill:none;stroke:black;stroke-dasharray:5,5;}</style>
+    <defs><marker id="h" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"/></marker></defs>
+    <g class="participants">
+        <text x="50" y="30" text-anchor="middle">User</text><line x1="50" y1="40" x2="50" y2="550" class="participant"/>
+        <text x="150" y="30" text-anchor="middle">TodoInput</text><line x1="150" y1="40" x2="150" y2="550" class="participant"/>
+        <text x="270" y="30" text-anchor="middle">TodoContext</text><line x1="270" y1="40" x2="270" y2="550" class="participant"/>
+        <text x="390" y="30" text-anchor="middle">Reducer</text><line x1="390" y1="40" x2="390" y2="550" class="participant"/>
+        <text x="510" y="30" text-anchor="middle">LocalStorage</text><line x1="510" y1="40" x2="510" y2="550" class="participant"/>
+        <text x="630" y="30" text-anchor="middle">TodoList</text><line x1="630" y1="40" x2="630" y2="550" class="participant"/>
+    </g>
+    <g class="messages">
+        <path d="M50,80 H150" class="arrow"/><text x="55" y="75" class="label">할 일 입력 및 추가 버튼 클릭</text>
+        <path d="M150,120 H270" class="arrow"/><text x="155" y="115" class="label">addTodo(title, priority)</text>
+        <path d="M270,160 H390" class="arrow"/><text x="275" y="155" class="label">dispatch(ADD_TODO)</text>
+        <path d="M390,200 C440,200,440,240,390,240" class="arrow"/><text x="420" y="220" class="label"><tspan x="420">새 Todo 생성</tspan><tspan x="420" dy="15">(id, createdAt 등)</tspan></text>
+        <path d="M390,280 H510" class="arrow"/><text x="395" y="275" class="label">업데이트된 todos 저장</text>
+        <path d="M510,320 H390" class="arrow-dash"/><text x="400" y="315" class="label">저장 완료</text>
+        <path d="M390,360 H270" class="arrow-dash"/><text x="275" y="355" class="label">새로운 state 반환</text>
+        <path d="M270,400 H630" class="arrow-dash"/><text x="275" y="395" class="label">업데이트된 todos 전달</text>
+        <path d="M630,440 H50" class="arrow-dash"/><text x="55" y="435" class="label">새 할 일이 목록에 표시</text>
+    </g>
+</svg>

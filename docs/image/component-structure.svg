@@ -1,0 +1,30 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+    <style>.label{font-size:13px;text-anchor:middle;dominant-baseline:central;}.box{stroke:#333;stroke-width:1.5;fill:white;rx:5;}.arrow{marker-end:url(#h);fill:none;stroke:black;}</style>
+    <defs><marker id="h" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"/></marker></defs>
+    <g>
+        <rect x="340" y="10" width="120" height="40" class="box" style="fill:#e1f5fe;"/><text x="400" y="30" class="label">App</text>
+        <rect x="80" y="90" width="120" height="40" class="box"/><text x="140" y="110" class="label">Header</text>
+        <rect x="340" y="90" width="120" height="40" class="box"/><text x="400" y="110" class="label">TodoContainer</text>
+        <rect x="580" y="90" width="120" height="40" class="box"/><text x="640" y="110" class="label">Footer</text>
+        <path d="M400,50 V90" class="arrow"/><path d="M400,50 C300,70,140,70,140,90" class="arrow"/><path d="M400,50 C500,70,640,70,640,90" class="arrow"/>
+        <rect x="20" y="170" width="100" height="40" class="box"/><text x="70" y="190" class="label">Logo</text>
+        <rect x="140" y="170" width="100" height="50" class="box"/><text x="190" y="188" class="label"><tspan x="190">UserInfo</tspan><tspan x="190" dy="15">Phase 2</tspan></text>
+        <path d="M140,130 V170" class="arrow"/><path d="M140,130 L70,170" class="arrow"/><path d="M140,130 L190,170" class="arrow"/>
+        <rect x="280" y="170" width="100" height="40" class="box"/><text x="330" y="190" class="label">TodoInput</text>
+        <rect x="400" y="170" width="100" height="40" class="box"/><text x="450" y="190" class="label">TodoFilters</text>
+        <rect x="520" y="170" width="100" height="40" class="box"/><text x="570" y="190" class="label">TodoList</text>
+        <rect x="640" y="170" width="100" height="40" class="box"/><text x="690" y="190" class="label">TodoStats</text>
+        <path d="M400,130 V170" class="arrow"/><path d="M400,130 L330,170" class="arrow"/><path d="M400,130 L450,170" class="arrow"/><path d="M400,130 L570,170" class="arrow"/><path d="M400,130 L690,170" class="arrow"/>
+        <rect x="520" y="250" width="100" height="40" class="box"/><text x="570" y="270" class="label">TodoItem</text>
+        <path d="M570,210 V250" class="arrow"/>
+        <rect x="380" y="330" width="100" height="40" class="box"/><text x="430" y="350" class="label">TodoText</text>
+        <rect x="500" y="330" width="120" height="40" class="box"/><text x="560" y="350" class="label">PriorityBadge</text>
+        <rect x="640" y="330" width="100" height="40" class="box"/><text x="690" y="350" class="label">TodoActions</text>
+        <path d="M570,290 V330" class="arrow"/><path d="M570,290 L430,330" class="arrow"/><path d="M570,290 L560,330" class="arrow"/><path d="M570,290 L690,330" class="arrow"/>
+        <rect x="340" y="450" width="120" height="50" class="box" style="fill:#f3e5f5;"/><text x="400" y="468" class="label"><tspan x="400">Context API</tspan><tspan x="400" dy="15">TodoContext</tspan></text>
+        <path d="M330,210 L400,450" class="arrow"/><path d="M450,210 L400,450" class="arrow"/><path d="M570,290 L400,450" class="arrow"/>
+        <rect x="250" y="540" width="120" height="50" class="box" style="fill:#fff3e0;"/><text x="310" y="558" class="label"><tspan x="310">useReducer</tspan><tspan x="310" dy="15">TodoReducer</tspan></text>
+        <rect x="450" y="540" width="120" height="50" class="box" style="fill:#e8f5e8;"/><text x="510" y="558" class="label"><tspan x="510">LocalStorage</tspan><tspan x="510" dy="15">Service</tspan></text>
+        <path d="M400,500 V540" class="arrow"/><path d="M400,500 L310,540" class="arrow"/><path d="M400,500 L510,540" class="arrow"/>
+    </g>
+</svg>

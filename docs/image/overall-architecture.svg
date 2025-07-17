@@ -1,0 +1,54 @@
+<svg width="800" height="500" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+    <style>
+        .label { font-size: 14px; text-anchor: middle; dominant-baseline: central; }
+        .group-label { font-size: 16px; font-weight: bold; text-anchor: middle; }
+        .box { stroke: #333; stroke-width: 1.5; fill: white; rx: 5; }
+        .group-box { stroke: #999; stroke-dasharray: 5,5; fill: #f9f9f9; rx: 10; }
+        .arrow { marker-end: url(#arrowhead); fill: none; stroke: black; stroke-width: 1.5; }
+    </style>
+    <defs>
+        <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" />
+        </marker>
+    </defs>
+
+    <text x="400" y="25" class="group-label">TODO Web App - 전체 아키텍처</text>
+
+    <!-- Phase 1 -->
+    <rect x="10" y="60" width="780" height="150" class="group-box" />
+    <text x="400" y="80" class="group-label">Phase 1: Frontend-Only MVP</text>
+
+    <rect x="200" y="120" width="180" height="60" class="box" style="fill:#e3f2fd;"/>
+    <text x="290" y="150" class="label">React App (Client)</text>
+
+    <rect x="420" y="120" width="180" height="60" class="box" style="fill:#fff3e0;"/>
+    <text x="510" y="150" class="label">localStorage (Browser)</text>
+
+    <path d="M380,150 H420" class="arrow" />
+
+    <!-- Phase 2 -->
+    <rect x="10" y="230" width="780" height="250" class="group-box" />
+    <text x="400" y="250" class="group-label">Phase 2: Backend Integration</text>
+
+    <rect x="50" y="340" width="180" height="60" class="box" style="fill:#e3f2fd;"/>
+    <text x="140" y="370" class="label">React App (Client)</text>
+
+    <g id="backend">
+        <rect x="280" y="290" width="470" height="170" class="box" style="fill:#e8f5e8; stroke-style: solid;"/>
+        <text x="515" y="310" class="label" style="font-weight:bold;">AWS Backend</text>
+
+        <rect x="300" y="340" width="130" height="60" class="box"/>
+        <text x="365" y="370" class="label">API Gateway</text>
+
+        <rect x="450" y="340" width="130" height="60" class="box"/>
+        <text x="515" y="370" class="label">Lambda</text>
+
+        <rect x="600" y="340" width="130" height="60" class="box" style="fill:#fce4ec;"/>
+        <text x="665" y="370" class="label">DynamoDB</text>
+    </g>
+
+    <path d="M230,370 H300" class="arrow" />
+    <path d="M430,370 H450" class="arrow" />
+    <path d="M580,370 H600" class="arrow" />
+
+</svg>
