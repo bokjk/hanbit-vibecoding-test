@@ -1,13 +1,13 @@
 ### TODO 앱 개발 작업 체크리스트 (모노레포)
 
--   [ ] **1. 모노레포 초기 설정**
-    -   [ ] `pnpm` 설치 및 `pnpm init`
-    -   [ ] `pnpm-workspace.yaml` 파일 생성 및 `apps/*`, `packages/*` 설정
-    -   [ ] `apps/client` 디렉터리에 Vite + React + TS 프로젝트 생성
-    -   [ ] `apps/server` 디렉터리에 Node.js + TS 프로젝트 설정
-    -   [ ] `packages/types` 디렉터리 생성 및 `tsconfig.json` 설정
-    -   [ ] `packages/ui` 디렉터리 생성 및 `Shadcn/ui` 초기화
-    -   [ ] **(커밋: `feat: setup pnpm monorepo with client, server, and packages`)**
+-   [x] **1. 모노레포 초기 설정**
+    -   [x] `pnpm` 설치 및 `pnpm init`
+    -   [x] `pnpm-workspace.yaml` 파일 생성 및 `apps/*`, `packages/*` 설정
+    -   [x] `apps/client` 디렉터리에 Vite + React + TS 프로젝트 생성
+    -   [x] `apps/server` 디렉터리에 Node.js + TS 프로젝트 설정
+    -   [x] `packages/types` 디렉터리 생성 및 `tsconfig.json` 설정
+    -   [x] `packages/ui` 디렉터리 생성 및 `Shadcn/ui` 초기화
+    -   [x] **(커밋: `feat: setup pnpm monorepo with client, server, and packages`)**
 
 -   [ ] **2. 공유 패키지 설정**
     -   [ ] `packages/types`에 `Todo`, `Priority` 등 공유 타입 정의
