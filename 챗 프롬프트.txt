@@ -13,6 +13,7 @@ UX/UI를 제외한 코어 비지니스 로직은 TDD에 기반해서 작업해�
 
 
 
+
 --- 정리
 요건정의 문서 = requirements.md
 설계 문서 = design.md
@@ -25,3 +26,8 @@ UX/UI를 제외한 코어 비지니스 로직은 TDD에 기반해서 작업해�
 4. 체크리스트에 맞춰서 작업 시작
 
 기타: 변경시마다 관련된 문서 같이 업데이트 
+
+
+
+--- 참고 사이트
+- https://github.com/PatrickJS/awesome-cursorrules 

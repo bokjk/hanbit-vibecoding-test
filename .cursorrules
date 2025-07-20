@@ -1,5 +1,157 @@
-- 커뮤니 케이션은 한국어로 해줘
-- 프론트엔드 UI 구현시에는 실행 코드를 먼저 작성한다. 코어 비즈니스 로직 구현 시에만 TDD로 진행 할 것.
-- 백엔드는 TDD로 구현할 것.
-- 커밋 전에 docs/checklist.md에 진행상황을 업데이트 한다.
-- 설계 변경시에는 requirements.md와 design.md를 수정한다.
+# TODO 앱 모노레포 Cursor Rules
+
+You are an expert in React, TypeScript, Vite, Tailwind CSS, and pnpm workspaces.
+
+## Project Structure
+This is a pnpm workspace monorepo with the following structure:
+- apps/client: React + TypeScript + Vite frontend
+- apps/server: Node.js + TypeScript backend (AWS Lambda)
+- packages/types: Shared TypeScript types
+- packages/ui: Shared UI components (shadcn/ui)
+
+## Core Principles
+
+### TypeScript Rules
+- Use strict TypeScript configuration
+- Avoid 'any' type, prefer 'unknown' with runtime checks
+- Explicitly type function inputs and outputs
+- Use advanced TypeScript features (type guards, mapped types, conditional types)
+- Prefer 'interface' for extendable objects, 'type' for unions and intersections
+
+### React Best Practices
+- Use functional components only
+- Implement custom hooks for business logic separation
+- Use React.memo, useCallback, useMemo appropriately for performance
+- Follow component composition patterns
+- Implement proper error boundaries
+
+### State Management
+- Use React Context + useReducer pattern
+- Structure actions with clear type definitions
+- Implement optimistic updates for better UX
+- Separate presentation from business logic
+
+### Styling & UI
+- Use Tailwind CSS utility-first approach
+- Leverage shadcn/ui components:
+  ```typescript
+  import { Button } from "@/components/ui/button"
+  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+  ```
+- Implement mobile-first responsive design
+- Use CSS variables for consistent theming
+- Avoid custom CSS unless absolutely necessary
+
+### Code Organization
+- Use kebab-case for file names
+- Use PascalCase for component names
+- Use camelCase for function names
+- Use UPPER_SNAKE_CASE for constants
+- Implement clear folder structure with feature-based organization
+
+### Testing Strategy
+- Use TDD for backend development (required)
+- Use implementation-first approach for frontend UI
+- Write unit tests with Vitest
+- Use React Testing Library for component testing
+- Aim for 90% test coverage
+- Mock external dependencies appropriately
+
+### Performance Optimization
+- Implement code splitting with React.lazy when needed
+- Use optimistic updates for immediate UI feedback
+- Implement virtual scrolling for large lists
+- Optimize images and assets
+- Use proper loading states and error handling
+
+### Accessibility
+- Follow WCAG 2.1 AA standards
+- Implement proper ARIA attributes
+- Ensure keyboard navigation support
+- Maintain adequate color contrast
+- Test with screen readers
+
+### Git Workflow
+- Use conventional commits (feat:, fix:, docs:, style:, refactor:, test:, chore:)
+- Write clear, descriptive commit messages in Korean
+- Make small, incremental commits
+- Conduct thorough code reviews via Pull Requests
+
+### Package Management
+- Use pnpm workspaces for monorepo management
+- Reference shared packages with "workspace:*"
+- Keep dependencies up to date
+- Separate dev dependencies appropriately
+
+### Development Process
+- Follow the project's requirements.md and design.md
+- Update docs/checklist.md after completing tasks
+- Implement proper error handling and loading states
+- Write comprehensive JSDoc documentation for complex functions
+- Use TypeScript utility types effectively
+
+### Security Considerations
+- Validate and sanitize all user inputs
+- Implement proper XSS prevention
+- Use HTTPS in production
+- Follow security best practices for API endpoints
+
+### Data Flow Patterns
+Stage 1 (localStorage): User → Component → Context → Reducer → LocalStorage Service
+Stage 2 (API): User → Component → Context → Reducer → API Service → Backend
+
+## Key File Patterns
+
+### Component Structure
+```typescript
+interface Props {
+  /** JSDoc description */
+  prop: Type;
+}
+
+export function Component({ prop }: Props) {
+  // hooks
+  // handlers
+  // render
+  return <div>JSX</div>
+}
+```
+
+### Service Layer
+```typescript
+export class ServiceName implements Interface {
+  async methodName(param: Type): Promise<ReturnType> {
+    try {
+      // implementation
+    } catch (error) {
+      console.error('Error message:', error);
+      throw new Error('User-friendly message');
+    }
+  }
+}
+```
+
+### Custom Hooks
+```typescript
+export function useCustomHook() {
+  const [state, setState] = useState<Type>(initialValue);
+  
+  const handler = useCallback(() => {
+    // logic
+  }, [dependencies]);
+  
+  return { state, handler };
+}
+```
+
+## Specific Instructions
+- Always prioritize user experience and accessibility
+- Implement proper loading states and error handling
+- Use semantic HTML elements
+- Write self-documenting code with clear naming
+- Follow the established project architecture
+- Maintain consistency with existing code patterns
+- Prefer composition over inheritance
+- Implement proper prop validation and default values
+
+Remember: This project follows a staged development approach (localStorage first, then API integration). Build features incrementally and maintain backward compatibility.
