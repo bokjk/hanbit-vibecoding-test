@@ -26,6 +26,12 @@ dev/ (root)
 
 ## 개발 원칙
 
+### 0. 의사소통 규칙
+- **모든 응답은 한국어로** 제공
+- **기술적 결정에 대한 명확한 설명** 제공
+- **변수/함수명은 영어로** 작성 (가독성을 위해)
+- **커밋 메시지는 한국어로** 작성 (Conventional Commits 준수)
+
 ### 1. 프로젝트 구조 및 명명 규칙
 - **파일명**: kebab-case (예: `todo-item.tsx`)
 - **컴포넌트명**: PascalCase (예: `TodoItem`)
@@ -100,22 +106,35 @@ import { Button, cn } from 'ui'
 
 ## TDD 개발 프로세스
 
-### 1. 백엔드 개발 (필수 TDD)
+### 1. 백엔드 개발 (필수 TDD) 🚨
 ```typescript
-// 1. 테스트 작성 (Red)
+// RED: 실패하는 테스트 먼저 작성
 describe('LocalStorageService', () => {
   it('새로운 todo를 추가하고 반환해야 함', async () => {
-    // given, when, then 패턴
+    // Given (준비)
+    const service = new LocalStorageService();
+    const request = { title: '테스트 할 일', priority: Priority.HIGH };
+    
+    // When (실행)
+    const result = await service.addTodo(request);
+    
+    // Then (검증)
+    expect(result.id).toBeDefined();
+    expect(result.title).toBe(request.title);
+    expect(result.completed).toBe(false);
   });
 });
 
-// 2. 최소 구현 (Green)
-// 3. 리팩토링 (Refactor)
+// GREEN: 테스트를 통과하는 최소 코드 작성
+// REFACTOR: 코드 개선 (테스트는 유지)
 ```
 
+**⚠️ 중요**: 백엔드 핵심 로직은 반드시 TDD로 개발해야 함
+
 ### 2. 프론트엔드 UI (구현 우선)
-- 실행 가능한 UI 구현 우선
-- 이후 테스트 추가로 안정성 확보
+- **실행 가능한 UI 먼저 구현**: 사용자가 즉시 확인 가능
+- **이후 테스트 추가**: 안정성 및 회귀 방지
+- **사용자 상호작용 중심**: React Testing Library 활용
 
 ## 코드 품질 및 컨벤션
 
@@ -290,18 +309,40 @@ interface TodoItemProps {
 }
 ```
 
+## 개발 워크플로우
+
+### 단계별 진행 절차
+1. **시작 전**: requirements.md와 design.md 숙지 필수
+2. **백엔드 기능**: TDD 방식 (테스트 → 구현 → 리팩토링)
+3. **프론트엔드 기능**: 실행 가능한 UI 먼저, 이후 테스트 추가
+4. **문서화**: 작업 완료 후 checklist.md 업데이트 필수
+5. **커밋**: Conventional Commits 형식으로 한국어 메시지
+6. **리뷰**: PR을 통한 코드 리뷰 진행
+
+## 🚨 절대 금지 사항
+
+- **❌ 요구사항 미확인 구현**: requirements.md 확인 없이 개발 금지
+- **❌ 백엔드 테스트 없는 코드**: TDD 없는 백엔드 로직 금지
+- **❌ 체크리스트 미업데이트**: 작업 완료 후 checklist.md 업데이트 필수
+- **❌ 불필요한 커스텀 CSS**: Tailwind로 해결 가능한 경우 커스텀 CSS 금지
+- **❌ any 타입 사용**: TypeScript의 any 타입 사용 금지
+- **❌ 영어 응답**: 모든 커뮤니케이션은 한국어로만
+
 ## 최종 체크리스트
 
 개발 완료 전 반드시 확인:
-- [ ] TypeScript 컴파일 에러 없음
-- [ ] ESLint 규칙 준수
-- [ ] 테스트 통과 (단위/통합)
-- [ ] 접근성 기준 충족
-- [ ] 모바일 반응성 확인
-- [ ] 성능 최적화 적용
-- [ ] 문서 업데이트
-- [ ] Git 커밋 메시지 규칙 준수
+- [ ] **요구사항 문서 확인** (requirements.md, design.md)
+- [ ] **TypeScript 컴파일 에러 없음**
+- [ ] **ESLint 규칙 준수**
+- [ ] **테스트 통과** (단위/통합)
+- [ ] **TDD 규칙 준수** (백엔드)
+- [ ] **접근성 기준 충족** (WCAG 2.1 AA)
+- [ ] **모바일 반응성 확인**
+- [ ] **성능 최적화 적용**
+- [ ] **체크리스트 업데이트** (docs/checklist.md)
+- [ ] **문서 동기화** (필요시 설계 문서 업데이트)
+- [ ] **Git 커밋 메시지 규칙 준수** (한국어 + Conventional Commits)
 
 ---
 
-이 규칙들을 따라 일관되고 확장 가능한 TODO 애플리케이션을 개발하세요. 
+이 규칙들을 엄격히 따라 일관되고 확장 가능한 TODO 애플리케이션을 개발하세요. 

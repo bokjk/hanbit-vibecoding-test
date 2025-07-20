@@ -2,6 +2,12 @@
 
 You are an expert in React, TypeScript, Vite, Tailwind CSS, and pnpm workspaces.
 
+## Communication Rules
+- Always communicate in Korean (한국어)
+- Provide clear explanations for technical decisions
+- Use descriptive variable and function names in English
+- Write commit messages in Korean following conventional commits
+
 ## Project Structure
 This is a pnpm workspace monorepo with the following structure:
 - apps/client: React + TypeScript + Vite frontend
@@ -50,12 +56,20 @@ This is a pnpm workspace monorepo with the following structure:
 - Implement clear folder structure with feature-based organization
 
 ### Testing Strategy
-- Use TDD for backend development (required)
-- Use implementation-first approach for frontend UI
+- **Backend Development**: MANDATORY TDD approach
+  - Write failing tests first (Red)
+  - Implement minimal code to pass (Green)
+  - Refactor while maintaining tests (Refactor)
+  - Core business logic must have tests before implementation
+- **Frontend Development**: Implementation-first approach
+  - Build working UI components first
+  - Add tests afterward for stability
+  - Focus on user interaction testing
 - Write unit tests with Vitest
 - Use React Testing Library for component testing
 - Aim for 90% test coverage
 - Mock external dependencies appropriately
+- Use given-when-then pattern for test structure
 
 ### Performance Optimization
 - Implement code splitting with React.lazy when needed
@@ -84,11 +98,14 @@ This is a pnpm workspace monorepo with the following structure:
 - Separate dev dependencies appropriately
 
 ### Development Process
-- Follow the project's requirements.md and design.md
-- Update docs/checklist.md after completing tasks
-- Implement proper error handling and loading states
-- Write comprehensive JSDoc documentation for complex functions
-- Use TypeScript utility types effectively
+- **Documentation First**: Always refer to requirements.md and design.md
+- **Progress Tracking**: MANDATORY update docs/checklist.md after each task completion
+- **Documentation Updates**: Update design documents when making architectural changes
+- **Error Handling**: Implement comprehensive error handling and loading states
+- **Code Documentation**: Write JSDoc for complex functions and public APIs
+- **Type Safety**: Use TypeScript utility types effectively
+- **Code Reviews**: All changes require PR review before merging
+- **Incremental Development**: Make small, focused commits with clear messages
 
 ### Security Considerations
 - Validate and sanitize all user inputs
@@ -145,13 +162,32 @@ export function useCustomHook() {
 ```
 
 ## Specific Instructions
-- Always prioritize user experience and accessibility
-- Implement proper loading states and error handling
-- Use semantic HTML elements
-- Write self-documenting code with clear naming
-- Follow the established project architecture
-- Maintain consistency with existing code patterns
-- Prefer composition over inheritance
-- Implement proper prop validation and default values
+- **Korean Communication**: Always respond in Korean (한국어)
+- **User Experience**: Always prioritize UX and accessibility
+- **Loading States**: Implement proper loading states and error handling
+- **Semantic HTML**: Use semantic HTML elements for better accessibility
+- **Self-Documenting Code**: Write clear, self-explaining code with descriptive naming
+- **Architecture Consistency**: Follow the established project architecture
+- **Code Patterns**: Maintain consistency with existing code patterns
+- **Composition**: Prefer composition over inheritance
+- **Prop Validation**: Implement proper prop validation and default values
+- **Responsive Design**: Mobile-first approach for all UI components
+- **Performance**: Consider performance implications of every implementation
+
+## Development Workflow
+1. **Before Starting**: Read requirements.md and design.md
+2. **Backend Features**: Start with TDD (test → implement → refactor)
+3. **Frontend Features**: Build working UI first, then add tests
+4. **Documentation**: Update checklist.md after each completed task
+5. **Commit**: Use conventional commits with Korean messages
+6. **Review**: Submit PR for code review
+
+## Critical Rules
+- 🚨 **NO** implementation without understanding requirements
+- 🚨 **NO** backend code without tests (TDD mandatory)
+- 🚨 **NO** commits without updating checklist.md
+- 🚨 **NO** custom CSS without justification (use Tailwind)
+- 🚨 **NO** 'any' types in TypeScript
+- 🚨 **ALL** communication must be in Korean
 
 Remember: This project follows a staged development approach (localStorage first, then API integration). Build features incrementally and maintain backward compatibility.
