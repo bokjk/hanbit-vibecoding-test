@@ -17,10 +17,10 @@
     -   [x] **(커밋: `feat: setup shared types and ui packages`)**
 
 -   [ ] **3. 핵심 로직 (TDD)**
-    -   [ ] **LocalStorage 서비스 (TDD)**
-        -   [ ] `apps/client/src/services/localStorage.service.test.ts` 테스트 작성
-        -   [ ] 테스트를 통과하는 `LocalStorageService` 클래스 구현
-        -   [ ] **(커밋: `feat(client): implement localStorage service with TDD`)**
+    -   [x] **LocalStorage 서비스 (TDD)**
+        -   [x] `apps/client/src/services/localStorage.service.test.ts` 테스트 작성
+        -   [x] 테스트를 통과하는 `LocalStorageService` 클래스 구현
+        -   [x] **(커밋: `feat(client): implement localStorage service with TDD`)**
     -   [ ] **상태 관리 로직 (TDD)**
         -   [ ] `apps/client/src/contexts/todo.reducer.test.ts` 테스트 작성
         -   [ ] 테스트를 통과하는 `todoReducer` 구현
