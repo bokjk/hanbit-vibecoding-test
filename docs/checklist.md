@@ -9,12 +9,12 @@
     -   [x] `packages/ui` 디렉터리 생성 및 `Shadcn/ui` 초기화
     -   [x] **(커밋: `feat: setup pnpm monorepo with client, server, and packages`)**
 
--   [ ] **2. 공유 패키지 설정**
-    -   [ ] `packages/types`에 `Todo`, `Priority` 등 공유 타입 정의
-    -   [ ] `client`와 `server`에서 `packages/types` 참조 설정
-    -   [ ] `packages/ui`에 `Button` 등 기본 UI 컴포넌트 추가
-    -   [ ] `client`에서 `packages/ui` 참조 설정
-    -   [ ] **(커밋: `feat: setup shared types and ui packages`)**
+-   [x] **2. 공유 패키지 설정**
+    -   [x] `packages/types`에 `Todo`, `Priority` 등 공유 타입 정의
+    -   [x] `client`와 `server`에서 `packages/types` 참조 설정
+    -   [x] `packages/ui`에 `Button` 등 기본 UI 컴포넌트 추가
+    -   [x] `client`에서 `packages/ui` 참조 설정
+    -   [x] **(커밋: `feat: setup shared types and ui packages`)**
 
 -   [ ] **3. 핵심 로직 (TDD)**
     -   [ ] **LocalStorage 서비스 (TDD)**
