@@ -2,12 +2,23 @@
   "name": "types",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
-  "keywords": [],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.13.1"
+  "packageManager": "pnpm@10.13.1",
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
 }

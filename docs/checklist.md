@@ -21,11 +21,11 @@
         -   [x] `apps/client/src/services/localStorage.service.test.ts` 테스트 작성
         -   [x] 테스트를 통과하는 `LocalStorageService` 클래스 구현
         -   [x] **(커밋: `feat(client): implement localStorage service with TDD`)**
-    -   [ ] **상태 관리 로직 (TDD)**
-        -   [ ] `apps/client/src/contexts/todo.reducer.test.ts` 테스트 작성
-        -   [ ] 테스트를 통과하는 `todoReducer` 구현
-        -   [ ] `TodoContext` 및 `TodoProvider` 설정
-        -   [ ] **(커밋: `feat(client): implement todo state management`)**
+    -   [x] **상태 관리 로직 (TDD)**
+        -   [x] `apps/client/src/contexts/todo.reducer.test.ts` 테스트 작성
+        -   [x] 테스트를 통과하는 `todoReducer` 구현
+        -   [x] `TodoContext` 및 `TodoProvider` 설정
+        -   [x] **(커밋: `feat(client): 상태 관리 로직 TDD 구현`)**
 
 -   [ ] **4. UI 개발 및 통합**
     -   [ ] `packages/ui`와 `Shadcn/ui`를 사용하여 `apps/client`의 컴포넌트 구현

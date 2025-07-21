@@ -1,1 +1,4 @@
 node_modules
+
+# Build outputs
+packages/types/dist/
