@@ -27,9 +27,9 @@
         -   [x] `TodoContext` 및 `TodoProvider` 설정
         -   [x] **(커밋: `feat(client): 상태 관리 로직 TDD 구현`)**
 
--   [ ] **4. UI 개발 및 통합**
-    -   [ ] `packages/ui`와 `Shadcn/ui`를 사용하여 `apps/client`의 컴포넌트 구현
-    -   [ ] `TodoContainer`에서 모든 컴포넌트 조립 및 기능 연동
+-   [x] **4. UI 개발 및 통합**
+    -   [x] `packages/ui`와 `Shadcn/ui`를 사용하여 `apps/client`의 컴포넌트 구현
+    -   [x] `TodoContainer`에서 모든 컴포넌트 조립 및 기능 연동
     -   [ ] **(커밋: `feat(client): implement UI and integrate features`)**
 
 -   [ ] **5. 백엔드 개발 (TDD)**
