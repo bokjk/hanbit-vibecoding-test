@@ -1,4 +1,4 @@
-import { Todo } from 'types';
+import type { Todo } from 'types/index';
 
 export interface TodoState {
   todos: Todo[];
@@ -7,7 +7,7 @@ export interface TodoState {
 }
 
 export type TodoAction =
-  | { type: 'ADD_TODO'; payload: Todo }
+  | { type: 'ADD_TODO'; payload: Omit<Todo, 'id' | 'createdAt' | 'updatedAt' | 'completed'> }
   | { type: 'UPDATE_TODO'; payload: Todo }
   | { type: 'DELETE_TODO'; payload: string }
   | { type: 'TOGGLE_TODO'; payload: string }
@@ -19,9 +19,16 @@ export type TodoAction =
 export function todoReducer(state: TodoState, action: TodoAction): TodoState {
   switch (action.type) {
     case 'ADD_TODO':
+      const newTodo: Todo = {
+        ...action.payload,
+        id: crypto.randomUUID(),
+        completed: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
       return {
         ...state,
-        todos: [...state.todos, action.payload],
+        todos: [...state.todos, newTodo],
       };
 
     case 'UPDATE_TODO':

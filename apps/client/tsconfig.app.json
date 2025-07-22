@@ -23,7 +23,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "types": ["../packages/types/dist"]
+      "@/*": ["../../packages/ui/src/*"],
+      "types": ["../../packages/types/src"]
     }
   },
   "include": ["src"]

@@ -1,9 +1,9 @@
 
 import { useState } from 'react';
-import { Button } from 'packages/ui/src/components/ui/button';
-import { Input } from 'packages/ui/src/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'packages/ui/src/components/ui/select';
-import { Priority } from 'packages/types/src';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { Priority } from 'types/index';
 
 interface TodoInputProps {
   onAddTodo: (title: string, priority: Priority) => void;

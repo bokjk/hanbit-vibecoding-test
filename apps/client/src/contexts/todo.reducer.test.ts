@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { Todo, Priority } from 'types';
-import { todoReducer, TodoState, TodoAction } from './todo.reducer';
+import type { Todo, Priority } from 'types/index';
+import { todoReducer } from './todo.reducer';
+import type { TodoState, TodoAction } from './todo.reducer';
 
 describe('todoReducer', () => {
   const initialState: TodoState = {

@@ -1,5 +1,5 @@
 
-import { Todo } from 'packages/types/src';
+import type { Todo } from 'types/index';
 import { TodoItem } from './todo-item';
 
 interface TodoListProps {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useReducer, ReactNode } from 'react';
-import { Todo } from 'types';
-import { todoReducer, TodoState, TodoAction } from './todo.reducer';
+import type { Todo } from 'types/index';
+import { todoReducer } from './todo.reducer';
+import type { TodoState, TodoAction } from './todo.reducer';
 
 const initialState: TodoState = {
   todos: [],

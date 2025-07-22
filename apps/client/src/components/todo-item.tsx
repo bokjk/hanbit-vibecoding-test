@@ -1,10 +1,10 @@
 
 import { useState } from 'react';
-import { Todo } from 'packages/types/src';
-import { Button } from 'packages/ui/src/components/ui/button';
-import { Checkbox } from 'packages/ui/src/components/ui/checkbox';
-import { Input } from 'packages/ui/src/components/ui/input';
-import { Card, CardContent } from 'packages/ui/src/components/ui/card';
+import type { Todo } from 'types/index';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface TodoItemProps {
   todo: Todo;

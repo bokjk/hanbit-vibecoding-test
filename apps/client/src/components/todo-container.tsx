@@ -5,7 +5,7 @@ import { TodoProvider } from '../contexts/todo.context';
 import { LocalStorageService } from '../services/localStorage.service';
 import { TodoInput } from './todo-input';
 import { TodoList } from './todo-list';
-import { Priority, Todo } from 'packages/types/src';
+import type { Priority, Todo } from 'types/index';
 
 const localStorageService = new LocalStorageService();
 

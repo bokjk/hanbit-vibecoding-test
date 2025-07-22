@@ -1,4 +1,8 @@
+import type { Todo } from 'types/index';
+
 export class LocalStorageService {
+  private readonly TODOS_KEY = 'todos';
+
   static save<T>(key: string, value: T): void {
     try {
       localStorage.setItem(key, JSON.stringify(value));
@@ -24,6 +28,25 @@ export class LocalStorageService {
     } catch (error) {
       console.error('Error removing from localStorage:', error);
       throw new Error('Failed to remove data from local storage.');
+    }
+  }
+
+  async getTodos(): Promise<Todo[]> {
+    try {
+      const todos = LocalStorageService.get<Todo[]>(this.TODOS_KEY);
+      return todos || [];
+    } catch (error) {
+      console.error('Error getting todos:', error);
+      return [];
+    }
+  }
+
+  async saveTodos(todos: Todo[]): Promise<void> {
+    try {
+      LocalStorageService.save(this.TODOS_KEY, todos);
+    } catch (error) {
+      console.error('Error saving todos:', error);
+      throw new Error('Failed to save todos to local storage.');
     }
   }
 }
