@@ -28,26 +28,58 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
   };
 
   return (
-    <div className="flex w-full items-center space-x-2">
-      <Input
-        type="text"
-        placeholder="Enter a new todo..."
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        onKeyDown={handleKeyDown}
-        className="flex-grow"
-      />
-      <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
-        <SelectTrigger className="w-[120px]">
-          <SelectValue placeholder="Priority" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="high">High</SelectItem>
-          <SelectItem value="medium">Medium</SelectItem>
-          <SelectItem value="low">Low</SelectItem>
-        </SelectContent>
-      </Select>
-      <Button onClick={handleAddClick}>Add</Button>
+    <div className="space-y-4">
+      {/* 데스크톱 레이아웃 */}
+      <div className="hidden md:flex w-full items-center space-x-3">
+        <Input
+          type="text"
+          placeholder="새로운 할 일을 입력하세요..."
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="flex-1"
+        />
+        <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="우선순위" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="high">높음</SelectItem>
+            <SelectItem value="medium">보통</SelectItem>
+            <SelectItem value="low">낮음</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button onClick={handleAddClick} className="px-6">
+          할 일 추가
+        </Button>
+      </div>
+
+      {/* 모바일 레이아웃 */}
+      <div className="md:hidden space-y-3">
+        <div className="flex items-center space-x-2">
+          <Input
+            type="text"
+            placeholder="새로운 할 일을 입력하세요..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1"
+          />
+          <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="high">높음</SelectItem>
+              <SelectItem value="medium">보통</SelectItem>
+              <SelectItem value="low">낮음</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button onClick={handleAddClick} className="w-full">
+          추가
+        </Button>
+      </div>
     </div>
   );
 }

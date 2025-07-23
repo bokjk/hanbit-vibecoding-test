@@ -9,3 +9,22 @@ export type Todo = {
   createdAt: string;
   updatedAt: string;
 }
+
+export type FilterType = 'all' | 'active' | 'completed';
+
+export type SortBy = 'createdAt' | 'priority' | 'title';
+
+export type SortOrder = 'asc' | 'desc';
+
+export interface TodoFilter {
+  type: FilterType;
+  sortBy: SortBy;
+  sortOrder: SortOrder;
+}
+
+export interface TodoStats {
+  total: number;
+  active: number;
+  completed: number;
+  completionRate: number;
+}

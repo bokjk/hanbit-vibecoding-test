@@ -1,7 +1,8 @@
-import type { Todo } from 'types/index';
+import type { Todo, TodoFilter, TodoStats } from 'types/index';
 
 export interface TodoState {
   todos: Todo[];
+  filter: TodoFilter;
   loading: boolean;
   error: string | null;
 }
@@ -11,6 +12,7 @@ export type TodoAction =
   | { type: 'UPDATE_TODO'; payload: Todo }
   | { type: 'DELETE_TODO'; payload: string }
   | { type: 'TOGGLE_TODO'; payload: string }
+  | { type: 'SET_FILTER'; payload: TodoFilter }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'LOAD_TODOS'; payload: Todo[] }
@@ -38,7 +40,10 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
       }
       
       const updatedTodos = [...state.todos];
-      updatedTodos[todoIndex] = action.payload;
+      updatedTodos[todoIndex] = {
+        ...action.payload,
+        updatedAt: new Date().toISOString(),
+      };
       
       return {
         ...state,
@@ -56,9 +61,19 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
         ...state,
         todos: state.todos.map(todo =>
           todo.id === action.payload
-            ? { ...todo, completed: !todo.completed }
+            ? { 
+                ...todo, 
+                completed: !todo.completed,
+                updatedAt: new Date().toISOString(),
+              }
             : todo
         ),
+      };
+
+    case 'SET_FILTER':
+      return {
+        ...state,
+        filter: action.payload,
       };
 
     case 'SET_LOADING':
