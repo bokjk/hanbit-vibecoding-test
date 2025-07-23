@@ -42,7 +42,7 @@
 ### 스타일링 및 UI
 - Tailwind CSS utility-first 접근법을 사용하세요
 - **Tailwind CSS 설정**: 반드시 https://tailwindcss.com/docs/installation/using-vite 공식 문서를 참조하세요
-- shadcn/ui 컴포넌트를 적극 활용하세요:
+- shadcn/ui 컴포넌트를 적극 활용하세요: 컴포넌트 목록은 https://ui.shadcn.com/docs/components 참조
   ```typescript
   import { Button } from "@/components/ui/button"
   import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
