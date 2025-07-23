@@ -17,17 +17,32 @@ export function TodoItem({ todo, onToggleTodo, onDeleteTodo, onEditTodo }: TodoI
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(todo.title);
 
-  const handleEdit = () => {
-    if (isEditing && newTitle.trim()) {
+  const handleSave = () => {
+    if (newTitle.trim()) {
       onEditTodo(todo.id, newTitle.trim());
     }
-    setIsEditing(!isEditing);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setNewTitle(todo.title);
+    setIsEditing(false);
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleEdit();
+      handleSave();
+    } else if (e.key === 'Escape') {
+      handleCancel();
     }
+  };
+
+  const handleBlur = () => {
+    handleSave();
   };
 
   return (
@@ -43,7 +58,7 @@ export function TodoItem({ todo, onToggleTodo, onDeleteTodo, onEditTodo }: TodoI
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               onKeyDown={handleKeyDown}
-              onBlur={handleEdit}
+              onBlur={handleBlur}
               autoFocus
             />
           ) : (
@@ -54,9 +69,20 @@ export function TodoItem({ todo, onToggleTodo, onDeleteTodo, onEditTodo }: TodoI
         </div>
         <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-500 capitalize">{todo.priority}</span>
-            <Button variant="outline" size="sm" onClick={handleEdit}>
-                {isEditing ? 'Save' : 'Edit'}
-            </Button>
+            {isEditing ? (
+              <>
+                <Button variant="outline" size="sm" onClick={handleSave}>
+                  Save
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleCancel}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={handleEdit}>
+                Edit
+              </Button>
+            )}
             <Button variant="destructive" size="sm" onClick={() => onDeleteTodo(todo.id)}>
                 Delete
             </Button>

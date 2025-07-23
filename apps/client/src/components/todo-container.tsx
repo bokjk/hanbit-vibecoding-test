@@ -1,7 +1,6 @@
 
-import { useReducer, useEffect } from 'react';
-import { todoReducer } from '../contexts/todo.reducer';
-import { TodoProvider } from '../contexts/todo.context';
+import { useEffect, useRef } from 'react';
+import { TodoProvider, useTodoContext } from '../contexts/todo.context';
 import { LocalStorageService } from '../services/localStorage.service';
 import { TodoInput } from './todo-input';
 import { TodoList } from './todo-list';
@@ -9,55 +8,70 @@ import type { Priority, Todo } from 'types/index';
 
 const localStorageService = new LocalStorageService();
 
-export function TodoContainer() {
-  const [state, dispatch] = useReducer(todoReducer, {
-    todos: [],
-    filteredTodos: [],
-  });
+function TodoContainerContent() {
+  const { state, updateTodo, addTodo, toggleTodo, deleteTodo, loadTodos } = useTodoContext();
+  const isInitialLoad = useRef(true);
 
   useEffect(() => {
-    const loadTodos = async () => {
+    const loadData = async () => {
       const todos = await localStorageService.getTodos();
-      dispatch({ type: 'SET_TODOS', payload: todos });
+      loadTodos(todos);
+      isInitialLoad.current = false;
     };
-    loadTodos();
-  }, []);
+    loadData();
+  }, [loadTodos]);
 
   useEffect(() => {
-    localStorageService.saveTodos(state.todos);
+    if (!isInitialLoad.current) {
+      localStorageService.saveTodos(state.todos);
+    }
   }, [state.todos]);
 
   const handleAddTodo = (title: string, priority: Priority) => {
     const newTodo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt' | 'completed'> = { title, priority };
-    dispatch({ type: 'ADD_TODO', payload: newTodo });
+    addTodo(newTodo);
   };
 
   const handleToggleTodo = (id: string) => {
-    dispatch({ type: 'TOGGLE_TODO', payload: { id } });
+    toggleTodo(id);
   };
 
   const handleDeleteTodo = (id: string) => {
-    dispatch({ type: 'DELETE_TODO', payload: { id } });
+    deleteTodo(id);
   };
 
   const handleEditTodo = (id: string, title: string) => {
-    dispatch({ type: 'EDIT_TODO', payload: { id, title } });
+    const existingTodo = state.todos.find(todo => todo.id === id);
+    if (existingTodo) {
+      const updatedTodo: Todo = {
+        ...existingTodo,
+        title,
+        updatedAt: new Date().toISOString(),
+      };
+      updateTodo(updatedTodo);
+    }
   };
 
   return (
-    <TodoProvider value={{ state, dispatch }}>
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Todo App</h1>
-        <TodoInput onAddTodo={handleAddTodo} />
-        <div className="mt-4">
-          <TodoList
-            todos={state.todos} // Or state.filteredTodos based on filter implementation
-            onToggleTodo={handleToggleTodo}
-            onDeleteTodo={handleDeleteTodo}
-            onEditTodo={handleEditTodo}
-          />
-        </div>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Todo App</h1>
+      <TodoInput onAddTodo={handleAddTodo} />
+      <div className="mt-4">
+        <TodoList
+          todos={state.todos}
+          onToggleTodo={handleToggleTodo}
+          onDeleteTodo={handleDeleteTodo}
+          onEditTodo={handleEditTodo}
+        />
       </div>
+    </div>
+  );
+}
+
+export function TodoContainer() {
+  return (
+    <TodoProvider>
+      <TodoContainerContent />
     </TodoProvider>
   );
 }

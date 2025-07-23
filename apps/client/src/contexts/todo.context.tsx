@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
 import type { Todo } from 'types/index';
 import { todoReducer } from './todo.reducer';
 import type { TodoState, TodoAction } from './todo.reducer';
@@ -12,7 +12,7 @@ const initialState: TodoState = {
 interface TodoContextType {
   state: TodoState;
   dispatch: React.Dispatch<TodoAction>;
-  addTodo: (todo: Todo) => void;
+  addTodo: (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt' | 'completed'>) => void;
   updateTodo: (todo: Todo) => void;
   deleteTodo: (id: string) => void;
   toggleTodo: (id: string) => void;
@@ -31,37 +31,37 @@ interface TodoProviderProps {
 export function TodoProvider({ children }: TodoProviderProps) {
   const [state, dispatch] = useReducer(todoReducer, initialState);
 
-  const addTodo = (todo: Todo) => {
+  const addTodo = useCallback((todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt' | 'completed'>) => {
     dispatch({ type: 'ADD_TODO', payload: todo });
-  };
+  }, []);
 
-  const updateTodo = (todo: Todo) => {
+  const updateTodo = useCallback((todo: Todo) => {
     dispatch({ type: 'UPDATE_TODO', payload: todo });
-  };
+  }, []);
 
-  const deleteTodo = (id: string) => {
+  const deleteTodo = useCallback((id: string) => {
     dispatch({ type: 'DELETE_TODO', payload: id });
-  };
+  }, []);
 
-  const toggleTodo = (id: string) => {
+  const toggleTodo = useCallback((id: string) => {
     dispatch({ type: 'TOGGLE_TODO', payload: id });
-  };
+  }, []);
 
-  const loadTodos = (todos: Todo[]) => {
+  const loadTodos = useCallback((todos: Todo[]) => {
     dispatch({ type: 'LOAD_TODOS', payload: todos });
-  };
+  }, []);
 
-  const clearTodos = () => {
+  const clearTodos = useCallback(() => {
     dispatch({ type: 'CLEAR_TODOS' });
-  };
+  }, []);
 
-  const setLoading = (loading: boolean) => {
+  const setLoading = useCallback((loading: boolean) => {
     dispatch({ type: 'SET_LOADING', payload: loading });
-  };
+  }, []);
 
-  const setError = (error: string | null) => {
+  const setError = useCallback((error: string | null) => {
     dispatch({ type: 'SET_ERROR', payload: error });
-  };
+  }, []);
 
   const value: TodoContextType = {
     state,
