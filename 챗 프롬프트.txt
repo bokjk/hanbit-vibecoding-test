@@ -40,7 +40,7 @@ UX/UI를 제외한 코어 비지니스 로직은 TDD에 기반해서 작업해�
 
 --- claude 사용량 정보
 
-ccusage
+- usage
 
 # npm으로 전역 설치
 npm install -g ccusage
@@ -53,13 +53,10 @@ ccusage daily
 출처: https://rudaks.tistory.com/entry/개발도구-ccusage-Claude-Code-사용량-분석-CLI-도구 [[루닥스 블로그] 연습만이 살길이다:티스토리]
 
 
+- Claude-Code-Usage-Monitor
 
-# npm으로 전역 설치
-npm install -g ccusage
+pip install claude-monitor
 
-# bun으로 전역 설치
-bun install -g ccusage
+claude-monitor 
 
-# 실행
-ccusage daily
-출처: https://rudaks.tistory.com/entry/개발도구-ccusage-Claude-Code-사용량-분석-CLI-도구 [[루닥스 블로그] 연습만이 살길이다:티스토리]
+https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor

@@ -53,16 +53,20 @@ function TodoContainerContent() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Todo App</h1>
-      <TodoInput onAddTodo={handleAddTodo} />
-      <div className="mt-4">
-        <TodoList
-          todos={state.todos}
-          onToggleTodo={handleToggleTodo}
-          onDeleteTodo={handleDeleteTodo}
-          onEditTodo={handleEditTodo}
-        />
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold text-center mb-8 text-red-500 bg-yellow-200 p-4 border-4 border-green-500">Todo App</h1>
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <TodoInput onAddTodo={handleAddTodo} />
+          <div className="mt-6">
+            <TodoList
+              todos={state.todos}
+              onToggleTodo={handleToggleTodo}
+              onDeleteTodo={handleDeleteTodo}
+              onEditTodo={handleEditTodo}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
