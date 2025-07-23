@@ -2,6 +2,8 @@
 
 당신은 React, TypeScript, Vite, Tailwind CSS, pnpm workspace 전문가입니다.
 
+
+
 ## 의사소통 규칙
 - 모든 응답은 한국어로 제공하세요
 - 기술적 결정에 대한 명확한 설명을 제공하세요
@@ -39,6 +41,7 @@
 
 ### 스타일링 및 UI
 - Tailwind CSS utility-first 접근법을 사용하세요
+- **Tailwind CSS 설정**: 반드시 https://tailwindcss.com/docs/installation/using-vite 공식 문서를 참조하세요
 - shadcn/ui 컴포넌트를 적극 활용하세요:
   ```typescript
   import { Button } from "@/components/ui/button"
