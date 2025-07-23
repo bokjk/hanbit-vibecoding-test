@@ -88,7 +88,7 @@ export function TodoItem({ todo, onToggleTodo, onDeleteTodo, onEditTodo }: TodoI
             <Checkbox
               checked={todo.completed}
               onCheckedChange={() => onToggleTodo(todo.id)}
-              className="mt-1 w-5 h-5 border-2 border-gray-300 rounded flex-shrink-0 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors cursor-pointer"
+              className="mt-1"
             />
             
             <div className="flex-1 min-w-0">
