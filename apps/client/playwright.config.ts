@@ -7,6 +7,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   // 테스트 파일 위치
   testDir: './e2e',
+  testMatch: '**/*.spec.ts',
   
   // 테스트 실행 설정
   fullyParallel: true,

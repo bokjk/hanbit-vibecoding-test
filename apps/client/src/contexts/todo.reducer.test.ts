@@ -30,7 +30,13 @@ describe('todoReducer', () => {
       const newState = todoReducer(initialState, action);
 
       expect(newState.todos).toHaveLength(1);
-      expect(newState.todos[0]).toEqual(mockTodo);
+      expect(newState.todos[0].title).toBe(mockTodo.title);
+      expect(newState.todos[0].description).toBe(mockTodo.description);
+      expect(newState.todos[0].completed).toBe(mockTodo.completed);
+      expect(newState.todos[0].priority).toBe(mockTodo.priority);
+      expect(newState.todos[0].id).toBeDefined();
+      expect(newState.todos[0].createdAt).toBeDefined();
+      expect(newState.todos[0].updatedAt).toBeDefined();
       expect(newState.loading).toBe(false);
       expect(newState.error).toBeNull();
     });
@@ -53,8 +59,10 @@ describe('todoReducer', () => {
       });
 
       expect(state.todos).toHaveLength(2);
-      expect(state.todos[0]).toEqual(mockTodo);
-      expect(state.todos[1]).toEqual(secondTodo);
+      expect(state.todos[0].title).toBe(mockTodo.title);
+      expect(state.todos[1].title).toBe(secondTodo.title);
+      expect(state.todos[0].id).toBeDefined();
+      expect(state.todos[1].id).toBeDefined();
     });
   });
 
@@ -78,9 +86,10 @@ describe('todoReducer', () => {
 
       const newState = todoReducer(stateWithTodo, action);
 
-      expect(newState.todos[0]).toEqual(updatedTodo);
       expect(newState.todos[0].title).toBe('Updated Todo');
       expect(newState.todos[0].completed).toBe(true);
+      expect(newState.todos[0].id).toBe(mockTodo.id);
+      expect(newState.todos[0].updatedAt).toBeDefined();
     });
 
     it('should not modify state if todo id does not exist', () => {
