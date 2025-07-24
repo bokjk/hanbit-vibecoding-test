@@ -60,3 +60,18 @@ pip install claude-monitor
 claude-monitor 
 
 https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor
+
+
+
+
+--- 플러그인
+ㅇ슈퍼클로드 
+주소 : https://github.com/SuperClaude-Org/SuperClaude_Framework
+유튜브 : https://www.youtube.com/watch?v=4ndOjpo2wS4&t=42s
+
+/sc:design --persona-frontend --seq --plan 어드민페이지를 제작하고싶어 UI만 만들어줘
+
+--- mcp
+ㅇ context7-mcp
+주소 : https://github.com/upstash/context7
+claude에 설치 : claude mcp add context7 -- npx @upstash/context7-mcp
