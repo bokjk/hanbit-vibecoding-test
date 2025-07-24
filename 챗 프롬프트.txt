@@ -70,6 +70,7 @@ https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor
 유튜브 : https://www.youtube.com/watch?v=4ndOjpo2wS4&t=42s
 
 /sc:design --persona-frontend --seq --plan 어드민페이지를 제작하고싶어 UI만 만들어줘
+/sc:setup --persona-frontend --plan --seq "Playwright E2E 테스트 환경을 완전히 설정해줘"
 
 --- mcp
 ㅇ context7-mcp

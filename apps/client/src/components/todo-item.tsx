@@ -97,7 +97,7 @@ export function TodoItem({ todo, onToggleTodo, onDeleteTodo, onEditTodo }: TodoI
   const priorityBadge = getPriorityBadge(todo.priority);
 
   return (
-    <Card className={`border-l-4 ${getPriorityColor(todo.priority)} transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
+    <Card data-testid="todo-item" className={`border-l-4 ${getPriorityColor(todo.priority)} transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
       todo.completed ? 'opacity-75 saturate-50' : ''
     }`}>
       <CardContent className="p-6">
@@ -105,6 +105,7 @@ export function TodoItem({ todo, onToggleTodo, onDeleteTodo, onEditTodo }: TodoI
           {/* 상단: 체크박스와 제목 */}
           <div className="flex items-start space-x-4">
             <Checkbox
+              data-testid="todo-checkbox"
               checked={todo.completed}
               onCheckedChange={() => onToggleTodo(todo.id)}
               className="mt-1 scale-125"
@@ -113,6 +114,7 @@ export function TodoItem({ todo, onToggleTodo, onDeleteTodo, onEditTodo }: TodoI
             <div className="flex-1 min-w-0">
               {isEditing ? (
                 <Input
+                  data-testid="edit-input"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -122,7 +124,7 @@ export function TodoItem({ todo, onToggleTodo, onDeleteTodo, onEditTodo }: TodoI
                 />
               ) : (
                 <div className="space-y-2">
-                  <h3 className={`text-lg font-semibold leading-tight ${
+                  <h3 data-testid="todo-title" className={`text-lg font-semibold leading-tight ${
                     todo.completed 
                       ? 'line-through text-gray-500' 
                       : 'text-gray-900'
@@ -176,6 +178,7 @@ export function TodoItem({ todo, onToggleTodo, onDeleteTodo, onEditTodo }: TodoI
             {!isEditing && (
               <div className="flex items-center space-x-2">
                 <Button
+                  data-testid="edit-button"
                   variant="ghost"
                   size="sm"
                   onClick={handleEdit}
@@ -186,6 +189,7 @@ export function TodoItem({ todo, onToggleTodo, onDeleteTodo, onEditTodo }: TodoI
                   </svg>
                 </Button>
                 <Button
+                  data-testid="delete-button"
                   variant="ghost"
                   size="sm"
                   onClick={() => onDeleteTodo(todo.id)}

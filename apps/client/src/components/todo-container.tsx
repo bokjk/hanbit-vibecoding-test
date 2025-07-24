@@ -84,7 +84,7 @@ function TodoContainerContent() {
         <div className="max-w-7xl mx-auto space-y-8">
           
           {/* 상단 통계 대시보드 */}
-          <section>
+          <section data-testid="todo-dashboard">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">대시보드 개요</h2>
               <p className="text-gray-600">현재 진행 상황을 한눈에 확인하세요</p>

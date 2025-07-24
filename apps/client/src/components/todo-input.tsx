@@ -32,6 +32,7 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
       {/* 데스크톱 레이아웃 */}
       <div className="hidden md:flex w-full items-center space-x-3">
         <Input
+          data-testid="todo-input"
           type="text"
           placeholder="새로운 할 일을 입력하세요..."
           value={title}
@@ -40,7 +41,7 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
           className="flex-1"
         />
         <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger data-testid="priority-select" className="w-[140px]">
             <SelectValue placeholder="우선순위" />
           </SelectTrigger>
           <SelectContent>
@@ -49,7 +50,7 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
             <SelectItem value="low">낮음</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={handleAddClick} className="px-6">
+        <Button data-testid="add-todo-button" onClick={handleAddClick} className="px-6">
           할 일 추가
         </Button>
       </div>
@@ -58,6 +59,7 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
       <div className="md:hidden space-y-3">
         <div className="flex items-center space-x-2">
           <Input
+            data-testid="todo-input"
             type="text"
             placeholder="새로운 할 일을 입력하세요..."
             value={title}
@@ -76,7 +78,7 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={handleAddClick} className="w-full">
+        <Button data-testid="add-todo-button" onClick={handleAddClick} className="w-full">
           추가
         </Button>
       </div>

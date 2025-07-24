@@ -11,7 +11,7 @@ interface TodoListProps {
 
 export function TodoList({ todos, onToggleTodo, onDeleteTodo, onEditTodo }: TodoListProps) {
   return (
-    <>
+    <div data-testid="todo-list">
       {todos.map((todo) => (
         <TodoItem
           key={todo.id}
@@ -21,6 +21,6 @@ export function TodoList({ todos, onToggleTodo, onDeleteTodo, onEditTodo }: Todo
           onEditTodo={onEditTodo}
         />
       ))}
-    </>
+    </div>
   );
 }

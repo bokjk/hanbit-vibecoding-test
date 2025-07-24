@@ -16,7 +16,7 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
   };
 
   return (
-    <header className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white shadow-xl">
+    <header data-testid="todo-header" className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white shadow-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* 왼쪽: 로고와 제목 */}
@@ -45,6 +45,7 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
                 </svg>
               </div>
               <Input
+                data-testid="search-input"
                 type="text"
                 placeholder="할 일 검색..."
                 value={searchQuery}

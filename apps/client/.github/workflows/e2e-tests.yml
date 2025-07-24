@@ -1,0 +1,179 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # 매일 오전 2시에 실행 (UTC)
+    - cron: '0 2 * * *'
+
+jobs:
+  e2e-tests:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, firefox, webkit]
+        
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+        
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: 종속성 설치
+        run: |
+          cd apps/client
+          npm ci
+          
+      - name: Playwright 설치
+        run: |
+          cd apps/client
+          npx playwright install --with-deps ${{ matrix.project }}
+          
+      - name: 애플리케이션 빌드
+        run: |
+          cd apps/client
+          npm run build
+          
+      - name: E2E 테스트 실행
+        run: |
+          cd apps/client
+          npx playwright test --project=${{ matrix.project }}
+        env:
+          CI: true
+          
+      - name: 테스트 결과 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.project }}
+          path: apps/client/playwright-report/
+          retention-days: 30
+          
+      - name: 테스트 결과 저장
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.project }}
+          path: apps/client/test-results/
+          retention-days: 30
+          
+      - name: 스크린샷 업로드
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots-${{ matrix.project }}
+          path: apps/client/test-results/screenshots/
+          retention-days: 7
+
+  mobile-tests:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+        
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: 종속성 설치
+        run: |
+          cd apps/client
+          npm ci
+          
+      - name: Playwright 설치
+        run: |
+          cd apps/client
+          npx playwright install --with-deps chromium
+          
+      - name: 모바일 E2E 테스트 실행
+        run: |
+          cd apps/client
+          npx playwright test --project="Mobile Chrome" --project="Mobile Safari"
+        env:
+          CI: true
+          
+      - name: 모바일 테스트 결과 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-test-results
+          path: apps/client/test-results/
+          retention-days: 30
+
+  performance-tests:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+        
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: 종속성 설치
+        run: |
+          cd apps/client
+          npm ci
+          
+      - name: Playwright 설치
+        run: |
+          cd apps/client
+          npx playwright install --with-deps chromium
+          
+      - name: 성능 테스트 실행
+        run: |
+          cd apps/client
+          npx playwright test performance --project=chromium
+        env:
+          CI: true
+          
+      - name: 성능 리포트 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-report
+          path: apps/client/performance-report/
+          retention-days: 30
+
+  test-summary:
+    needs: [e2e-tests, mobile-tests, performance-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: 테스트 결과 요약
+        run: |
+          echo "## 🎭 E2E 테스트 결과 요약" >> $GITHUB_STEP_SUMMARY
+          echo "| 테스트 유형 | 상태 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 데스크톱 E2E | ${{ needs.e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 모바일 E2E | ${{ needs.mobile-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 성능 테스트 | ${{ needs.performance-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          
+      - name: Slack 알림 (실패 시)
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#dev-alerts'
+          text: '🚨 TODO 앱 E2E 테스트가 실패했습니다!'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

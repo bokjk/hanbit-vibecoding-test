@@ -15,7 +15,7 @@ export function TodoStatsComponent({ stats, className = '' }: TodoStatsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-blue-600 mb-1">전체 할 일</p>
-              <p className="text-3xl font-bold text-blue-700">{stats.total}</p>
+              <p data-testid="stats-total" className="text-3xl font-bold text-blue-700">{stats.total}</p>
             </div>
             <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
               <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +32,7 @@ export function TodoStatsComponent({ stats, className = '' }: TodoStatsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-orange-600 mb-1">진행 중</p>
-              <p className="text-3xl font-bold text-orange-700">{stats.active}</p>
+              <p data-testid="stats-active" className="text-3xl font-bold text-orange-700">{stats.active}</p>
             </div>
             <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
               <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +49,7 @@ export function TodoStatsComponent({ stats, className = '' }: TodoStatsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-green-600 mb-1">완료됨</p>
-              <p className="text-3xl font-bold text-green-700">{stats.completed}</p>
+              <p data-testid="stats-completed" className="text-3xl font-bold text-green-700">{stats.completed}</p>
             </div>
             <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
               <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@ export function TodoStatsComponent({ stats, className = '' }: TodoStatsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-purple-600 mb-1">완료율</p>
-              <p className="text-3xl font-bold text-purple-700">{stats.completionRate}%</p>
+              <p data-testid="stats-completion-rate" className="text-3xl font-bold text-purple-700">{stats.completionRate}%</p>
             </div>
             <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
               <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
