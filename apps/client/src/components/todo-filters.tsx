@@ -17,8 +17,11 @@ interface FilterChipProps {
 }
 
 function FilterChip({ label, icon, isActive, onClick, count }: FilterChipProps) {
+  const testId = `filter-${label === '전체' ? 'all' : label === '진행 중' ? 'active' : label === '완료됨' ? 'completed' : label.toLowerCase()}`;
+  
   return (
     <Button
+      data-testid={testId}
       variant={isActive ? 'default' : 'outline'}
       onClick={onClick}
       className={`h-10 px-4 transition-all duration-200 hover:scale-105 ${
@@ -146,7 +149,7 @@ export function TodoFilters({ filter, onFilterChange, className = '' }: TodoFilt
         
         <div className="grid grid-cols-1 gap-3">
           <Select value={filter.sortBy} onValueChange={handleSortByChange}>
-            <SelectTrigger className="h-10 bg-white border-gray-200 hover:border-gray-300 focus:border-blue-500 transition-colors">
+            <SelectTrigger data-testid="sort-by-select" className="h-10 bg-white border-gray-200 hover:border-gray-300 focus:border-blue-500 transition-colors">
               <SelectValue placeholder="정렬 기준" />
             </SelectTrigger>
             <SelectContent>
@@ -178,7 +181,7 @@ export function TodoFilters({ filter, onFilterChange, className = '' }: TodoFilt
           </Select>
           
           <Select value={filter.sortOrder} onValueChange={handleSortOrderChange}>
-            <SelectTrigger className="h-10 bg-white border-gray-200 hover:border-gray-300 focus:border-blue-500 transition-colors">
+            <SelectTrigger data-testid="sort-order-select" className="h-10 bg-white border-gray-200 hover:border-gray-300 focus:border-blue-500 transition-colors">
               <SelectValue placeholder="정렬 순서" />
             </SelectTrigger>
             <SelectContent>

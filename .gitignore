@@ -1,4 +1,11 @@
+!.*
 node_modules
 
 # Build outputs
 packages/types/dist/
+
+# Test outputs
+test-results/
+playwright-report/
+**/test-results/
+**/playwright-report/
