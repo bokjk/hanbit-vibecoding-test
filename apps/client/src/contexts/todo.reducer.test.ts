@@ -6,6 +6,11 @@ import type { TodoState, TodoAction } from './todo.reducer';
 describe('todoReducer', () => {
   const initialState: TodoState = {
     todos: [],
+    filter: {
+      type: 'all',
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+    },
     loading: false,
     error: null,
   };
