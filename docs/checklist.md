@@ -55,9 +55,3 @@
     -   [ ] `apps/server`에서 CDK를 통한 통합 배포 테스트
     -   [ ] GitHub Actions를 이용한 CI/CD 파이프라인 구축 (통합 백엔드 배포)
     -   [ ] **(커밋: `chore: setup CI/CD with integrated backend deployment`)**
-
--   [ ] **7. 문서 업데이트**
-    -   [x] 백엔드와 인프라 통합 구조로 문서 업데이트
-        -   [x] `docs/requirements.md`: 기술 스택 통합 섹션 수정
-        -   [x] `docs/design.md`: CDK 인프라 설계를 통합 구조로 수정
-        -   [x] **(커밋: `docs: update architecture docs for integrated backend structure`)**
