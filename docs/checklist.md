@@ -38,13 +38,26 @@
         -   [x] types 패키지 exports 설정 수정
         -   [x] **(커밋: `fix: 타입스크립트 모듈 import 에러 및 LocalStorage 서비스 수정`)**
 
--   [ ] **5. 백엔드 개발 (TDD)**
-    -   [ ] `apps/server`에 Lambda 함수 핸들러 테스트 작성
+-   [ ] **5. 통합 백엔드 개발 (Lambda + CDK, TDD)**
+    -   [ ] `apps/backend` 디렉터리 생성 및 구조 설정
+    -   [ ] `apps/backend/lambda/functions/`에 Lambda 함수 핸들러 테스트 작성 (TDD)
     -   [ ] 테스트를 통과하는 Todo CRUD 로직 구현
-    -   [ ] **(커밋: `feat(server): implement serverless backend for todos`)**
+    -   [ ] `apps/backend/infrastructure/`에 CDK 스택 구현
+        -   [ ] DynamoDB 테이블 설정
+        -   [ ] Cognito 인증 설정 (게스트 지원)
+        -   [ ] API Gateway + Lambda 통합
+        -   [ ] CloudWatch 모니터링 설정
+    -   [ ] 통합 빌드 스크립트 설정 (`package.json`)
+    -   [ ] **(커밋: `feat(backend): implement integrated serverless backend with CDK`)**
 
--   [ ] **6. API 연동 및 배포**
+-   [ ] **6. API 연동 및 통합 배포**
     -   [ ] `apps/client`에 `APIRepository` 구현 및 연동
-    -   [ ] AWS CDK를 사용하여 `apps/server` 배포 스크립트 작성
-    -   [ ] GitHub Actions를 이용한 CI/CD 파이프라인 구축 (프론트/백엔드 분리 배포)
-    -   [ ] **(커밋: `chore: setup CI/CD and deploy to AWS`)**
+    -   [ ] `apps/backend`에서 CDK를 통한 통합 배포 테스트
+    -   [ ] GitHub Actions를 이용한 CI/CD 파이프라인 구축 (통합 백엔드 배포)
+    -   [ ] **(커밋: `chore: setup CI/CD with integrated backend deployment`)**
+
+-   [ ] **7. 문서 업데이트**
+    -   [x] 백엔드와 인프라 통합 구조로 문서 업데이트
+        -   [x] `docs/requirements.md`: 기술 스택 통합 섹션 수정
+        -   [x] `docs/design.md`: CDK 인프라 설계를 통합 구조로 수정
+        -   [x] **(커밋: `docs: update architecture docs for integrated backend structure`)**
