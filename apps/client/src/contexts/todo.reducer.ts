@@ -1,4 +1,4 @@
-import type { Todo, TodoFilter, TodoStats } from 'types/index';
+import type { Todo, TodoFilter } from 'types/index';
 
 export interface TodoState {
   todos: Todo[];
