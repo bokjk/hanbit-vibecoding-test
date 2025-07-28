@@ -330,7 +330,7 @@ interface DynamoDBItem {
 
 #### 7.5.1 통합 프로젝트 구조
 ```typescript
-// 📁 apps/backend/                  // 백엔드 + 인프라 통합 관리
+// 📁 apps/server/                   // 백엔드 + 인프라 통합 관리
 // ├── infrastructure/               // CDK 인프라 코드
 // │   ├── bin/
 // │   │   └── app.ts               // CDK 앱 진입점
@@ -377,7 +377,7 @@ interface DynamoDBItem {
 2. **배포 편의성**
    ```bash
    # 하나의 명령으로 전체 백엔드 + 인프라 배포
-   cd apps/backend
+   cd apps/server
    pnpm build && pnpm deploy
 
    # 또는 환경별 배포

@@ -1050,7 +1050,7 @@ class DynamoDBTodoService implements TodoService {
 ### 8.1 통합 프로젝트 구조
 
 ```typescript
-// 📁 apps/backend/                  // 백엔드 + 인프라 통합 관리
+// 📁 apps/server/                   // 백엔드 + 인프라 통합 관리
 // ├── infrastructure/               // CDK 인프라 코드
 // │   ├── bin/
 // │   │   └── app.ts               // CDK 앱 진입점
@@ -2718,7 +2718,7 @@ export class PerformanceMonitor {
 #### 12.3.1 로컬 개발 환경 설정
 ```bash
 # 프로젝트 루트에서
-cd apps/backend
+cd apps/server
 
 # 의존성 설치
 pnpm install
@@ -2793,7 +2793,7 @@ pnpm deploy:prod
 / (root)
 ├── apps/
 │   ├── client/                   # React 프론트엔드
-│   └── backend/                  # Lambda + CDK 통합 백엔드
+│   └── server/                   # Lambda + CDK 통합 백엔드
 │       ├── infrastructure/       # CDK 인프라 코드
 │       └── lambda/               # Lambda 함수 코드
 ├── packages/

@@ -39,10 +39,10 @@
         -   [x] **(커밋: `fix: 타입스크립트 모듈 import 에러 및 LocalStorage 서비스 수정`)**
 
 -   [ ] **5. 통합 백엔드 개발 (Lambda + CDK, TDD)**
-    -   [ ] `apps/backend` 디렉터리 생성 및 구조 설정
-    -   [ ] `apps/backend/lambda/functions/`에 Lambda 함수 핸들러 테스트 작성 (TDD)
+    -   [ ] `apps/server` 디렉터리 생성 및 구조 설정
+    -   [ ] `apps/server/lambda/functions/`에 Lambda 함수 핸들러 테스트 작성 (TDD)
     -   [ ] 테스트를 통과하는 Todo CRUD 로직 구현
-    -   [ ] `apps/backend/infrastructure/`에 CDK 스택 구현
+    -   [ ] `apps/server/infrastructure/`에 CDK 스택 구현
         -   [ ] DynamoDB 테이블 설정
         -   [ ] Cognito 인증 설정 (게스트 지원)
         -   [ ] API Gateway + Lambda 통합
@@ -52,7 +52,7 @@
 
 -   [ ] **6. API 연동 및 통합 배포**
     -   [ ] `apps/client`에 `APIRepository` 구현 및 연동
-    -   [ ] `apps/backend`에서 CDK를 통한 통합 배포 테스트
+    -   [ ] `apps/server`에서 CDK를 통한 통합 배포 테스트
     -   [ ] GitHub Actions를 이용한 CI/CD 파이프라인 구축 (통합 백엔드 배포)
     -   [ ] **(커밋: `chore: setup CI/CD with integrated backend deployment`)**
 
