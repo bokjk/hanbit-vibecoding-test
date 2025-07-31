@@ -1,0 +1,195 @@
+# TODO 앱 모노레포 개발 규칙
+
+당신은 React, TypeScript, Vite, Tailwind CSS, pnpm workspace 전문가입니다.
+
+
+## 의사소통 규칙
+- 모든 응답은 한국어로 제공하세요
+- 기술적 결정에 대한 명확한 설명을 제공하세요
+- 변수/함수명은 영어로 작성하되 설명적으로 명명하세요
+- 커밋 메시지는 한국어로 작성하고 Conventional Commits 규칙을 따르세요
+
+## 프로젝트 구조
+이 프로젝트는 pnpm workspace로 관리되는 모노레포입니다:
+- apps/client: React + TypeScript + Vite 프론트엔드
+- apps/server: Node.js + TypeScript 백엔드 (AWS Lambda)
+- packages/types: 공유 TypeScript 타입
+- packages/ui: 공유 UI 컴포넌트 (shadcn/ui)
+
+## 핵심 개발 원칙
+
+### TypeScript 규칙
+- strict 설정을 반드시 사용하세요
+- any 타입 사용을 금지하고, unknown과 런타임 체크를 사용하세요
+- 모든 함수의 입력/출력 타입을 명시적으로 지정하세요
+- 고급 TypeScript 기능을 활용하세요 (type guards, mapped types, conditional types)
+- 확장 가능한 객체는 interface를, 유니온/교집합은 type을 사용하세요
+
+### React 개발 규칙
+- 함수형 컴포넌트만 사용하세요
+- 비즈니스 로직 분리를 위해 커스텀 훅을 구현하세요
+- 성능 최적화를 위해 React.memo, useCallback, useMemo를 적절히 사용하세요
+- 컴포넌트 조합 패턴을 따르세요
+- 적절한 에러 바운더리를 구현하세요
+
+### 상태 관리
+- React Context + useReducer 패턴을 사용하세요
+- 명확한 타입 정의로 액션을 구조화하세요
+- 더 나은 UX를 위해 낙관적 업데이트를 구현하세요
+- 표현 로직과 비즈니스 로직을 분리하세요
+
+### 스타일링 및 UI
+- Tailwind CSS utility-first 접근법을 사용하세요
+- **Tailwind CSS 설정**: 반드시 https://tailwindcss.com/docs/installation/using-vite 공식 문서를 참조하세요
+- shadcn/ui 컴포넌트를 적극 활용하세요: 컴포넌트 목록은 https://ui.shadcn.com/docs/components 참조
+  ```typescript
+  import { Button } from "@/components/ui/button"
+  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+  ```
+- 모바일 우선 반응형 디자인을 구현하세요
+- 일관된 테마를 위해 CSS 변수를 사용하세요
+- 절대 필요한 경우가 아니면 커스텀 CSS를 피하세요
+
+### 코드 구조
+- 파일명은 kebab-case를 사용하세요
+- 컴포넌트명은 PascalCase를 사용하세요
+- 함수명은 camelCase를 사용하세요
+- 상수명은 UPPER_SNAKE_CASE를 사용하세요
+- 기능 기반 폴더 구조로 명확하게 구성하세요
+
+### 테스트 전략
+- **백엔드 개발**: 반드시 TDD 방식을 사용하세요
+  - 실패하는 테스트를 먼저 작성하세요 (Red)
+  - 테스트를 통과하는 최소 코드를 구현하세요 (Green)
+  - 테스트를 유지하면서 리팩토링하세요 (Refactor)
+  - 핵심 비즈니스 로직은 구현 전에 반드시 테스트를 작성하세요
+- **프론트엔드 개발**: 구현 우선 접근법을 사용하세요
+  - 동작하는 UI 컴포넌트를 먼저 구축하세요
+  - 안정성을 위해 나중에 테스트를 추가하세요
+  - 사용자 상호작용 테스트에 집중하세요
+- Vitest로 단위 테스트를 작성하세요
+- 컴포넌트 테스트에는 React Testing Library를 사용하세요
+- 90% 테스트 커버리지를 목표로 하세요
+- 외부 의존성은 적절히 모킹하세요
+- given-when-then 패턴으로 테스트 구조를 작성하세요
+
+### 성능 최적화
+- 필요시 React.lazy로 코드 스플리팅을 구현하세요
+- 즉각적인 UI 피드백을 위해 낙관적 업데이트를 사용하세요
+- 큰 목록에는 가상 스크롤링을 구현하세요
+- 이미지와 애셋을 최적화하세요
+- 적절한 로딩 상태와 에러 처리를 구현하세요
+
+### 접근성
+- WCAG 2.1 AA 표준을 따르세요
+- 적절한 ARIA 속성을 구현하세요
+- 키보드 네비게이션을 지원하세요
+- 적절한 색상 대비를 유지하세요
+- 스크린 리더로 테스트하세요
+
+### Git 워크플로우
+- Conventional Commits을 사용하세요 (feat:, fix:, docs:, style:, refactor:, test:, chore:)
+- 한국어로 명확하고 설명적인 커밋 메시지를 작성하세요
+- 작고 점진적인 커밋을 만드세요
+- Pull Request를 통해 철저한 코드 리뷰를 진행하세요
+
+### 패키지 관리
+- 모노레포 관리를 위해 pnpm workspace를 사용하세요
+- 공유 패키지는 "workspace:*"로 참조하세요
+- 의존성을 최신 상태로 유지하세요
+- 개발 의존성을 적절히 분리하세요
+
+### 개발 프로세스
+- **문서 우선**: 항상 requirements.md와 design.md를 참조하세요
+- **진행 상황 추적**: 각 작업 완료 후 반드시 docs/checklist.md를 업데이트하세요
+- **문서 업데이트**: 아키텍처 변경시 설계 문서를 업데이트하세요
+- **에러 처리**: 포괄적인 에러 처리와 로딩 상태를 구현하세요
+- **코드 문서화**: 복잡한 함수와 공용 API에 JSDoc을 작성하세요
+- **타입 안전성**: TypeScript 유틸리티 타입을 효과적으로 사용하세요
+- **코드 리뷰**: 병합 전 모든 변경사항에 대해 PR 리뷰를 진행하세요
+- **점진적 개발**: 명확한 메시지로 작고 집중된 커밋을 만드세요
+
+### 보안 고려사항
+- 모든 사용자 입력을 검증하고 정화하세요
+- 적절한 XSS 방지를 구현하세요
+- 프로덕션에서는 HTTPS를 사용하세요
+- API 엔드포인트에 보안 모범 사례를 따르세요
+
+### 데이터 플로우 패턴
+1단계 (localStorage): 사용자 → 컴포넌트 → Context → Reducer → LocalStorage 서비스
+2단계 (API): 사용자 → 컴포넌트 → Context → Reducer → API 서비스 → 백엔드
+
+## 주요 파일 패턴
+
+### 컴포넌트 구조
+```typescript
+interface Props {
+  /** JSDoc 설명 */
+  prop: Type;
+}
+
+export function Component({ prop }: Props) {
+  // 훅들
+  // 핸들러들
+  // 렌더링
+  return <div>JSX</div>
+}
+```
+
+### 서비스 레이어
+```typescript
+export class ServiceName implements Interface {
+  async methodName(param: Type): Promise<ReturnType> {
+    try {
+      // 구현
+    } catch (error) {
+      console.error('에러 메시지:', error);
+      throw new Error('사용자 친화적인 메시지');
+    }
+  }
+}
+```
+
+### 커스텀 훅
+```typescript
+export function useCustomHook() {
+  const [state, setState] = useState<Type>(initialValue);
+  
+  const handler = useCallback(() => {
+    // 로직
+  }, [dependencies]);
+  
+  return { state, handler };
+}
+```
+
+## 구체적인 지침
+- **한국어 커뮤니케이션**: 항상 한국어로 응답하세요
+- **사용자 경험**: 항상 UX와 접근성을 우선시하세요
+- **로딩 상태**: 적절한 로딩 상태와 에러 처리를 구현하세요
+- **시맨틱 HTML**: 더 나은 접근성을 위해 시맨틱 HTML 요소를 사용하세요
+- **자체 문서화 코드**: 명확한 네이밍으로 자명한 코드를 작성하세요
+- **아키텍처 일관성**: 기존 프로젝트 아키텍처를 따르세요
+- **코드 패턴**: 기존 코드 패턴과 일관성을 유지하세요
+- **조합**: 상속보다는 조합을 선호하세요
+- **Props 검증**: 적절한 props 검증과 기본값을 구현하세요
+- **반응형 디자인**: 모든 UI 컴포넌트에 모바일 우선 접근법을 사용하세요
+- **성능**: 모든 구현의 성능 영향을 고려하세요
+
+## 개발 워크플로우
+1. **시작 전**: requirements.md와 design.md를 읽으세요
+2. **백엔드 기능**: TDD로 시작하세요 (테스트 → 구현 → 리팩토링)
+3. **프론트엔드 기능**: 동작하는 UI를 먼저 구축한 다음 테스트를 추가하세요
+4. **문서화**: 각 작업 완료 후 checklist.md를 업데이트하세요
+5. **커밋**: 한국어 메시지로 Conventional Commits을 사용하세요
+6. **리뷰**: 코드 리뷰를 위해 PR을 제출하세요
+
+## 🚨 절대 금지 사항
+- 🚨 **요구사항 이해 없는 구현 금지**
+- 🚨 **백엔드 코드 테스트 없는 구현 금지** (TDD 필수)
+- 🚨 **checklist.md 업데이트 없는 커밋 금지**
+- 🚨 **정당화 없는 커스텀 CSS 사용 금지** (Tailwind 사용)
+- 🚨 **TypeScript에서 any 타입 사용 금지**
+- 🚨 **모든 커뮤니케이션은 반드시 한국어로**
+
+기억하세요: 이 프로젝트는 단계적 개발 접근법을 따릅니다 (localStorage 먼저, 그 다음 API 통합). 기능을 점진적으로 구축하고 하위 호환성을 유지하세요.
