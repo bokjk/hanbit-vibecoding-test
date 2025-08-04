@@ -4,6 +4,11 @@ alwaysApply: false
 
 # React 개발 규칙
 
+> **참조 설계 문서**: 
+> - [컴포넌트 설계](../../docs/design/04-components.md) - React 컴포넌트 계층 구조, 주요 컴포넌트 명세
+> - [상태 관리 설계](../../docs/design/05-state-management.md) - Context + useReducer 패턴, 커스텀 훅
+> - [데이터 플로우](../../docs/design/06-data-flow.md) - 컴포넌트 간 데이터 흐름, 상태 동기화
+
 ## 🎨 컴포넌트 패턴
 
 ### 기본 구조

@@ -4,6 +4,12 @@ alwaysApply: false
 
 # 백엔드 개발 규칙
 
+> **참조 설계 문서**: 
+> - [API 설계 (2단계)](../../docs/design/07-api-design.md) - REST API 엔드포인트 및 클라이언트 설계
+> - [보안 설계](../../docs/design/08-security.md) - 인증/인가, JWT 토큰 관리, 데이터 보안
+> - [배포 전략](../../docs/design/09-deployment.md) - AWS 서버리스 인프라, Lambda 함수
+> - [테스트 전략](../../docs/design/10-testing.md) - TDD 방식, 단위/통합 테스트
+
 ## 🎯 TDD 필수 원칙
 
 ### Red-Green-Refactor 사이클

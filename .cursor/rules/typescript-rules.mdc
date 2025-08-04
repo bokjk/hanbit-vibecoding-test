@@ -4,6 +4,10 @@ alwaysApply: false
 
 # TypeScript 개발 규칙
 
+> **참조 설계 문서**: 
+> - [데이터 모델 설계](../../docs/design/03-data-models.md) - TypeScript 인터페이스, 타입 정의
+> - [문서 개요](../../docs/design/01-overview.md) - TypeScript strict 모드 사용
+
 ## 🎯 타입 안전성
 
 ### 기본 규칙

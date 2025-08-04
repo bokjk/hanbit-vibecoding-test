@@ -4,6 +4,10 @@ alwaysApply: false
 
 # 스타일링 및 UI 규칙
 
+> **참조 설계 문서**: 
+> - [컴포넌트 설계](../../docs/design/04-components.md) - UI 컴포넌트 구조, 공통 컴포넌트
+> - [문서 개요](../../docs/design/01-overview.md) - 기술 스택 (Tailwind CSS, shadcn/ui)
+
 ## 🎨 Tailwind CSS
 
 ### 기본 원칙
