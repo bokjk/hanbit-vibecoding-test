@@ -3,7 +3,7 @@
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "commonjs",
-    "outDir": "./dist",
+    "outDir": "../dist/lambda",
     "rootDir": "./",
     "strict": true,
     "noImplicitAny": true,
@@ -27,23 +27,21 @@
     "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./lambda/*"],
-      "@/types/*": ["./lambda/types/*"],
-      "@/services/*": ["./lambda/services/*"],
-      "@/repositories/*": ["./lambda/repositories/*"],
-      "@/utils/*": ["./lambda/utils/*"],
-      "@/handlers/*": ["./lambda/handlers/*"]
+      "@/*": ["./*"],
+      "@/types/*": ["./types/*"],
+      "@/services/*": ["./services/*"],
+      "@/repositories/*": ["./repositories/*"],
+      "@/utils/*": ["./utils/*"],
+      "@/handlers/*": ["./handlers/*"]
     }
   },
   "include": [
-    "lambda/**/*.ts"
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "dist",
-    "infrastructure/node_modules"
+    "dist"
   ]
-
 }

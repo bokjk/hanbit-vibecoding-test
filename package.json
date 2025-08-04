@@ -5,7 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:client": "pnpm --filter @hanbit/client build",
+    "build:server": "pnpm --filter @hanbit/server build",
+    "build:all": "pnpm run build:client && pnpm run build:server",
+    "test:client": "pnpm --filter @hanbit/client test",
+    "test:server": "pnpm --filter @hanbit/server test",
+    "test:all": "pnpm run test:client && pnpm run test:server",
+    "deploy:server": "pnpm --filter @hanbit/server deploy",
+    "dev:client": "pnpm --filter @hanbit/client dev",
+    "lint:all": "pnpm --filter @hanbit/client lint && pnpm --filter @hanbit/server lint"
   },
   "keywords": [],
   "author": "",
@@ -17,9 +26,12 @@
   },
   "lint-staged": {
     "apps/client/**/*.{ts,tsx,js,jsx}": [
-      "pnpm --filter apps/client lint --fix",
-      "pnpm --filter apps/client build",
-      "pnpm --filter apps/client test"
+      "pnpm --filter @hanbit/client lint --fix",
+      "pnpm --filter @hanbit/client build",
+      "pnpm --filter @hanbit/client test"
+    ],
+    "apps/server/**/*.ts": [
+      "pnpm --filter @hanbit/server lint --fix"
     ]
   }
 }

@@ -22,8 +22,8 @@
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "types": "workspace:*",
-    "ui": "workspace:*"
+    "@hanbit/types": "workspace:*",
+    "@hanbit/ui": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

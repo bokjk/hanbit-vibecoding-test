@@ -48,12 +48,12 @@
         -   [x] **(커밋: `fix: 타입스크립트 모듈 import 에러 및 LocalStorage 서비스 수정`)**
 
 -   [ ] **5. 통합 백엔드 개발 (Lambda + CDK, TDD)**
-    -   [ ] **5.1 프로젝트 구조 설정**
-        -   [ ] `apps/server` 디렉터리 생성
-        -   [ ] `apps/server/infrastructure/` CDK 인프라 코드 구조
-        -   [ ] `apps/server/lambda/` Lambda 함수 코드 구조
-        -   [ ] 통합 `package.json` 및 빌드 설정
-        -   [ ] **(커밋: `feat(backend): setup integrated backend project structure`)**
+    -   [x] **5.1 프로젝트 구조 설정**
+        -   [x] `apps/server` 디렉터리 생성
+        -   [x] `apps/server/infrastructure/` CDK 인프라 코드 구조
+        -   [x] `apps/server/lambda/` Lambda 함수 코드 구조
+        -   [x] 통합 `package.json` 및 빌드 설정
+        -   [x] **(커밋: `feat(backend): setup integrated backend project structure`)**
     
     -   [ ] **5.2 데이터베이스 스택 (DynamoDB)**
         -   [ ] `DatabaseStack` CDK 구현
