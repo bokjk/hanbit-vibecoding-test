@@ -19,6 +19,11 @@ UX/UI를 제외한 코어 비지니스 로직은 TDD에 기반해서 작업해�
 - @requirements.md 에 백엔드 요건정의를 추가해줘. 백엔드는 AWS 서버리스 아키텍쳐를 사용하여 구현해줘.
 학습용 프로젝트라서 인증은 필요없지만 Cognito를 사용해서 로그인 하지않은 사용자의 권한을 구현해줘.
 CI/CD는 깃헙 액션즈, lac는 TypeScript용 CDK를 사용해줘
+- @requirements.md 에 맞춰 @design.md 를 수정해줘
+- @design.md 에 맞춰 cheklist.md 를 수정해줘
+- @design.md 파일이 너무 커졌어. 작업목적에 따라 참고하기 쉽게 docs/design 폴더를 만들고 파일을 분리해서 저장해줘
+- @docs/design 안에 작업별로 설계문서가 분리되어있는데, @.cursor/rules 와 @.claude 에서도 목적에 맞게 분리된 설계문서들을 참조하도록
+기존의 규칙들을 업데이트 해줘. development-principles.md 과 global-cursor-rules.mdc 는 건들지마
 
 
 
@@ -82,3 +87,31 @@ https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor
 ㅇ context7-mcp
 주소 : https://github.com/upstash/context7
 claude에 설치 : claude mcp add context7 -- npx @upstash/context7-mcp
+
+
+
+--- 디자인 하기
+클로드데스크탑에서 playwright mcp 설치 후
+프롬프트를 아래와같이 전송
+
+"""
+https://linear.app/ 이 웹사이트의 테마를 그대로 사용해서 새로운 웹사이트를 만들고싶어. 이 웹사이트를 크롤링해서 테마 데이터를 JSON 으로 변환해줘
+"""
+
+여기서 나온 JSON 데이터를 docs 폴더에 저장
+그리고 그 데이터를 프롬프트에 연결해주고 아래와 같이 프롬프트를 작성
+"""
+우리가 사용할 테마를 JSON 으로 입력해줄께. 이걸 기반으로 /sampleComponents 페이지를 만들고
+해당 페이지에 내가 확인할 수있는 데모 컴포넌트들을 만들어줘. 이 컴포넌트들은 프로젝트 전방적으로 반복적으로 사용 할 계획이기 때문에
+일반화와 중앙화에 신경써줘
+"""
+
+샘플페이지 완성
+"
+추가로 컴포넌트가 필요하면 caroudsel 디자인도 만들어주고 Card 컴포넌트는 이미지가 입력된 예제로 만들어줘
+"
+"
+Navbar, Footer, Hero 도 데모 컴포넌트를 작업해줘
+"
+처럼 추가로 입력
+

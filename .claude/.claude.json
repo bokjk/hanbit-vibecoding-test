@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "stdio",
+      "command": "context7-mcp"
+    }
+  }
+}

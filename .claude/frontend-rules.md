@@ -1,0 +1,99 @@
+# React 개발 규칙
+
+## 🎨 컴포넌트 패턴
+
+### 기본 구조
+```typescript
+interface Props {
+  /** JSDoc으로 props 설명 */
+  title: string;
+  onAction?: () => void;
+}
+
+export function ComponentName({ title, onAction }: Props) {
+  // 1. 훅들
+  const [state, setState] = useState<Type>(initialValue);
+  
+  // 2. 핸들러들
+  const handleAction = useCallback(() => {
+    onAction?.();
+  }, [onAction]);
+  
+  // 3. 렌더링
+  return (
+    <div className="...">
+      {/* JSX */}
+    </div>
+  );
+}
+```
+
+### 컴포넌트 규칙
+- **함수형 컴포넌트만 사용하세요**
+- 비즈니스 로직 분리를 위해 커스텀 훅을 구현하세요
+- 컴포넌트 조합 패턴을 따르세요 (상속보다 조합)
+- 적절한 에러 바운더리를 구현하세요
+
+## ⚡ 성능 최적화
+
+### 메모이제이션
+```typescript
+// ✅ React.memo로 컴포넌트 최적화
+export const ExpensiveComponent = React.memo(function ExpensiveComponent({ data }: Props) {
+  return <div>{/* 렌더링 */}</div>;
+});
+
+// ✅ useCallback으로 함수 최적화
+const handleClick = useCallback((id: string) => {
+  onItemClick(id);
+}, [onItemClick]);
+
+// ✅ useMemo로 계산 최적화
+const expensiveValue = useMemo(() => {
+  return heavyCalculation(data);
+}, [data]);
+```
+
+### 성능 가이드라인
+- React.memo, useCallback, useMemo를 적절히 사용하세요
+- 필요시 React.lazy로 코드 스플리팅을 구현하세요
+- 큰 목록에는 가상 스크롤링을 구현하세요
+- 즉각적인 UI 피드백을 위해 낙관적 업데이트를 사용하세요
+
+## 🪝 커스텀 훅 패턴
+
+```typescript
+export function useCustomHook() {
+  const [state, setState] = useState<Type>(initialValue);
+  
+  const handler = useCallback(() => {
+    // 비즈니스 로직
+  }, [dependencies]);
+  
+  // 정리 로직
+  useEffect(() => {
+    return () => {
+      // cleanup
+    };
+  }, []);
+  
+  return { state, handler };
+}
+```
+
+## 🎯 상태 관리
+- React Context + useReducer 패턴을 사용하세요
+- 명확한 타입 정의로 액션을 구조화하세요
+- 표현 로직과 비즈니스 로직을 분리하세요
+- 더 나은 UX를 위해 낙관적 업데이트를 구현하세요
+
+## 📁 파일 구조
+- 파일명: kebab-case (예: `todo-item.tsx`)
+- 컴포넌트명: PascalCase (예: `TodoItem`)
+- 기능 기반 폴더 구조로 명확하게 구성하세요
+
+## ♿ 접근성
+- WCAG 2.1 AA 표준을 따르세요
+- 적절한 ARIA 속성을 구현하세요
+- 키보드 네비게이션을 지원하세요
+- 시맨틱 HTML 요소를 사용하세요

@@ -1,4 +1,13 @@
-### TODO 앱 개발 작업 체크리스트 (모노레포)
+# TODO 앱 개발 작업 체크리스트 (모노레포)
+
+## 📋 개발 진행 상황 요약
+- **완료**: 1-4단계 (프론트엔드 MVP)
+- **진행 중**: 5단계 (통합 백엔드 개발)
+- **계획**: 6-9단계 (연동, 보안, 배포, 검증)
+
+---
+
+## 🏗️ 단계별 체크리스트
 
 -   [x] **1. 모노레포 초기 설정**
     -   [x] `pnpm` 설치 및 `pnpm init`
@@ -39,19 +48,134 @@
         -   [x] **(커밋: `fix: 타입스크립트 모듈 import 에러 및 LocalStorage 서비스 수정`)**
 
 -   [ ] **5. 통합 백엔드 개발 (Lambda + CDK, TDD)**
-    -   [ ] `apps/server` 디렉터리 생성 및 구조 설정
-    -   [ ] `apps/server/lambda/functions/`에 Lambda 함수 핸들러 테스트 작성 (TDD)
-    -   [ ] 테스트를 통과하는 Todo CRUD 로직 구현
-    -   [ ] `apps/server/infrastructure/`에 CDK 스택 구현
-        -   [ ] DynamoDB 테이블 설정
-        -   [ ] Cognito 인증 설정 (게스트 지원)
-        -   [ ] API Gateway + Lambda 통합
-        -   [ ] CloudWatch 모니터링 설정
-    -   [ ] 통합 빌드 스크립트 설정 (`package.json`)
-    -   [ ] **(커밋: `feat(backend): implement integrated serverless backend with CDK`)**
+    -   [ ] **5.1 프로젝트 구조 설정**
+        -   [ ] `apps/server` 디렉터리 생성
+        -   [ ] `apps/server/infrastructure/` CDK 인프라 코드 구조
+        -   [ ] `apps/server/lambda/` Lambda 함수 코드 구조
+        -   [ ] 통합 `package.json` 및 빌드 설정
+        -   [ ] **(커밋: `feat(backend): setup integrated backend project structure`)**
+    
+    -   [ ] **5.2 데이터베이스 스택 (DynamoDB)**
+        -   [ ] `DatabaseStack` CDK 구현
+        -   [ ] Single Table Design 구조 설정
+        -   [ ] TTL 설정 (게스트 데이터용)
+        -   [ ] GSI 설정 (정렬 및 쿼리 최적화)
+        -   [ ] **(커밋: `feat(backend): implement DynamoDB stack with single table design`)**
+    
+    -   [ ] **5.3 인증 스택 (Cognito)**
+        -   [ ] `AuthStack` CDK 구현
+        -   [ ] Cognito User Pool 설정
+        -   [ ] Identity Pool 설정 (게스트 지원)
+        -   [ ] IAM 역할 및 정책 설정
+        -   [ ] **(커밋: `feat(backend): implement Cognito authentication stack`)**
+    
+    -   [ ] **5.4 Lambda 함수 개발 (TDD)**
+        -   [ ] `TodoRepository` 인터페이스 및 테스트 작성
+        -   [ ] `DynamoDBTodoRepository` 구현 및 테스트
+        -   [ ] Lambda 핸들러 함수들 TDD 구현:
+            -   [ ] `get-todos` 핸들러
+            -   [ ] `create-todo` 핸들러
+            -   [ ] `update-todo` 핸들러
+            -   [ ] `delete-todo` 핸들러
+            -   [ ] `guest-auth` 핸들러
+            -   [ ] `migrate` 핸들러
+        -   [ ] 공유 로직 및 미들웨어 구현
+        -   [ ] **(커밋: `feat(backend): implement Lambda functions with TDD`)**
+    
+    -   [ ] **5.5 API 스택 (API Gateway)**
+        -   [ ] `ApiStack` CDK 구현
+        -   [ ] REST API 엔드포인트 설정
+        -   [ ] Cognito Authorizer 통합
+        -   [ ] CORS 설정
+        -   [ ] Lambda 통합 설정
+        -   [ ] **(커밋: `feat(backend): implement API Gateway stack`)**
+    
+    -   [ ] **5.6 모니터링 스택 (CloudWatch)**
+        -   [ ] `MonitoringStack` CDK 구현
+        -   [ ] Lambda 로그 및 메트릭 설정
+        -   [ ] X-Ray 트레이싱 설정
+        -   [ ] 대시보드 및 알람 설정
+        -   [ ] **(커밋: `feat(backend): implement monitoring and observability stack`)**
 
--   [ ] **6. API 연동 및 통합 배포**
-    -   [ ] `apps/client`에 `APIRepository` 구현 및 연동
-    -   [ ] `apps/server`에서 CDK를 통한 통합 배포 테스트
-    -   [ ] GitHub Actions를 이용한 CI/CD 파이프라인 구축 (통합 백엔드 배포)
-    -   [ ] **(커밋: `chore: setup CI/CD with integrated backend deployment`)**
+-   [ ] **6. 프론트엔드-백엔드 연동 (2단계)**
+    -   [ ] **6.1 API 클라이언트 구현**
+        -   [ ] `TodoAPIClient` 클래스 구현
+        -   [ ] 인증 서비스 통합 (`AuthService`)
+        -   [ ] API 에러 처리 및 재시도 로직
+        -   [ ] **(커밋: `feat(client): implement API client with authentication`)**
+    
+    -   [ ] **6.2 상태 관리 확장**
+        -   [ ] `AuthContext` 및 인증 상태 관리
+        -   [ ] API 서비스와 localStorage 서비스 추상화
+        -   [ ] 낙관적 업데이트 및 동기화 로직
+        -   [ ] **(커밋: `feat(client): extend state management for API integration`)**
+    
+    -   [ ] **6.3 데이터 마이그레이션**
+        -   [ ] localStorage 데이터를 클라우드로 마이그레이션 기능
+        -   [ ] 게스트 사용자 흐름 구현
+        -   [ ] 인증 사용자 등록/로그인 흐름
+        -   [ ] **(커밋: `feat(client): implement data migration and authentication flows`)**
+
+-   [ ] **7. 보안 및 품질 강화**
+    -   [ ] **7.1 보안 구현**
+        -   [ ] 입력 검증 및 XSS 방지
+        -   [ ] Rate Limiting 구현
+        -   [ ] CORS 정책 설정
+        -   [ ] CSP (Content Security Policy) 설정
+        -   [ ] **(커밋: `feat(security): implement comprehensive security measures`)**
+    
+    -   [ ] **7.2 테스트 커버리지 확장**
+        -   [ ] 통합 테스트 (DynamoDB 연동)
+        -   [ ] Contract 테스트 (API 스펙 검증)
+        -   [ ] E2E 테스트 (Playwright)
+        -   [ ] 성능 테스트
+        -   [ ] **(커밋: `test: implement comprehensive test coverage`)**
+    
+    -   [ ] **7.3 에러 처리 및 모니터링**
+        -   [ ] 구조화된 로깅 시스템
+        -   [ ] 에러 추적 및 알림
+        -   [ ] 성능 모니터링 대시보드
+        -   [ ] **(커밋: `feat(monitoring): implement error tracking and monitoring`)**
+
+-   [ ] **8. 배포 및 운영**
+    -   [ ] **8.1 환경별 배포 설정**
+        -   [ ] 개발(dev), 테스트(test), 프로덕션(prod) 환경 구성
+        -   [ ] 환경별 CDK 설정 및 배포 스크립트
+        -   [ ] 시크릿 관리 (AWS Parameter Store/Secrets Manager)
+        -   [ ] **(커밋: `feat(deploy): setup environment-specific deployment`)**
+    
+    -   [ ] **8.2 CI/CD 파이프라인**
+        -   [ ] GitHub Actions 백엔드 배포 워크플로우
+        -   [ ] 프론트엔드 GitHub Pages 배포
+        -   [ ] 자동화된 테스트 및 품질 검사
+        -   [ ] 롤백 전략 구현
+        -   [ ] **(커밋: `chore: implement comprehensive CI/CD pipeline`)**
+    
+    -   [ ] **8.3 성능 최적화**
+        -   [ ] Lambda 콜드 스타트 최적화
+        -   [ ] DynamoDB 쿼리 최적화
+        -   [ ] 프론트엔드 번들 최적화
+        -   [ ] CDN 및 캐싱 전략
+        -   [ ] **(커밋: `perf: implement performance optimizations`)**
+
+-   [ ] **9. 최종 검증 및 문서화**
+    -   [ ] **9.1 사용자 수용 테스트**
+        -   [ ] 핵심 사용자 시나리오 테스트
+        -   [ ] 접근성 검증 (WCAG 2.1 AA)
+        -   [ ] 크로스 브라우저 테스트
+        -   [ ] 모바일 반응형 테스트
+        -   [ ] **(커밋: `test: complete user acceptance testing`)**
+    
+    -   [ ] **9.2 문서화 완성**
+        -   [ ] API 문서 (OpenAPI 3.0)
+        -   [ ] 사용자 가이드
+        -   [ ] 개발자 문서
+        -   [ ] 운영 매뉴얼
+        -   [ ] **(커밋: `docs: complete comprehensive documentation`)**
+    
+    -   [ ] **9.3 프로덕션 배포**
+        -   [ ] 프로덕션 환경 최종 검증
+        -   [ ] 도메인 설정 및 SSL 인증서
+        -   [ ] 모니터링 및 알람 설정 확인
+        -   [ ] 백업 및 재해 복구 계획
+        -   [ ] **(커밋: `chore: production deployment and final setup`)**
