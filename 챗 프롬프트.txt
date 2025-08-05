@@ -73,6 +73,8 @@ claude-monitor
 
 https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor
 
+업그레이드 pip install --upgrade claude-monitor==3.1.0
+
 
 
 
