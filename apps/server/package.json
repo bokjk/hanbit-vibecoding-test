@@ -1,5 +1,5 @@
 {
-  "name": "@hanbit/server",
+  "name": "@vive/server",
   "version": "1.0.0",
   "description": "TODO 앱 백엔드 서버 (AWS Lambda)",
   "main": "index.js",
@@ -22,7 +22,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@hanbit/types": "workspace:*",
+    "@vive/types": "workspace:*",
     "@aws-sdk/client-dynamodb": "^3.470.0",
     "@aws-sdk/util-dynamodb": "^3.470.0",
     "jsonwebtoken": "^9.0.2",

@@ -134,4 +134,4 @@ pnpm deploy
 
 - **자동 수정**: `lint:fix`와 `format`은 대부분의 스타일 문제를 자동으로 수정합니다
 - **Git Hook**: 커밋시 자동으로 코드 품질 검사가 실행됩니다
-- **필터 명령어**: 특정 패키지만 작업하려면 `pnpm --filter @hanbit/client [명령어]` 형태로 사용하세요
+- **필터 명령어**: 특정 패키지만 작업하려면 `pnpm --filter @vive/client [명령어]` 형태로 사용하세요

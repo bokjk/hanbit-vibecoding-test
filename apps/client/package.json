@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "@vive/client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -22,8 +22,8 @@
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "@hanbit/types": "workspace:*",
-    "@hanbit/ui": "workspace:*"
+    "@vive/types": "workspace:*",
+    "@vive/ui": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
