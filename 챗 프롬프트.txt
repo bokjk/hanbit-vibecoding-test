@@ -24,6 +24,7 @@ CI/CD는 깃헙 액션즈, lac는 TypeScript용 CDK를 사용해줘
 - @design.md 파일이 너무 커졌어. 작업목적에 따라 참고하기 쉽게 docs/design 폴더를 만들고 파일을 분리해서 저장해줘
 - @docs/design 안에 작업별로 설계문서가 분리되어있는데, @.cursor/rules 와 @.claude 에서도 목적에 맞게 분리된 설계문서들을 참조하도록
 기존의 규칙들을 업데이트 해줘. development-principles.md 과 global-cursor-rules.mdc 는 건들지마
+- 백엔드도 git hook을 사용해서 lint autofix, prettier, build, test가 수행되도록 설정해줘
 
 
 

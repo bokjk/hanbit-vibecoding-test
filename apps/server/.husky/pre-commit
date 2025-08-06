@@ -1,0 +1,19 @@
+echo "🔍 pre-commit hook 실행 중..."
+
+# lint-staged 실행 (코드 품질 검사 및 자동 수정)
+echo "📝 코드 스타일 검사 및 자동 수정..."
+pnpm lint-staged
+
+# 타입 체크
+echo "🔍 TypeScript 타입 체크..."
+pnpm type-check
+
+# 빌드 테스트
+echo "🏗️  빌드 테스트..."
+pnpm build
+
+# 단위 테스트
+echo "🧪 테스트 실행..."
+pnpm test --run
+
+echo "✅ pre-commit hook 완료!"
