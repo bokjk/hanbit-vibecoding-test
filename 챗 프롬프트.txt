@@ -86,10 +86,21 @@ https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor
 /sc:design --persona-frontend --seq --plan 어드민페이지를 제작하고싶어 UI만 만들어줘
 /sc:setup --persona-frontend --plan --seq "Playwright E2E 테스트 환경을 완전히 설정해줘"
 
+
+
+ㅇ serena 
+https://github.com/oraios/serena
+확인 후 정리필요
+
+
 --- mcp
 ㅇ context7-mcp
 주소 : https://github.com/upstash/context7
 claude에 설치 : claude mcp add context7 -- npx @upstash/context7-mcp
+
+
+
+
 
 
 
