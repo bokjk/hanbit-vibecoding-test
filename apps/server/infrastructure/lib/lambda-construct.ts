@@ -1,12 +1,17 @@
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { resolve } from 'path';
 
 export interface LambdaConstructProps {
   todoTable: dynamodb.Table;
+  userPool: cognito.UserPool;
+  userPoolClient: cognito.UserPoolClient;
+  identityPool: cognito.CfnIdentityPool;
 }
 
 /**
@@ -24,12 +29,13 @@ export class LambdaConstruct extends Construct {
   public readonly authHandlers: {
     login: lambda.Function;
     refresh: lambda.Function;
+    guestAuth: lambda.Function;
   };
 
   constructor(scope: Construct, id: string, props: LambdaConstructProps) {
     super(scope, id);
 
-    const { todoTable } = props;
+    const { todoTable, userPool, userPoolClient, identityPool } = props;
 
     // 공통 Lambda 설정
     const commonLambdaProps = {
@@ -38,6 +44,10 @@ export class LambdaConstruct extends Construct {
       memorySize: 512,
       environment: {
         DYNAMODB_TABLE_NAME: todoTable.tableName,
+        COGNITO_USER_POOL_ID: userPool.userPoolId,
+        COGNITO_CLIENT_ID: userPoolClient.userPoolClientId,
+        COGNITO_IDENTITY_POOL_ID: identityPool.ref,
+        AWS_REGION: cdk.Stack.of(this).region,
         NODE_ENV: process.env.NODE_ENV || 'development',
         LOG_LEVEL: process.env.LOG_LEVEL || 'info',
       },
@@ -104,6 +114,16 @@ export class LambdaConstruct extends Construct {
         handler: 'handlers/auth/refresh.handler',
         description: '토큰 갱신 처리',
       }),
+
+      guestAuth: new lambda.Function(this, 'GuestAuthHandler', {
+        ...commonLambdaProps,
+        functionName: 'hanbit-auth-guest',
+        code: lambda.Code.fromAsset(lambdaCodePath),
+        handler: 'auth/guest-auth.handler',
+        description: '게스트 사용자 인증 처리',
+        timeout: cdk.Duration.seconds(15), // 게스트 인증은 더 빠르게
+        memorySize: 256, // 메모리 사용량 최적화
+      }),
     };
 
     // DynamoDB 테이블 접근 권한 부여
@@ -114,6 +134,15 @@ export class LambdaConstruct extends Construct {
     Object.values(this.authHandlers).forEach(handler => {
       todoTable.grantReadData(handler);
     });
+
+    // 게스트 인증 핸들러에 Cognito Identity Pool 접근 권한 추가
+    this.authHandlers.guestAuth.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['cognito-identity:GetId', 'cognito-identity:GetCredentialsForIdentity'],
+        resources: ['*'], // Identity Pool은 리소스별 제한이 불가능
+      })
+    );
 
     // 태그 추가
     const allHandlers = [...Object.values(this.todoHandlers), ...Object.values(this.authHandlers)];
