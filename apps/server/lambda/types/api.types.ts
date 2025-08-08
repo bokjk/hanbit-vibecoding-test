@@ -1,4 +1,4 @@
-import { Priority } from '@hanbit/types';
+import { Priority } from './constants';
 
 /**
  * API 요청/응답 타입 정의

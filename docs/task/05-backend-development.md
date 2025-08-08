@@ -4,7 +4,7 @@
 
 AWS 서버리스 아키텍처 기반 백엔드 구현 및 CDK 인프라 코드 구성
 
-## ✅ 완료 상태: **진행 중** (5.1-5.3 완료, 5.4-5.6 진행 예정)
+## ✅ 완료 상태: **진행 중** (5.1-5.4 완료, 5.5-5.6 진행 예정)
 
 ## 📝 세부 체크리스트
 
@@ -39,18 +39,20 @@ AWS 서버리스 아키텍처 기반 백엔드 구현 및 CDK 인프라 코드 �
   - [x] ESLint 오류 수정 및 코드 품질 확인
   - [x] **(커밋: `feat(backend): implement Cognito authentication stack`)**
 
-- [ ] **5.4 Lambda 함수 개발 (TDD)**
-  - [ ] `TodoRepository` 인터페이스 및 테스트 작성
-  - [ ] `DynamoDBTodoRepository` 구현 및 테스트
-  - [ ] Lambda 핸들러 함수들 TDD 구현:
-    - [ ] `get-todos` 핸들러
-    - [ ] `create-todo` 핸들러
-    - [ ] `update-todo` 핸들러
-    - [ ] `delete-todo` 핸들러
-    - [ ] `guest-auth` 핸들러
-    - [ ] `migrate` 핸들러
-  - [ ] 공유 로직 및 미들웨어 구현
-  - [ ] **(커밋: `feat(backend): implement Lambda functions with TDD`)**
+- [x] **5.4 Lambda 함수 개발 (TDD)**
+  - [x] `TodoRepository` 인터페이스 및 테스트 작성
+  - [x] `DynamoDBTodoRepository` 구현 및 테스트 (`repositories/todo-repository.ts`)
+  - [x] Lambda 핸들러 함수들 TDD 구현:
+    - [x] `list` 핸들러 (GET /todos - 필터링 및 페이지네이션)
+    - [x] `create` 핸들러 (POST /todos - 인증 및 권한 검증)
+    - [x] `update` 핸들러 (PUT /todos/{id} - 소유권 검증)
+    - [x] `delete` 핸들러 (DELETE /todos/{id} - 소유권 검증)
+    - [x] 기존 `guest-auth` 핸들러 유지
+  - [x] 공유 로직 및 미들웨어 구현:
+    - [x] 의존성 주입 컨테이너 (`utils/container.ts`)
+    - [x] JWT 토큰 검증 미들웨어
+    - [x] 에러 처리 및 로깅
+  - [x] **(커밋: `feat(backend): implement Lambda functions with TDD`)**
 
 - [ ] **5.5 API 스택 (API Gateway)**
   - [ ] `ApiStack` CDK 구현

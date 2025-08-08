@@ -5,7 +5,7 @@
  * DynamoDB 작업을 위한 유틸리티 타입들을 정의합니다.
  */
 
-import { Priority } from '@vive/types';
+import { Priority } from './constants';
 
 // ==========================================
 // DynamoDB 기본 아이템 타입
@@ -64,6 +64,7 @@ export interface DynamoTodoItem extends DynamoItemWithTTL {
   description?: string;
   completed: boolean;
   priority: Priority;
+  dueDate?: string;
   createdAt: string;
   updatedAt: string;
 

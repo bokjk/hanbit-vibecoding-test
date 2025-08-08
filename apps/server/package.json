@@ -24,6 +24,7 @@
   "dependencies": {
     "@vive/types": "workspace:*",
     "@aws-sdk/client-dynamodb": "^3.470.0",
+    "@aws-sdk/lib-dynamodb": "^3.470.0",
     "@aws-sdk/client-cognito-identity": "^3.470.0",
     "@aws-sdk/util-dynamodb": "^3.470.0",
     "jsonwebtoken": "^9.0.2",

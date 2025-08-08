@@ -1,7 +1,20 @@
 import jwt from 'jsonwebtoken';
 import jwksClient, { JwksClient } from 'jwks-rsa';
 import { logger } from './logger';
-import { AuthContext } from '../middleware/auth-middleware';
+interface AuthContext {
+  userId: string;
+  userType: 'authenticated' | 'guest';
+  sessionId?: string;
+  permissions: {
+    canRead: boolean;
+    canCreate: boolean;
+    canUpdate: boolean;
+    canDelete: boolean;
+    persistData: boolean;
+    maxItems: number;
+  };
+  tokenClaims: Record<string, unknown>;
+}
 
 /**
  * JWT 토큰 검증 유틸리티
