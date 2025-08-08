@@ -4,7 +4,7 @@
 
 AWS 서버리스 아키텍처 기반 백엔드 구현 및 CDK 인프라 코드 구성
 
-## ✅ 완료 상태: **진행 중** (5.1-5.4 완료, 5.5-5.6 진행 예정)
+## ✅ 완료 상태: **거의 완료** (5.1-5.5 완료, 5.6 진행 예정)
 
 ## 📝 세부 체크리스트
 
@@ -54,13 +54,16 @@ AWS 서버리스 아키텍처 기반 백엔드 구현 및 CDK 인프라 코드 �
     - [x] 에러 처리 및 로깅
   - [x] **(커밋: `feat(backend): implement Lambda functions with TDD`)**
 
-- [ ] **5.5 API 스택 (API Gateway)**
-  - [ ] `ApiStack` CDK 구현
-  - [ ] REST API 엔드포인트 설정
-  - [ ] Cognito Authorizer 통합
-  - [ ] CORS 설정
-  - [ ] Lambda 통합 설정
-  - [ ] **(커밋: `feat(backend): implement API Gateway stack`)**
+- [x] **5.5 API 스택 (API Gateway)**
+  - [x] `ApiConstruct` CDK 구현 완료
+  - [x] REST API 엔드포인트 설정 (/todos, /auth, /health)
+  - [x] Cognito Authorizer 통합 (인증된 사용자만 TODO API 접근)
+  - [x] 환경별 CORS 설정 (개발/프로덕션 도메인 분리)
+  - [x] 요청/응답 모델 정의 및 검증
+  - [x] 표준화된 오류 응답 매핑 구현
+  - [x] API Gateway 정책 및 throttling 설정
+  - [x] Lambda 통합 설정 완료
+  - [x] **(커밋: `feat(backend): implement comprehensive API Gateway stack with Cognito authorization`)**
 
 - [ ] **5.6 모니터링 스택 (CloudWatch)**
   - [ ] `MonitoringStack` CDK 구현
