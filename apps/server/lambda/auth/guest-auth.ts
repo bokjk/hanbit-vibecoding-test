@@ -6,6 +6,10 @@ import {
 } from '@aws-sdk/client-cognito-identity';
 import { createSuccessResponse, createErrorResponse } from '../utils/response';
 import { logger } from '../utils/logger';
+import { initializeXRay, addAnnotation } from '../utils/xray-tracer';
+
+// X-Ray 초기화
+initializeXRay();
 
 /**
  * 게스트 사용자를 위한 인증 핸들러
@@ -69,6 +73,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   });
 
   try {
+    // X-Ray에 작업 정보 추가
+    addAnnotation('operation', 'guestAuth');
+
     // 요청 body 파싱
     const requestBody: GuestAuthRequest = event.body ? JSON.parse(event.body) : {};
 

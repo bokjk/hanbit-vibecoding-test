@@ -42,6 +42,7 @@ export class LambdaConstruct extends Construct {
       runtime: lambda.Runtime.NODEJS_18_X,
       timeout: cdk.Duration.seconds(30),
       memorySize: 512,
+      tracing: lambda.Tracing.ACTIVE, // X-Ray 트레이싱 활성화
       environment: {
         DYNAMODB_TABLE_NAME: todoTable.tableName,
         COGNITO_USER_POOL_ID: userPool.userPoolId,
@@ -50,6 +51,7 @@ export class LambdaConstruct extends Construct {
         AWS_REGION: cdk.Stack.of(this).region,
         NODE_ENV: process.env.NODE_ENV || 'development',
         LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+        _X_AMZN_TRACE_ID: '', // X-Ray SDK 활성화를 위한 환경 변수
       },
       logRetention: logs.RetentionDays.ONE_WEEK,
       bundling: {
@@ -144,9 +146,26 @@ export class LambdaConstruct extends Construct {
       })
     );
 
-    // 태그 추가
+    // X-Ray 권한 추가
+    const xrayPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'xray:PutTraceSegments',
+        'xray:PutTelemetryRecords',
+        'xray:GetSamplingRules',
+        'xray:GetSamplingTargets',
+        'xray:GetSamplingStatisticSummaries',
+      ],
+      resources: ['*'],
+    });
+
+    // 태그 추가 및 X-Ray 권한 부여
     const allHandlers = [...Object.values(this.todoHandlers), ...Object.values(this.authHandlers)];
     allHandlers.forEach(handler => {
+      // X-Ray 권한 추가
+      handler.addToRolePolicy(xrayPolicy);
+
+      // 태그 추가
       cdk.Tags.of(handler).add('Component', 'Lambda');
       cdk.Tags.of(handler).add('Project', 'HanbitTodo');
     });

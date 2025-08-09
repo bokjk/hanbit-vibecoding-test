@@ -1,30 +1,32 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { 
-  createSuccessResponse, 
-  createErrorResponse, 
+import {
+  createSuccessResponse,
+  createErrorResponse,
   createValidationErrorResponse,
-  createUnauthorizedResponse
+  createUnauthorizedResponse,
 } from '@/utils/response';
 import { parseAndValidate, LoginRequestSchema } from '@/utils/validation';
 import { logger } from '@/utils/logger';
+import { initializeXRay, addAnnotation } from '@/utils/xray-tracer';
+
+// X-Ray 초기화
+initializeXRay();
 
 /**
  * POST /auth/login - 사용자 로그인
  */
-export const handler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const timer = logger.startTimer();
   const requestId = event.requestContext.requestId;
 
   try {
     logger.logRequest('POST', '/auth/login', { requestId });
 
+    // X-Ray에 작업 정보 추가
+    addAnnotation('operation', 'login');
+
     // 요청 본문 검증
-    const loginRequest = parseAndValidate(
-      event.body,
-      LoginRequestSchema
-    );
+    const loginRequest = parseAndValidate(event.body, LoginRequestSchema);
 
     // TODO: 비즈니스 로직 구현
     // 1. 사용자 조회
@@ -45,9 +47,9 @@ export const handler = async (
       };
 
       const duration = timer();
-      logger.logResponse('POST', '/auth/login', 200, duration, { 
+      logger.logResponse('POST', '/auth/login', 200, duration, {
         requestId,
-        userId: loginResponse.user.id
+        userId: loginResponse.user.id,
       });
 
       return createSuccessResponse(loginResponse);
@@ -55,14 +57,13 @@ export const handler = async (
 
     // 인증 실패
     const duration = timer();
-    logger.warn('Login failed', { 
+    logger.warn('Login failed', {
       requestId,
-      username: loginRequest.username
+      username: loginRequest.username,
     });
     logger.logResponse('POST', '/auth/login', 401, duration, { requestId });
 
     return createUnauthorizedResponse('사용자명 또는 비밀번호가 올바르지 않습니다');
-
   } catch (error) {
     const duration = timer();
     logger.error('Error during login', error as Error, { requestId });

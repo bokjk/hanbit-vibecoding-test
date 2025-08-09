@@ -4,6 +4,7 @@ import { DatabaseConstruct } from './database-construct';
 import { AuthConstruct } from './auth-construct';
 import { LambdaConstruct } from './lambda-construct';
 import { ApiConstruct } from './api-construct';
+import { MonitoringConstruct } from './monitoring-construct';
 
 /**
  * Hanbit TODO 앱의 메인 CDK 스택
@@ -36,6 +37,15 @@ export class HanbitStack extends cdk.Stack {
       userPool: auth.userPool,
     });
 
+    // 모니터링 스택 생성 (CloudWatch)
+    const monitoring = new MonitoringConstruct(this, 'Monitoring', {
+      restApi: api.restApi,
+      todoTable: database.todoTable,
+      todoHandlers: lambda.todoHandlers,
+      authHandlers: lambda.authHandlers,
+      alertEmail: process.env.ALERT_EMAIL, // 선택적 알림 이메일
+    });
+
     // 출력 값들
     new cdk.CfnOutput(this, 'ApiEndpoint', {
       value: api.restApi.url,
@@ -60,6 +70,16 @@ export class HanbitStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'IdentityPoolId', {
       value: auth.identityPool.ref,
       description: 'Cognito Identity Pool ID',
+    });
+
+    new cdk.CfnOutput(this, 'DashboardUrl', {
+      value: `https://console.aws.amazon.com/cloudwatch/home?region=${this.region}#dashboards:name=${monitoring.dashboard.dashboardName}`,
+      description: 'CloudWatch 대시보드 URL',
+    });
+
+    new cdk.CfnOutput(this, 'AlarmTopicArn', {
+      value: monitoring.alarmTopic.topicArn,
+      description: 'SNS 알람 토픽 ARN',
     });
   }
 }

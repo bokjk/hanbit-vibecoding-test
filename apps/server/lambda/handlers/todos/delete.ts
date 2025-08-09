@@ -10,9 +10,13 @@ import { getTodoService, warmupContainer } from '@/utils/container';
 import { validateJWTToken } from '@/utils/token-validator';
 import { AuthError } from '@/services/todo.service';
 import { ItemNotFoundError } from '@/types/database.types';
+import { initializeXRay, addUserInfo, addAnnotation } from '@/utils/xray-tracer';
 
 // Lambda Cold Start 최적화
 warmupContainer();
+
+// X-Ray 초기화
+initializeXRay();
 
 /**
  * DELETE /todos/{id} - TODO 아이템 삭제
@@ -33,6 +37,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     const token = authHeader.substring(7);
     const authContext = await validateJWTToken(token);
+
+    // X-Ray에 사용자 정보 추가
+    addUserInfo(authContext.userId, authContext.userType);
+    addAnnotation('operation', 'deleteTodo');
 
     // 2. 경로 파라미터 검증
     const { id } = validatePathParams(event.pathParameters, IdParamSchema);

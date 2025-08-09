@@ -1,30 +1,32 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { 
-  createSuccessResponse, 
-  createErrorResponse, 
+import {
+  createSuccessResponse,
+  createErrorResponse,
   createValidationErrorResponse,
-  createUnauthorizedResponse
+  createUnauthorizedResponse,
 } from '@/utils/response';
 import { parseAndValidate, RefreshRequestSchema } from '@/utils/validation';
 import { logger } from '@/utils/logger';
+import { initializeXRay, addAnnotation } from '@/utils/xray-tracer';
+
+// X-Ray 초기화
+initializeXRay();
 
 /**
  * POST /auth/refresh - 토큰 갱신
  */
-export const handler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const timer = logger.startTimer();
   const requestId = event.requestContext.requestId;
 
   try {
     logger.logRequest('POST', '/auth/refresh', { requestId });
 
+    // X-Ray에 작업 정보 추가
+    addAnnotation('operation', 'refresh');
+
     // 요청 본문 검증
-    const refreshRequest = parseAndValidate(
-      event.body,
-      RefreshRequestSchema
-    );
+    const refreshRequest = parseAndValidate(event.body, RefreshRequestSchema);
 
     // TODO: 비즈니스 로직 구현
     // 1. 리프레시 토큰 검증
@@ -51,7 +53,6 @@ export const handler = async (
     logger.logResponse('POST', '/auth/refresh', 401, duration, { requestId });
 
     return createUnauthorizedResponse('유효하지 않은 리프레시 토큰입니다');
-
   } catch (error) {
     const duration = timer();
     logger.error('Error during token refresh', error as Error, { requestId });

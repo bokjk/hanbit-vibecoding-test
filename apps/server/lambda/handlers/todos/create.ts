@@ -9,9 +9,13 @@ import { logger } from '@/utils/logger';
 import { getTodoService, warmupContainer } from '@/utils/container';
 import { validateJWTToken } from '@/utils/token-validator';
 import { AuthError } from '@/services/todo.service';
+import { initializeXRay, addUserInfo, addAnnotation } from '@/utils/xray-tracer';
 
 // Lambda Cold Start 최적화
 warmupContainer();
+
+// X-Ray 초기화
+initializeXRay();
 
 /**
  * POST /todos - 새로운 TODO 아이템 생성
@@ -38,6 +42,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       userId: authContext.userId,
       userType: authContext.userType,
     });
+
+    // X-Ray에 사용자 정보 추가
+    addUserInfo(authContext.userId, authContext.userType);
+    addAnnotation('operation', 'createTodo');
 
     // 2. 요청 본문 검증
     const createTodoRequest = parseAndValidate(event.body, CreateTodoRequestSchema);

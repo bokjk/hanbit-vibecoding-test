@@ -6,9 +6,13 @@ import { validateJWTToken } from '@/utils/token-validator';
 import { AuthError } from '@/services/todo.service';
 import { Priority } from '@/types/constants';
 import { ListTodosRequest } from '@/types/api.types';
+import { initializeXRay, addUserInfo, addAnnotation } from '@/utils/xray-tracer';
 
 // Lambda Cold Start 최적화
 warmupContainer();
+
+// X-Ray 초기화
+initializeXRay();
 
 /**
  * GET /todos - TODO 목록 조회 (필터링 및 페이지네이션 지원)
@@ -38,6 +42,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       userId: authContext.userId,
       userType: authContext.userType,
     });
+
+    // X-Ray에 사용자 정보 추가
+    addUserInfo(authContext.userId, authContext.userType);
+    addAnnotation('operation', 'listTodos');
 
     // 2. 쿼리 파라미터 파싱
     const queryParams = event.queryStringParameters || {};
