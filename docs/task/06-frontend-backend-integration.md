@@ -22,11 +22,13 @@ LocalStorage 기반 1단계에서 클라우드 API 기반 2단계로 전환
   - [x] 기존 컴포넌트 업데이트 (동기화 상태 UI 포함)
   - [x] **(커밋: `feat(client): 상태 관리 확장 및 통합 스토리지 서비스 구현`)**
 
-- [ ] **6.3 데이터 마이그레이션**
-  - [ ] localStorage 데이터를 클라우드로 마이그레이션 기능
-  - [ ] 게스트 사용자 흐름 구현
-  - [ ] 인증 사용자 등록/로그인 흐름
-  - [ ] **(커밋: `feat(client): implement data migration and authentication flows`)**
+- [x] **6.3 데이터 마이그레이션** ✅ **완료**
+  - [x] localStorage 데이터를 클라우드로 마이그레이션 기능 (`DataMigrationService` 클래스 구현)
+  - [x] 게스트 사용자 흐름 구현 (`MigrationDialog`, `AuthPrompt` 컴포넌트)
+  - [x] 인증 사용자 등록/로그인 흐름 (`LoginForm`, `RegisterForm` 스켈레톤 구현)
+  - [x] App 초기화 로직 수정 (AuthProvider 통합, 마이그레이션 자동 감지)
+  - [x] 마이그레이션 상태 관리 훅 (`use-migration.ts`) 구현
+  - [x] **(커밋: `feat(client): implement data migration and authentication flows`)**
 
 ## 🎯 목표
 

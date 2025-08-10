@@ -330,3 +330,8 @@ export class TodoAPIClient {
     return this.request('/version', { method: 'GET' });
   }
 }
+
+/**
+ * TODO API 클라이언트 인스턴스
+ */
+export const todoApiService = new TodoAPIClient();

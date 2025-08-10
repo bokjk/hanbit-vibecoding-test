@@ -1,12 +1,12 @@
 
 import { useState } from 'react';
 import { TodoProvider } from '../contexts/todo.context';
-import { AuthProvider } from '../contexts/auth.context';
 import { TodoInput } from './todo-input';
 import { TodoList } from './todo-list';
 import { TodoFilters } from './todo-filters';
 import { TodoStatsComponent, TodoProgressBar } from './todo-stats';
 import { TodoHeader } from './todo-header';
+import { MigrationStatus } from './auth/migration-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTodo, useTodoSync } from '../hooks/use-todo';
@@ -77,6 +77,11 @@ function TodoContainerContent() {
       <main className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto space-y-8">
           
+          {/* 마이그레이션 상태 표시 */}
+          <section>
+            <MigrationStatus className="mb-4" />
+          </section>
+
           {/* 상단 통계 대시보드 */}
           <section data-testid="todo-dashboard">
             <div className="mb-6">
@@ -229,10 +234,8 @@ function TodoContainerContent() {
 
 export function TodoContainer() {
   return (
-    <AuthProvider>
-      <TodoProvider enableAutoSync={true}>
-        <TodoContainerContent />
-      </TodoProvider>
-    </AuthProvider>
+    <TodoProvider enableAutoSync={true}>
+      <TodoContainerContent />
+    </TodoProvider>
   );
 }

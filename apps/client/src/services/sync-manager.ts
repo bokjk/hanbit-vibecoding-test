@@ -11,7 +11,7 @@
 import type { Todo } from 'types/index';
 import type { PendingOperation, SyncStatus, ConnectionStatus } from '../contexts/todo.reducer';
 import { offlineStorage, type SyncMetadata } from './offline-storage';
-import { todoApiService } from './api/todo-api.service';
+import { todoApiService } from './api/todo-api-client';
 
 /**
  * 동기화 결과
