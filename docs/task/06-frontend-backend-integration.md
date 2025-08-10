@@ -14,11 +14,13 @@ LocalStorage 기반 1단계에서 클라우드 API 기반 2단계로 전환
   - [x] API 에러 처리 및 재시도 로직
   - [x] **(커밋: `feat: API 클라이언트 및 통합 스토리지 서비스 구현`)**
 
-- [ ] **6.2 상태 관리 확장**
-  - [ ] `AuthContext` 및 인증 상태 관리
-  - [ ] API 서비스와 localStorage 서비스 추상화
-  - [ ] 낙관적 업데이트 및 동기화 로직
-  - [ ] **(커밋: `feat(client): extend state management for API integration`)**
+- [x] **6.2 상태 관리 확장** ✅ **완료**
+  - [x] `AuthContext` 및 인증 상태 관리
+  - [x] API 서비스와 localStorage 서비스 추상화 (통합 스토리지 서비스)
+  - [x] 낙관적 업데이트 및 동기화 로직
+  - [x] 커스텀 훅 구현 (`use-todo.ts`)
+  - [x] 기존 컴포넌트 업데이트 (동기화 상태 UI 포함)
+  - [x] **(커밋: `feat(client): 상태 관리 확장 및 통합 스토리지 서비스 구현`)**
 
 - [ ] **6.3 데이터 마이그레이션**
   - [ ] localStorage 데이터를 클라우드로 마이그레이션 기능

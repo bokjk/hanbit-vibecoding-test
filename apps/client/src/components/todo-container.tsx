@@ -1,7 +1,7 @@
 
-import { useEffect, useRef, useState } from 'react';
-import { TodoProvider, useTodoContext } from '../contexts/todo.context';
-import { LocalStorageService } from '../services/localStorage.service';
+import { useState } from 'react';
+import { TodoProvider } from '../contexts/todo.context';
+import { AuthProvider } from '../contexts/auth.context';
 import { TodoInput } from './todo-input';
 import { TodoList } from './todo-list';
 import { TodoFilters } from './todo-filters';
@@ -9,53 +9,47 @@ import { TodoStatsComponent, TodoProgressBar } from './todo-stats';
 import { TodoHeader } from './todo-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Priority, Todo } from 'types/index';
-
-const localStorageService = new LocalStorageService();
+import { useTodo, useTodoSync } from '../hooks/use-todo';
+import type { Priority } from 'types/index';
 
 function TodoContainerContent() {
-  const { state, filteredTodos, stats, updateTodo, addTodo, toggleTodo, deleteTodo, loadTodos, setFilter } = useTodoContext();
+  const { 
+    todos: filteredTodos, 
+    stats, 
+    loading,
+    error,
+    updateTodo, 
+    deleteTodo, 
+    toggleTodo,
+    filter: filterHelpers,
+    metadata
+  } = useTodo();
+  
+  const syncHelpers = useTodoSync();
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const isInitialLoad = useRef(true);
 
-  useEffect(() => {
-    const loadData = async () => {
-      const todos = await localStorageService.getTodos();
-      loadTodos(todos);
-      isInitialLoad.current = false;
-    };
-    loadData();
-  }, [loadTodos]);
-
-  useEffect(() => {
-    if (!isInitialLoad.current) {
-      localStorageService.saveTodos(state.todos);
+  const handleToggleTodo = async (id: string) => {
+    try {
+      await toggleTodo(id);
+    } catch (error) {
+      console.error('Failed to toggle todo:', error);
     }
-  }, [state.todos]);
-
-  const handleAddTodo = (title: string, priority: Priority) => {
-    const newTodo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt' | 'completed'> = { title, priority };
-    addTodo(newTodo);
   };
 
-  const handleToggleTodo = (id: string) => {
-    toggleTodo(id);
+  const handleDeleteTodo = async (id: string) => {
+    try {
+      await deleteTodo(id);
+    } catch (error) {
+      console.error('Failed to delete todo:', error);
+    }
   };
 
-  const handleDeleteTodo = (id: string) => {
-    deleteTodo(id);
-  };
-
-  const handleEditTodo = (id: string, title: string) => {
-    const existingTodo = state.todos.find(todo => todo.id === id);
-    if (existingTodo) {
-      const updatedTodo: Todo = {
-        ...existingTodo,
-        title,
-        updatedAt: new Date().toISOString(),
-      };
-      updateTodo(updatedTodo);
+  const handleEditTodo = async (id: string, title: string) => {
+    try {
+      await updateTodo(id, { title });
+    } catch (error) {
+      console.error('Failed to edit todo:', error);
     }
   };
 
@@ -108,7 +102,7 @@ function TodoContainerContent() {
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">새로운 할 일 추가</h3>
                     <p className="text-sm text-gray-600">목표를 설정하고 우선순위를 정해보세요</p>
                   </div>
-                  <TodoInput onAddTodo={handleAddTodo} />
+                  <TodoInput />
                 </CardContent>
               </Card>
             </div>
@@ -133,8 +127,10 @@ function TodoContainerContent() {
                   
                   <div className={`${showFilterPanel ? 'block' : 'hidden'} lg:block`}>
                     <TodoFilters
-                      filter={state.filter}
-                      onFilterChange={setFilter}
+                      filter={filterHelpers}
+                      onFilterChange={filterHelpers}
+                      syncHelpers={syncHelpers}
+                      metadata={metadata}
                     />
                   </div>
                 </CardContent>
@@ -233,8 +229,10 @@ function TodoContainerContent() {
 
 export function TodoContainer() {
   return (
-    <TodoProvider>
-      <TodoContainerContent />
-    </TodoProvider>
+    <AuthProvider>
+      <TodoProvider enableAutoSync={true}>
+        <TodoContainerContent />
+      </TodoProvider>
+    </AuthProvider>
   );
 }

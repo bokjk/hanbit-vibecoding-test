@@ -4,20 +4,44 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Priority } from 'types/index';
+import { useTodoForm } from '../hooks/use-todo';
 
 interface TodoInputProps {
-  onAddTodo: (title: string, priority: Priority) => void;
+  // Props는 선택적이며, 커스텀 처리를 원할 경우 사용
+  onAddTodo?: (title: string, priority: Priority) => void;
 }
 
 export function TodoInput({ onAddTodo }: TodoInputProps) {
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { createTodo, canCreate, loading } = useTodoForm();
 
-  const handleAddClick = () => {
-    if (title.trim()) {
-      onAddTodo(title.trim(), priority);
+  const handleAddClick = async () => {
+    if (!title.trim() || isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      
+      if (onAddTodo) {
+        // 외부에서 제공된 핸들러 사용
+        onAddTodo(title.trim(), priority);
+      } else {
+        // 내장된 useTodo 훅 사용
+        await createTodo(title.trim(), {
+          priority,
+        });
+      }
+      
+      // 성공적으로 추가되면 폼 리셋
       setTitle('');
       setPriority('medium');
+    } catch (error) {
+      console.error('Failed to add todo:', error);
+      // 에러는 Context 레벨에서 처리되므로 여기서는 로깅만
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -50,8 +74,13 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
             <SelectItem value="low">낮음</SelectItem>
           </SelectContent>
         </Select>
-        <Button data-testid="add-todo-button" onClick={handleAddClick} className="px-6">
-          할 일 추가
+        <Button 
+          data-testid="add-todo-button" 
+          onClick={handleAddClick} 
+          className="px-6"
+          disabled={!canCreate || isSubmitting || loading || !title.trim()}
+        >
+          {isSubmitting || loading ? '추가 중...' : '할 일 추가'}
         </Button>
       </div>
 
@@ -78,8 +107,13 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
             </SelectContent>
           </Select>
         </div>
-        <Button data-testid="add-todo-button" onClick={handleAddClick} className="w-full">
-          추가
+        <Button 
+          data-testid="add-todo-button" 
+          onClick={handleAddClick} 
+          className="w-full"
+          disabled={!canCreate || isSubmitting || loading || !title.trim()}
+        >
+          {isSubmitting || loading ? '추가 중...' : '추가'}
         </Button>
       </div>
     </div>
