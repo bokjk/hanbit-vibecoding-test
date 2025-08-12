@@ -1,0 +1,485 @@
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/Lambda", "Duration", "FunctionName", "TodoApp-CreateTodo"],
+          [".", ".", ".", "TodoApp-ListTodos"],
+          [".", ".", ".", "TodoApp-UpdateTodo"],
+          [".", ".", ".", "TodoApp-DeleteTodo"],
+          [".", ".", ".", "TodoApp-Login"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "Lambda 응답 시간 (평균)",
+        "view": "timeSeries",
+        "stacked": false,
+        "yAxis": {
+          "left": {
+            "min": 0,
+            "max": 5000
+          }
+        },
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "임계값 (3초)",
+              "value": 3000
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/Lambda", "Errors", "FunctionName", "TodoApp-CreateTodo"],
+          [".", ".", ".", "TodoApp-ListTodos"],
+          [".", ".", ".", "TodoApp-UpdateTodo"],
+          [".", ".", ".", "TodoApp-DeleteTodo"],
+          [".", ".", ".", "TodoApp-Login"]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "Lambda 에러 발생 횟수",
+        "view": "timeSeries",
+        "stacked": false,
+        "yAxis": {
+          "left": {
+            "min": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 6,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/Lambda", "Invocations", "FunctionName", "TodoApp-CreateTodo"],
+          [".", ".", ".", "TodoApp-ListTodos"],
+          [".", ".", ".", "TodoApp-UpdateTodo"],
+          [".", ".", ".", "TodoApp-DeleteTodo"],
+          [".", ".", ".", "TodoApp-Login"]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "Lambda 호출 횟수",
+        "view": "timeSeries",
+        "stacked": false
+      }
+    },
+    {
+      "type": "metric",
+      "x": 8,
+      "y": 6,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/Lambda",
+            "ConcurrentExecutions",
+            "FunctionName",
+            "TodoApp-CreateTodo"
+          ],
+          [".", ".", ".", "TodoApp-ListTodos"],
+          [".", ".", ".", "TodoApp-UpdateTodo"],
+          [".", ".", ".", "TodoApp-DeleteTodo"],
+          [".", ".", ".", "TodoApp-Login"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "Lambda 동시 실행 수",
+        "view": "timeSeries",
+        "stacked": false
+      }
+    },
+    {
+      "type": "metric",
+      "x": 16,
+      "y": 6,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/Lambda", "Throttles", "FunctionName", "TodoApp-CreateTodo"],
+          [".", ".", ".", "TodoApp-ListTodos"],
+          [".", ".", ".", "TodoApp-UpdateTodo"],
+          [".", ".", ".", "TodoApp-DeleteTodo"],
+          [".", ".", ".", "TodoApp-Login"]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "Lambda 스로틀링 횟수",
+        "view": "timeSeries",
+        "stacked": false
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 12,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/ApiGateway", "Latency", "ApiName", "TodoApp-API"],
+          [".", "IntegrationLatency", ".", "."]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "API Gateway 지연 시간",
+        "view": "timeSeries",
+        "stacked": false,
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "임계값 (2초)",
+              "value": 2000
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 12,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/ApiGateway", "4XXError", "ApiName", "TodoApp-API"],
+          [".", "5XXError", ".", "."]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "API Gateway 에러 발생 횟수",
+        "view": "timeSeries",
+        "stacked": false
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 18,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/DynamoDB",
+            "ConsumedReadCapacityUnits",
+            "TableName",
+            "TodoApp-Todos"
+          ],
+          [".", "ConsumedWriteCapacityUnits", ".", "."]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "DynamoDB 사용량 - Todos 테이블",
+        "view": "timeSeries",
+        "stacked": false
+      }
+    },
+    {
+      "type": "metric",
+      "x": 8,
+      "y": 18,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/DynamoDB", "ThrottledRequests", "TableName", "TodoApp-Todos"],
+          [".", "SystemErrors", ".", "."],
+          [".", "UserErrors", ".", "."]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "DynamoDB 에러 - Todos 테이블",
+        "view": "timeSeries",
+        "stacked": false
+      }
+    },
+    {
+      "type": "metric",
+      "x": 16,
+      "y": 18,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/DynamoDB",
+            "SuccessfulRequestLatency",
+            "TableName",
+            "TodoApp-Todos",
+            "Operation",
+            "Query"
+          ],
+          ["...", "Scan"],
+          ["...", "PutItem"],
+          ["...", "UpdateItem"],
+          ["...", "DeleteItem"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "DynamoDB 지연 시간 - Todos 테이블",
+        "view": "timeSeries",
+        "stacked": false
+      }
+    },
+    {
+      "type": "log",
+      "x": 0,
+      "y": 24,
+      "width": 24,
+      "height": 6,
+      "properties": {
+        "query": "SOURCE '/aws/lambda/TodoApp-CreateTodo'\n| SOURCE '/aws/lambda/TodoApp-ListTodos'\n| SOURCE '/aws/lambda/TodoApp-UpdateTodo'\n| SOURCE '/aws/lambda/TodoApp-DeleteTodo'\n| SOURCE '/aws/lambda/TodoApp-Login'\n| fields @timestamp, @message\n| filter @message like /ERROR/\n| sort @timestamp desc\n| limit 50",
+        "region": "us-east-1",
+        "title": "최근 에러 로그",
+        "view": "table"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 30,
+      "width": 6,
+      "height": 3,
+      "properties": {
+        "metrics": [
+          ["AWS/Lambda", "Duration", "FunctionName", "TodoApp-CreateTodo"],
+          [".", ".", ".", "TodoApp-ListTodos"],
+          [".", ".", ".", "TodoApp-UpdateTodo"],
+          [".", ".", ".", "TodoApp-DeleteTodo"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "평균 응답 시간",
+        "view": "singleValue",
+        "sparkline": true
+      }
+    },
+    {
+      "type": "metric",
+      "x": 6,
+      "y": 30,
+      "width": 6,
+      "height": 3,
+      "properties": {
+        "metrics": [
+          [{ "expression": "SUM([m1, m2, m3, m4])", "label": "전체 에러" }],
+          [
+            "AWS/Lambda",
+            "Errors",
+            "FunctionName",
+            "TodoApp-CreateTodo",
+            { "id": "m1", "visible": false }
+          ],
+          [
+            ".",
+            ".",
+            ".",
+            "TodoApp-ListTodos",
+            { "id": "m2", "visible": false }
+          ],
+          [
+            ".",
+            ".",
+            ".",
+            "TodoApp-UpdateTodo",
+            { "id": "m3", "visible": false }
+          ],
+          [
+            ".",
+            ".",
+            ".",
+            "TodoApp-DeleteTodo",
+            { "id": "m4", "visible": false }
+          ]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "총 에러 발생 수",
+        "view": "singleValue",
+        "sparkline": true
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 30,
+      "width": 6,
+      "height": 3,
+      "properties": {
+        "metrics": [
+          [{ "expression": "SUM([m1, m2, m3, m4])", "label": "전체 호출" }],
+          [
+            "AWS/Lambda",
+            "Invocations",
+            "FunctionName",
+            "TodoApp-CreateTodo",
+            { "id": "m1", "visible": false }
+          ],
+          [
+            ".",
+            ".",
+            ".",
+            "TodoApp-ListTodos",
+            { "id": "m2", "visible": false }
+          ],
+          [
+            ".",
+            ".",
+            ".",
+            "TodoApp-UpdateTodo",
+            { "id": "m3", "visible": false }
+          ],
+          [
+            ".",
+            ".",
+            ".",
+            "TodoApp-DeleteTodo",
+            { "id": "m4", "visible": false }
+          ]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "총 API 호출 수",
+        "view": "singleValue",
+        "sparkline": true
+      }
+    },
+    {
+      "type": "metric",
+      "x": 18,
+      "y": 30,
+      "width": 6,
+      "height": 3,
+      "properties": {
+        "metrics": [
+          [{ "expression": "(m2/m1)*100", "label": "에러율 (%)" }],
+          ["AWS/Lambda", "Invocations", { "id": "m1", "visible": false }],
+          [".", "Errors", { "id": "m2", "visible": false }]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "시스템 에러율",
+        "view": "singleValue",
+        "sparkline": true
+      }
+    },
+    {
+      "type": "custom",
+      "x": 0,
+      "y": 33,
+      "width": 24,
+      "height": 6,
+      "properties": {
+        "title": "X-Ray 서비스 맵",
+        "view": "servicemap",
+        "region": "us-east-1"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 39,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/X-Ray", "ResponseTime", "ServiceName", "TodoApp"],
+          [".", ".", ".", "DynamoDB"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "X-Ray 추적 응답 시간",
+        "view": "timeSeries",
+        "stacked": false
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 39,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/X-Ray", "ErrorRate", "ServiceName", "TodoApp"],
+          [".", "FaultRate", ".", "."]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "X-Ray 에러 및 장애율",
+        "view": "timeSeries",
+        "stacked": false,
+        "yAxis": {
+          "left": {
+            "min": 0,
+            "max": 100
+          }
+        }
+      }
+    },
+    {
+      "type": "log",
+      "x": 0,
+      "y": 45,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "query": "SOURCE '/aws/lambda/TodoApp-CreateTodo'\n| SOURCE '/aws/lambda/TodoApp-ListTodos'\n| SOURCE '/aws/lambda/TodoApp-UpdateTodo'\n| SOURCE '/aws/lambda/TodoApp-DeleteTodo'\n| fields @timestamp, @message, @requestId\n| filter @message like /DURATION/\n| stats avg(@duration) as avgDuration by bin(5m)\n| sort @timestamp desc",
+        "region": "us-east-1",
+        "title": "5분별 평균 실행 시간 추이",
+        "view": "table"
+      }
+    },
+    {
+      "type": "log",
+      "x": 12,
+      "y": 45,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "query": "SOURCE '/aws/lambda/TodoApp-CreateTodo'\n| SOURCE '/aws/lambda/TodoApp-ListTodos'\n| SOURCE '/aws/lambda/TodoApp-UpdateTodo'\n| SOURCE '/aws/lambda/TodoApp-DeleteTodo'\n| fields @timestamp, @message\n| filter @type = \"REPORT\"\n| stats count() as invocations by bin(5m)\n| sort @timestamp desc",
+        "region": "us-east-1",
+        "title": "5분별 API 호출 패턴",
+        "view": "table"
+      }
+    }
+  ]
+}
