@@ -70,7 +70,7 @@ export class UnifiedTodoService {
    */
   async saveTodos(todos: Todo[]): Promise<void> {
     if (this.currentMode === StorageMode.LOCAL_STORAGE) {
-      await (this.currentStorage as any).saveTodos(todos);
+      await (this.currentStorage as {saveTodos: (todos: Todo[]) => Promise<void>}).saveTodos(todos);
       return;
     }
 
@@ -357,7 +357,7 @@ export class UnifiedTodoService {
         return this.createAPIStorageService();
       case StorageMode.LOCAL_STORAGE:
       default:
-        return this.localStorageService as any; // AbstractStorageService로 캐스팅
+        return this.localStorageService as AbstractStorageService; // AbstractStorageService로 캐스팅
     }
   }
 
@@ -418,7 +418,7 @@ export class UnifiedTodoService {
 
     // API 스토리지 캐시 정보 추가
     if (this.apiStorageService && 'getCacheInfo' in this.apiStorageService) {
-      (info as any).cacheInfo = this.apiStorageService.getCacheInfo();
+      (info as {cacheInfo?: unknown}).cacheInfo = (this.apiStorageService as {getCacheInfo: () => unknown}).getCacheInfo();
     }
 
     return info;

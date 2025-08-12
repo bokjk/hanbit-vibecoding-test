@@ -114,7 +114,7 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
     // 기존 TODO CRUD 액션들
     // ================================
     
-    case 'ADD_TODO':
+    case 'ADD_TODO': {
       const newTodo: Todo = {
         ...action.payload,
         id: crypto.randomUUID(),
@@ -126,8 +126,9 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
         ...state,
         todos: [...state.todos, newTodo],
       };
+    }
 
-    case 'UPDATE_TODO':
+    case 'UPDATE_TODO': {
       const todoIndex = state.todos.findIndex(todo => todo.id === action.payload.id);
       if (todoIndex === -1) {
         return state;
@@ -143,6 +144,7 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
         ...state,
         todos: updatedTodos,
       };
+    }
 
     case 'DELETE_TODO':
       return {
@@ -236,7 +238,7 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
     // 대기 중인 작업 관리
     // ================================
 
-    case 'ADD_PENDING_OPERATION':
+    case 'ADD_PENDING_OPERATION': {
       const newOperation: PendingOperation = {
         ...action.payload,
         id: crypto.randomUUID(),
@@ -248,6 +250,7 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
         ...state,
         pendingOperations: [...state.pendingOperations, newOperation],
       };
+    }
 
     case 'REMOVE_PENDING_OPERATION':
       return {
@@ -337,7 +340,7 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
         todos: [...state.todos, action.payload],
       };
 
-    case 'OPTIMISTIC_UPDATE_TODO':
+    case 'OPTIMISTIC_UPDATE_TODO': {
       const optimisticUpdateIndex = state.todos.findIndex(todo => todo.id === action.payload.id);
       if (optimisticUpdateIndex === -1) {
         return state;
@@ -350,6 +353,7 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
         ...state,
         todos: optimisticUpdatedTodos,
       };
+    }
 
     case 'OPTIMISTIC_DELETE_TODO':
       return {

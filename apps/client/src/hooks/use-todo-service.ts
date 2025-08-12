@@ -102,7 +102,8 @@ export function useTodoService(): UseTodoServiceReturn {
     operation: () => Promise<T>,
     operationName: string
   ): Promise<T> => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
+      (async () => {
       setLoading(true);
       setError(null);
 
@@ -129,6 +130,7 @@ export function useTodoService(): UseTodoServiceReturn {
         // 작업 완료 후 동기화 상태 업데이트
         updateSyncStatus();
       }
+      })();
     });
   }, [setLoading, setError, updateSyncStatus]);
 

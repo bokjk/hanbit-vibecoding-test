@@ -136,7 +136,7 @@ export function TodoProvider({ children, enableAutoSync = true }: TodoProviderPr
     if (authState.isInitialized && authState.isAuthenticated) {
       loadTodos();
     }
-  }, [authState.isInitialized, authState.isAuthenticated]);
+  }, [authState.isInitialized, authState.isAuthenticated, loadTodos]);
 
   // 동기화 관리자 이벤트 리스너 등록
   useEffect(() => {
@@ -144,7 +144,7 @@ export function TodoProvider({ children, enableAutoSync = true }: TodoProviderPr
       dispatch({ type: 'SYNC_START' });
     };
 
-    const handleSyncSuccess = (event: string, data: any) => {
+    const handleSyncSuccess = (event: string, data: {syncedTodos?: unknown}) => {
       dispatch({ 
         type: 'SYNC_SUCCESS', 
         payload: { 
@@ -154,14 +154,14 @@ export function TodoProvider({ children, enableAutoSync = true }: TodoProviderPr
       });
     };
 
-    const handleSyncError = (event: string, data: any) => {
+    const handleSyncError = (event: string, data: {error?: string}) => {
       dispatch({ 
         type: 'SYNC_ERROR', 
         payload: data?.error || 'Sync failed' 
       });
     };
 
-    const handleConnectionChange = (event: string, data: any) => {
+    const handleConnectionChange = (event: string, data: {isOnline?: boolean}) => {
       dispatch({ 
         type: 'SET_CONNECTION_STATUS', 
         payload: data?.isOnline ? 'online' : 'offline' 
@@ -206,7 +206,7 @@ export function TodoProvider({ children, enableAutoSync = true }: TodoProviderPr
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [enableAutoSync]);
+  }, [enableAutoSync, loadTodos]);
 
   // ================================
   // 계산된 값들

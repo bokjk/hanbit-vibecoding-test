@@ -11,6 +11,8 @@
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
+    "test:contract": "vitest --config vitest.contract.config.ts",
+    "test:contract:watch": "vitest --config vitest.contract.config.ts --watch",
     "deploy": "cd infrastructure && pnpm cdk deploy",
     "destroy": "cd infrastructure && pnpm cdk destroy",
     "synth": "cd infrastructure && pnpm cdk synth",
@@ -44,7 +46,16 @@
     "@vitest/coverage-v8": "^1.1.3",
     "eslint": "^8.56.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.1.3"
+    "vitest": "^1.1.3",
+    "openapi-backend": "^5.10.6",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "swagger-parser": "^10.0.3",
+    "@apidevtools/swagger-parser": "^10.1.0",
+    "supertest": "^6.3.3",
+    "@types/supertest": "^6.0.2",
+    "nock": "^13.4.0",
+    "yaml": "^2.3.4"
   },
   "keywords": [
     "todo",

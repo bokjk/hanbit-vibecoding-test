@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { TodoPage } from './page-objects/todo-page';
 import { generateLargeTodoList } from './fixtures/test-data';
-import { collectPerformanceMetrics } from './helpers/test-helpers';
+import { collectPerformanceMetrics, collectDetailedPerformanceMetrics } from './helpers/test-helpers';
 
 test.describe('성능 테스트', () => {
   let todoPage: TodoPage;
@@ -10,24 +10,56 @@ test.describe('성능 테스트', () => {
     todoPage = new TodoPage(page);
   });
 
-  test('초기 페이지 로드 성능', async ({ page }) => {
+  test('초기 페이지 로드 성능 및 Core Web Vitals', async ({ page }) => {
     const startTime = Date.now();
     
     await todoPage.goto();
     
     const loadTime = Date.now() - startTime;
     
-    // 3초 이내 로드 확인
+    // 기본 로드 시간 확인 (3초 이내)
     expect(loadTime).toBeLessThan(3000);
     
-    // 성능 메트릭 수집
+    // Core Web Vitals 메트릭 수집
     const metrics = await collectPerformanceMetrics(page);
     
-    console.log('성능 메트릭:', metrics);
+    console.log('Core Web Vitals:', {
+      LCP: `${metrics.lcp}ms`,
+      FCP: `${metrics.fcp}ms`,
+      CLS: metrics.cls,
+      TTFB: `${metrics.ttfb}ms`
+    });
     
-    // Core Web Vitals 기준
-    expect(metrics.firstContentfulPaint).toBeLessThan(2500); // 2.5초
-    expect(metrics.domContentLoaded).toBeLessThan(1000); // 1초
+    // Core Web Vitals 기준 검증
+    expect(metrics.fcp).toBeLessThan(1800); // FCP < 1.8s (Good)
+    expect(metrics.lcp).toBeLessThan(2500); // LCP < 2.5s (Good)  
+    expect(metrics.cls).toBeLessThan(0.1);  // CLS < 0.1 (Good)
+    expect(metrics.ttfb).toBeLessThan(800); // TTFB < 800ms (Good)
+    expect(metrics.domContentLoaded).toBeLessThan(1000); // DOM 준비 < 1초
+  });
+
+  test('상세 성능 분석', async ({ page }) => {
+    await todoPage.goto();
+    
+    // 상세 성능 메트릭 수집
+    const detailedMetrics = await collectDetailedPerformanceMetrics(page);
+    
+    console.log('상세 성능 분석:', {
+      timing: detailedMetrics.timing,
+      memory: detailedMetrics.memory,
+      resources: detailedMetrics.resources,
+      connection: detailedMetrics.connection
+    });
+    
+    // 성능 기준 검증
+    expect(detailedMetrics.timing.ttfb).toBeLessThan(800); // TTFB < 800ms
+    expect(detailedMetrics.timing.totalTime).toBeLessThan(3000); // 전체 로드 < 3s
+    expect(detailedMetrics.resources.totalRequests).toBeLessThan(25); // 요청 수 < 25개
+    
+    // 메모리 사용량 검증 (Chrome에서만)
+    if (detailedMetrics.memory) {
+      expect(detailedMetrics.memory.usedJSHeapSize).toBeLessThan(50 * 1024 * 1024); // < 50MB
+    }
   });
 
   test('대량 데이터 렌더링 성능', async ({ page }) => {
@@ -115,7 +147,7 @@ test.describe('성능 테스트', () => {
     // 초기 메모리 사용량
     const initialMemory = await page.evaluate(() => {
       if ('memory' in performance) {
-        // @ts-ignore
+        // @ts-expect-error: Chrome-specific memory API
         return performance.memory.usedJSHeapSize;
       }
       return 0;
@@ -129,7 +161,7 @@ test.describe('성능 테스트', () => {
     // 최종 메모리 사용량
     const finalMemory = await page.evaluate(() => {
       if ('memory' in performance) {
-        // @ts-ignore
+        // @ts-expect-error: Chrome-specific memory API
         return performance.memory.usedJSHeapSize;
       }
       return 0;

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Priority } from 'types/index';
 import { useTodoForm } from '../hooks/use-todo';
+import { useSafeInput, logSecurityWarning } from '../utils/client-security';
 
 interface TodoInputProps {
   // Props는 선택적이며, 커스텀 처리를 원할 경우 사용
@@ -17,6 +18,7 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { createTodo, canCreate, loading } = useTodoForm();
+  const { sanitizeInput } = useSafeInput();
 
   const handleAddClick = async () => {
     if (!title.trim() || isSubmitting) return;
@@ -24,12 +26,23 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
     try {
       setIsSubmitting(true);
       
+      // 입력 정화 (XSS 방지)
+      const sanitizedTitle = sanitizeInput(title.trim());
+      
+      // 보안 경고 로깅 (개발 모드에서만)
+      if (sanitizedTitle !== title.trim()) {
+        logSecurityWarning('제목에서 위험한 내용이 정화되었습니다', {
+          original: title.trim(),
+          sanitized: sanitizedTitle
+        });
+      }
+      
       if (onAddTodo) {
         // 외부에서 제공된 핸들러 사용
-        onAddTodo(title.trim(), priority);
+        onAddTodo(sanitizedTitle, priority);
       } else {
         // 내장된 useTodo 훅 사용
-        await createTodo(title.trim(), {
+        await createTodo(sanitizedTitle, {
           priority,
         });
       }
@@ -51,6 +64,23 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
     }
   };
 
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // 실시간 입력 정화 (타이핑 중에는 기본 정화만 적용)
+    const sanitized = sanitizeInput(value);
+    
+    // 보안 경고 (개발 모드에서만)
+    if (sanitized !== value && value.length > 0) {
+      logSecurityWarning('입력 중 위험한 내용이 감지되어 정화되었습니다', {
+        original: value,
+        sanitized
+      });
+    }
+    
+    setTitle(sanitized);
+  };
+
   return (
     <div className="space-y-4">
       {/* 데스크톱 레이아웃 */}
@@ -60,7 +90,7 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
           type="text"
           placeholder="새로운 할 일을 입력하세요..."
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={handleTitleChange}
           onKeyDown={handleKeyDown}
           className="flex-1"
         />
@@ -92,7 +122,7 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
             type="text"
             placeholder="새로운 할 일을 입력하세요..."
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={handleTitleChange}
             onKeyDown={handleKeyDown}
             className="flex-1"
           />

@@ -71,4 +71,165 @@ test.describe('TODO 앱 핵심 기능 테스트', () => {
       completionRate: 0
     });
   });
+
+  test('할 일을 완료로 표시할 수 있어야 함', async () => {
+    const todoTitle = '완료할 할 일';
+    
+    // 할 일 추가
+    await todoPage.addTodo(todoTitle, 'medium');
+    
+    // 초기 상태 확인
+    await todoPage.expectStatsToEqual({
+      total: 1,
+      active: 1,
+      completed: 0,
+      completionRate: 0
+    });
+    
+    // 할 일 완료 표시
+    await todoPage.toggleTodo(todoTitle);
+    
+    // 완료 상태 확인
+    await todoPage.expectStatsToEqual({
+      total: 1,
+      active: 0,
+      completed: 1,
+      completionRate: 100
+    });
+  });
+
+  test('할 일을 편집할 수 있어야 함', async () => {
+    const originalTitle = '원래 제목';
+    const newTitle = '수정된 제목';
+    
+    // 할 일 추가
+    await todoPage.addTodo(originalTitle, 'high');
+    
+    // 원래 제목이 표시되는지 확인
+    await expect(todoPage.getTodoItem(originalTitle)).toBeVisible();
+    
+    // 할 일 편집
+    await todoPage.editTodo(originalTitle, newTitle);
+    
+    // 새 제목이 표시되고 원래 제목은 사라졌는지 확인
+    await expect(todoPage.getTodoItem(newTitle)).toBeVisible();
+    await expect(todoPage.getTodoItem(originalTitle)).not.toBeVisible();
+  });
+
+  test('할 일을 삭제할 수 있어야 함', async () => {
+    const todoTitle = '삭제할 할 일';
+    
+    // 할 일 추가
+    await todoPage.addTodo(todoTitle, 'low');
+    
+    // 추가되었는지 확인
+    await todoPage.expectStatsToEqual({
+      total: 1,
+      active: 1,
+      completed: 0,
+      completionRate: 0
+    });
+    
+    // 할 일 삭제
+    await todoPage.deleteTodo(todoTitle);
+    
+    // 삭제되었는지 확인
+    await todoPage.expectStatsToEqual({
+      total: 0,
+      active: 0,
+      completed: 0,
+      completionRate: 0
+    });
+  });
+});
+
+test.describe('TODO 앱 필터링 및 정렬 테스트', () => {
+  let todoPage: TodoPage;
+
+  test.beforeEach(async ({ page }) => {
+    todoPage = new TodoPage(page);
+    await todoPage.goto();
+    await todoPage.clearStorage();
+
+    // 테스트용 할 일 여러 개 추가
+    await todoPage.addTodo('첫 번째 할 일', 'high');
+    await todoPage.addTodo('두 번째 할 일', 'medium');
+    await todoPage.addTodo('세 번째 할 일', 'low');
+    
+    // 첫 번째 할 일 완료 처리
+    await todoPage.toggleTodo('첫 번째 할 일');
+  });
+
+  test('완료된 할 일만 필터링할 수 있어야 함', async () => {
+    // 완료된 할 일만 보기
+    await todoPage.applyFilter('completed');
+    
+    // 완료된 할 일만 표시되는지 확인
+    await expect(todoPage.getTodoItem('첫 번째 할 일')).toBeVisible();
+    await expect(todoPage.getTodoItem('두 번째 할 일')).not.toBeVisible();
+    await expect(todoPage.getTodoItem('세 번째 할 일')).not.toBeVisible();
+  });
+
+  test('진행 중인 할 일만 필터링할 수 있어야 함', async () => {
+    // 진행 중인 할 일만 보기
+    await todoPage.applyFilter('active');
+    
+    // 진행 중인 할 일만 표시되는지 확인
+    await expect(todoPage.getTodoItem('첫 번째 할 일')).not.toBeVisible();
+    await expect(todoPage.getTodoItem('두 번째 할 일')).toBeVisible();
+    await expect(todoPage.getTodoItem('세 번째 할 일')).toBeVisible();
+  });
+
+  test('모든 할 일을 볼 수 있어야 함', async () => {
+    // 모든 할 일 보기
+    await todoPage.applyFilter('all');
+    
+    // 모든 할 일이 표시되는지 확인
+    await expect(todoPage.getTodoItem('첫 번째 할 일')).toBeVisible();
+    await expect(todoPage.getTodoItem('두 번째 할 일')).toBeVisible();
+    await expect(todoPage.getTodoItem('세 번째 할 일')).toBeVisible();
+  });
+});
+
+test.describe('TODO 앱 검색 테스트', () => {
+  let todoPage: TodoPage;
+
+  test.beforeEach(async ({ page }) => {
+    todoPage = new TodoPage(page);
+    await todoPage.goto();
+    await todoPage.clearStorage();
+
+    // 검색 테스트용 할 일들 추가
+    await todoPage.addTodo('회의 준비하기', 'high');
+    await todoPage.addTodo('보고서 작성', 'medium');
+    await todoPage.addTodo('회의록 정리', 'low');
+    await todoPage.addTodo('프로젝트 계획', 'medium');
+  });
+
+  test('할 일을 검색할 수 있어야 함', async () => {
+    // '회의' 검색
+    await todoPage.search('회의');
+    
+    // 검색 결과 확인
+    await expect(todoPage.getTodoItem('회의 준비하기')).toBeVisible();
+    await expect(todoPage.getTodoItem('회의록 정리')).toBeVisible();
+    await expect(todoPage.getTodoItem('보고서 작성')).not.toBeVisible();
+    await expect(todoPage.getTodoItem('프로젝트 계획')).not.toBeVisible();
+  });
+
+  test('검색어를 지우면 모든 할 일이 표시되어야 함', async () => {
+    // 검색 후
+    await todoPage.search('보고서');
+    await expect(todoPage.getTodoItem('보고서 작성')).toBeVisible();
+    await expect(todoPage.getTodoItem('회의 준비하기')).not.toBeVisible();
+    
+    // 검색어 지우기
+    await todoPage.search('');
+    
+    // 모든 할 일이 다시 표시되는지 확인
+    await expect(todoPage.getTodoItem('회의 준비하기')).toBeVisible();
+    await expect(todoPage.getTodoItem('보고서 작성')).toBeVisible();
+    await expect(todoPage.getTodoItem('회의록 정리')).toBeVisible();
+    await expect(todoPage.getTodoItem('프로젝트 계획')).toBeVisible();
+  });
 });

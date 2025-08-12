@@ -40,10 +40,10 @@ function AppContent() {
     if (!migration.migration.isInProgress) {
       initializeApp();
     }
-  }, [migration.migration.isInProgress]);
+  }, [migration.migration.isInProgress, migration]);
 
   // 마이그레이션 완료 처리
-  const handleMigrationComplete = (result: any) => {
+  const handleMigrationComplete = (result: unknown) => {
     console.log('Migration completed:', result);
     setShowMigrationDialog(false);
     

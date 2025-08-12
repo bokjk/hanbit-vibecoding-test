@@ -101,7 +101,13 @@ claude에 설치 : claude mcp add context7 -- npx @upstash/context7-mcp
 
 
 
+--- 서브에이전트
+ㅇ /review 
+- 코드리뷰, 변경된 코드 검사, 피드백 생성
+- 코드 리뷰어
 
+--- 클로드 코드 훅스
+활용= claude가 코드 수정하면 코드포매터 (prettier 등)를 자동으로 실행
 
 
 

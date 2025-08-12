@@ -193,7 +193,7 @@ export function useMigration(): UseMigrationReturn {
    */
   const history = useMemo(() => {
     return migrationUtils.getMigrationHistory();
-  }, [migrationState.isComplete]);
+  }, [migrationState.isComplete, migrationUtils]);
 
   // ================================
   // 액션 메서드들
@@ -302,7 +302,7 @@ export function useMigration(): UseMigrationReturn {
     return () => {
       isMounted = false;
     };
-  }, [authState.isInitialized, authState.isAuthenticated, authState.isGuest, checkMigrationRequired]);
+  }, [authState.isInitialized, authState.isAuthenticated, authState.isGuest, checkMigrationRequired, migrationState.isComplete, migrationState.isInProgress]);
 
   // ================================
   // 반환값 구성

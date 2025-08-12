@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 // import { Progress } from '@/components/ui/progress';
-import { AlertCircle, CheckCircle, Loader2, X, Database, Cloud, ArrowRight } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader2, Database, Cloud, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useMigration, useMigrationProgress } from '../../hooks/use-migration';
 import type { MigrationResult } from '../../services/data-migration.service';
@@ -44,7 +44,7 @@ export function MigrationDialog({
     if (isOpen && autoStart && migration.canStart) {
       handleStartMigration();
     }
-  }, [isOpen, autoStart, migration.canStart]);
+  }, [isOpen, autoStart, migration.canStart, handleStartMigration]);
 
   // 마이그레이션 완료/오류 처리
   useEffect(() => {
@@ -63,7 +63,7 @@ export function MigrationDialog({
     } else if (migration.migration.error) {
       onError?.(migration.migration.error);
     }
-  }, [migration.migration.isComplete, migration.migration.error, onComplete, onError]);
+  }, [migration.migration.isComplete, migration.migration.error, migration, onComplete, onError]);
 
   /**
    * 마이그레이션 시작
@@ -136,11 +136,7 @@ export function MigrationDialog({
   /**
    * 진행률 색상 결정
    */
-  const getProgressColor = () => {
-    if (migration.migration.error) return 'bg-red-500';
-    if (migration.migration.isComplete) return 'bg-green-500';
-    return 'bg-blue-500';
-  };
+  // getProgressColor 함수 제거 - 사용하지 않음
 
   /**
    * 예상 시간 포맷팅

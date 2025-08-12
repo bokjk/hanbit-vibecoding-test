@@ -609,7 +609,7 @@ export const offlineStorageUtils = {
   getStorageUsage(): number {
     let totalSize = 0;
     for (const key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
         const value = localStorage[key];
         totalSize += key.length + (value?.length || 0);
       }

@@ -17,7 +17,6 @@ import {
   Cloud, 
   Smartphone, 
   Zap,
-  Check,
   X,
   Info
 } from 'lucide-react';

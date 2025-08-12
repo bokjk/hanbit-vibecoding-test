@@ -311,7 +311,7 @@ describe('todoReducer', () => {
       const unknownAction = {
         type: 'UNKNOWN_ACTION',
         payload: 'test',
-      } as any;
+      } as never;
 
       const newState = todoReducer(initialState, unknownAction);
 

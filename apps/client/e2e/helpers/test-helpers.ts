@@ -133,22 +133,131 @@ export async function checkAccessibility(page: Page) {
 }
 
 /**
- * 성능 메트릭 수집
+ * 성능 메트릭 수집 (Core Web Vitals 포함)
  */
 export async function collectPerformanceMetrics(page: Page) {
   const metrics = await page.evaluate(() => {
     const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
     const paint = performance.getEntriesByType('paint');
     
-    return {
-      domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
-      loadComplete: navigation.loadEventEnd - navigation.loadEventStart,
-      firstPaint: paint.find(entry => entry.name === 'first-paint')?.startTime || 0,
-      firstContentfulPaint: paint.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
-      networkTime: navigation.responseEnd - navigation.requestStart
-    };
+    // Core Web Vitals 측정
+    return new Promise((resolve) => {
+      const coreWebVitals: Record<string, number> = {
+        // 기본 성능 메트릭
+        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+        loadComplete: navigation.loadEventEnd - navigation.loadEventStart,
+        firstPaint: paint.find(entry => entry.name === 'first-paint')?.startTime || 0,
+        firstContentfulPaint: paint.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
+        networkTime: navigation.responseEnd - navigation.requestStart,
+        
+        // Core Web Vitals
+        lcp: 0, // Largest Contentful Paint
+        fid: 0, // First Input Delay  
+        cls: 0, // Cumulative Layout Shift
+        ttfb: navigation.responseStart - navigation.requestStart, // Time to First Byte
+        fcp: paint.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0 // First Contentful Paint
+      };
+
+      // LCP 측정
+      if ('PerformanceObserver' in window) {
+        try {
+          const lcpObserver = new PerformanceObserver((list) => {
+            const entries = list.getEntries();
+            if (entries.length > 0) {
+              coreWebVitals.lcp = entries[entries.length - 1].startTime;
+            }
+          });
+          lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+
+          // CLS 측정
+          const clsObserver = new PerformanceObserver((list) => {
+            let clsValue = 0;
+            for (const entry of list.getEntries()) {
+              if (!entry.hadRecentInput) {
+                // @ts-expect-error: Performance API not fully typed
+                clsValue += entry.value;
+              }
+            }
+            coreWebVitals.cls = clsValue;
+          });
+          clsObserver.observe({ type: 'layout-shift', buffered: true });
+
+        } catch (error) {
+          console.warn('PerformanceObserver not fully supported:', error);
+        }
+      }
+
+      // 짧은 딜레이 후 메트릭 반환 (LCP, CLS 수집 시간 확보)
+      setTimeout(() => resolve(coreWebVitals), 1000);
+    });
   });
   
+  return metrics;
+}
+
+/**
+ * 상세 성능 분석 (메모리, CPU, 네트워크 포함)
+ */
+export async function collectDetailedPerformanceMetrics(page: Page) {
+  const metrics = await page.evaluate(() => {
+    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    const resources = performance.getEntriesByType('resource');
+    
+    // 메모리 정보 (Chrome에서만 사용 가능)
+    let memoryInfo = null;
+    if ('memory' in performance) {
+      // @ts-expect-error: Chrome-specific memory API
+      memoryInfo = {
+        // @ts-expect-error: Chrome-specific memory API
+        usedJSHeapSize: performance.memory.usedJSHeapSize,
+        // @ts-expect-error: Chrome-specific memory API
+        totalJSHeapSize: performance.memory.totalJSHeapSize,
+        // @ts-expect-error: Chrome-specific memory API
+        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit
+      };
+    }
+
+    // 리소스 로딩 분석
+    const resourceAnalysis = {
+      totalRequests: resources.length,
+      totalTransferSize: resources.reduce((sum: number, resource: PerformanceResourceTiming) => sum + (resource.transferSize || 0), 0),
+      slowestResource: resources.reduce((slowest: PerformanceResourceTiming | null, resource: PerformanceResourceTiming) => 
+        (resource.duration > (slowest?.duration || 0)) ? resource : slowest, null
+      ),
+      cachedResources: resources.filter((resource: PerformanceResourceTiming) => resource.transferSize === 0).length
+    };
+
+    return {
+      // 기본 성능 데이터
+      timing: {
+        redirect: navigation.redirectEnd - navigation.redirectStart,
+        dns: navigation.domainLookupEnd - navigation.domainLookupStart,
+        connect: navigation.connectEnd - navigation.connectStart,
+        ssl: navigation.connectEnd - navigation.secureConnectionStart,
+        ttfb: navigation.responseStart - navigation.requestStart,
+        download: navigation.responseEnd - navigation.responseStart,
+        domProcessing: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+        totalTime: navigation.loadEventEnd - navigation.navigationStart
+      },
+      
+      // 메모리 정보
+      memory: memoryInfo,
+      
+      // 리소스 분석
+      resources: resourceAnalysis,
+      
+      // 네트워크 정보
+      connection: {
+        // @ts-expect-error: Network Information API not fully typed
+        effectiveType: navigator.connection?.effectiveType || 'unknown',
+        // @ts-expect-error: Network Information API not fully typed
+        downlink: navigator.connection?.downlink || 0,
+        // @ts-expect-error: Network Information API not fully typed
+        rtt: navigator.connection?.rtt || 0
+      }
+    };
+  });
+
   return metrics;
 }
 
@@ -183,14 +292,14 @@ export async function testResponsiveBreakpoints(page: Page, callback: () => Prom
 export async function triggerErrorBoundary(page: Page) {
   // 의도적으로 JavaScript 에러 발생
   await page.evaluate(() => {
-    // @ts-ignore
+    // @ts-expect-error: Intentionally adding to window for testing
     window.triggerTestError = () => {
       throw new Error('Test error for error boundary');
     };
   });
   
   await page.evaluate(() => {
-    // @ts-ignore
+    // @ts-expect-error: Using test function added above
     window.triggerTestError();
   });
 }

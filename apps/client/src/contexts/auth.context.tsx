@@ -103,7 +103,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
               payload: {
                 guestToken: tokenInfo.accessToken,
                 expiresIn: 3600,
-                permissions: userInfoResponse.data.permissions as any,
+                permissions: userInfoResponse.data.permissions,
               },
             });
             emitEvent('login', { user: userInfoResponse.data.user, isGuest: true });
@@ -145,7 +145,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
     } finally {
       isInitializing.current = false;
     }
-  }, [state.isInitialized, initOptions, emitEvent]);
+  }, [state.isInitialized, initOptions, emitEvent, requestGuestAccess]);
 
   const requestGuestAccess = useCallback(async () => {
     try {

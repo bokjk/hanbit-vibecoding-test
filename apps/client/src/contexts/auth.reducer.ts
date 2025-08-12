@@ -65,7 +65,7 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
         isInitialized: true,
       };
 
-    case 'AUTH_INIT_GUEST':
+    case 'AUTH_INIT_GUEST': {
       const guestUser: User = {
         id: `guest-${Date.now()}`,
         username: 'Guest User',
@@ -91,6 +91,7 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
         error: null,
         isInitialized: true,
       };
+    }
 
     case 'AUTH_INIT_FAILURE':
       return {
@@ -136,7 +137,7 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
       };
 
     // 토큰 갱신 관련
-    case 'AUTH_TOKEN_REFRESH_SUCCESS':
+    case 'AUTH_TOKEN_REFRESH_SUCCESS': {
       if (!state.tokenInfo) {
         return state;
       }
@@ -153,6 +154,7 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
         tokenExpiration: new Date(action.payload.expiresAt),
         error: null,
       };
+    }
 
     case 'AUTH_TOKEN_REFRESH_FAILURE':
       return {
@@ -257,7 +259,7 @@ export const authSelectors = {
   getRemainingQuota: (state: AuthState, currentCount: number): number => {
     const maxItems = authSelectors.getMaxTodos(state);
     if ('unlimitedItems' in (state.permissions || {}) && 
-        (state.permissions as any).unlimitedItems) {
+        state.permissions && 'unlimitedItems' in state.permissions && state.permissions.unlimitedItems) {
       return Infinity;
     }
     return Math.max(0, maxItems - currentCount);

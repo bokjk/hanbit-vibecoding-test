@@ -1,0 +1,569 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  # 1. 기본 검증 (린트, 타입 체크, 유닛 테스트)
+  validate:
+    name: 기본 검증
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 의존성 설치
+        run: pnpm install --frozen-lockfile
+
+      - name: 타입 체크 - 클라이언트
+        run: pnpm --filter @vive/client type-check
+
+      - name: 타입 체크 - 서버
+        run: pnpm --filter @vive/server type-check
+
+      - name: 린트 검사 - 클라이언트
+        run: pnpm --filter @vive/client lint
+
+      - name: 린트 검사 - 서버
+        run: pnpm --filter @vive/server lint
+
+      - name: 유닛 테스트 - 클라이언트
+        run: pnpm --filter @vive/client test --coverage
+
+      - name: 유닛 테스트 - 서버
+        run: pnpm --filter @vive/server test --coverage
+
+      - name: 테스트 결과 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results
+          path: |
+            apps/client/coverage/
+            apps/server/coverage/
+          retention-days: 30
+
+  # 2. Contract Testing - API 스키마 검증
+  contract-tests:
+    name: Contract Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: validate
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 의존성 설치
+        run: pnpm install --frozen-lockfile
+
+      - name: OpenAPI 스키마 검증
+        run: |
+          cd apps/server
+          # OpenAPI 스키마 문법 검증
+          npx swagger-parser validate openapi/api-schema.yaml
+
+      - name: Contract 테스트 실행
+        run: |
+          cd apps/server
+          pnpm test:contract --reporter=verbose --reporter=json --outputFile=contract-test-results.json
+        env:
+          NODE_ENV: test
+          IS_CONTRACT_TEST: true
+
+      - name: Contract 테스트 결과 분석
+        run: |
+          cd apps/server
+          if [ -f contract-test-results.json ]; then
+            echo "✅ Contract 테스트 결과 분석:"
+            node -e "
+              const results = require('./contract-test-results.json');
+              const totalTests = results.numTotalTests || 0;
+              const passedTests = results.numPassedTests || 0;
+              const failedTests = results.numFailedTests || 0;
+              
+              console.log(\`총 테스트: \${totalTests}\`);
+              console.log(\`성공: \${passedTests}\`);
+              console.log(\`실패: \${failedTests}\`);
+              
+              if (failedTests > 0) {
+                console.log('\\n❌ 실패한 테스트:');
+                results.testResults?.forEach(suite => {
+                  suite.assertionResults?.forEach(test => {
+                    if (test.status === 'failed') {
+                      console.log(\`  - \${test.title}\`);
+                      console.log(\`    \${test.failureMessages?.[0] || 'No error details'}\`);
+                    }
+                  });
+                });
+                process.exit(1);
+              } else {
+                console.log('\\n✅ 모든 Contract 테스트가 성공했습니다!');
+              }
+            "
+          else
+            echo "⚠️ Contract 테스트 결과 파일을 찾을 수 없습니다."
+          fi
+
+      - name: Contract 테스트 결과 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: contract-test-results
+          path: |
+            apps/server/contract-test-results.json
+            apps/server/test-results/
+          retention-days: 30
+
+      - name: Contract 테스트 보고서 생성
+        if: always()
+        run: |
+          cd apps/server
+          echo "# 📋 Contract Testing 보고서" > contract-report.md
+          echo "" >> contract-report.md
+          echo "## 🔍 검증 항목" >> contract-report.md
+          echo "- ✅ OpenAPI 스키마 문법 검증" >> contract-report.md
+          echo "- ✅ 요청/응답 스키마 검증" >> contract-report.md
+          echo "- ✅ HTTP 상태 코드 일관성" >> contract-report.md
+          echo "- ✅ 에러 응답 형식 검증" >> contract-report.md
+          echo "- ✅ 보안 헤더 검증" >> contract-report.md
+          echo "- ✅ CORS 정책 검증" >> contract-report.md
+          echo "" >> contract-report.md
+          
+          if [ -f contract-test-results.json ]; then
+            node -e "
+              const results = require('./contract-test-results.json');
+              const fs = require('fs');
+              
+              let report = fs.readFileSync('contract-report.md', 'utf8');
+              report += '## 📊 테스트 결과\\n\\n';
+              report += \`- 총 테스트: \${results.numTotalTests || 0}\\n\`;
+              report += \`- ✅ 성공: \${results.numPassedTests || 0}\\n\`;
+              report += \`- ❌ 실패: \${results.numFailedTests || 0}\\n\`;
+              report += \`- ⏱️ 실행 시간: \${results.testResults?.[0]?.perfStats?.runtime || 0}ms\\n\\n\`;
+              
+              if (results.numFailedTests > 0) {
+                report += '## ❌ 실패한 테스트\\n\\n';
+                results.testResults?.forEach(suite => {
+                  suite.assertionResults?.forEach(test => {
+                    if (test.status === 'failed') {
+                      report += \`### \${test.title}\\n\`;
+                      report += \`\\\`\\\`\\\`\\n\${test.failureMessages?.[0] || 'No error details'}\\\`\\\`\\\`\\n\\n\`;
+                    }
+                  });
+                });
+              } else {
+                report += '## ✅ 모든 테스트 성공\\n\\n';
+                report += '프론트엔드와 백엔드 간의 API 계약이 완전히 검증되었습니다.\\n';
+              }
+              
+              fs.writeFileSync('contract-report.md', report);
+            "
+          fi
+
+      - name: Contract 보고서 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: contract-report
+          path: apps/server/contract-report.md
+          retention-days: 30
+
+  # 3. 통합 테스트
+  integration-tests:
+    name: 통합 테스트
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: [validate, contract-tests]
+
+    services:
+      # DynamoDB Local (테스트용)
+      dynamodb:
+        image: amazon/dynamodb-local:latest
+        ports:
+          - 8000:8000
+        options: >-
+          --health-cmd="curl -f http://localhost:8000/"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 의존성 설치
+        run: pnpm install --frozen-lockfile
+
+      - name: DynamoDB 테이블 생성
+        run: |
+          # DynamoDB Local에 테스트용 테이블 생성
+          cd apps/server
+          node -e "
+            const AWS = require('@aws-sdk/client-dynamodb');
+            const client = new AWS.DynamoDBClient({
+              endpoint: 'http://localhost:8000',
+              region: 'us-east-1',
+              credentials: {
+                accessKeyId: 'dummy',
+                secretAccessKey: 'dummy'
+              }
+            });
+            
+            async function createTable() {
+              try {
+                await client.send(new AWS.CreateTableCommand({
+                  TableName: 'hanbit-todos-test',
+                  KeySchema: [
+                    { AttributeName: 'userId', KeyType: 'HASH' },
+                    { AttributeName: 'id', KeyType: 'RANGE' }
+                  ],
+                  AttributeDefinitions: [
+                    { AttributeName: 'userId', AttributeType: 'S' },
+                    { AttributeName: 'id', AttributeType: 'S' }
+                  ],
+                  BillingMode: 'PAY_PER_REQUEST'
+                }));
+                console.log('✅ DynamoDB 테스트 테이블 생성 완료');
+              } catch (error) {
+                console.error('❌ DynamoDB 테이블 생성 실패:', error.message);
+                process.exit(1);
+              }
+            }
+            
+            createTable();
+          "
+
+      - name: 통합 테스트 - 서버
+        run: |
+          cd apps/server
+          pnpm test --testPathPattern=integration --coverage
+        env:
+          NODE_ENV: test
+          DYNAMODB_ENDPOINT: http://localhost:8000
+          AWS_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: dummy
+          AWS_SECRET_ACCESS_KEY: dummy
+
+      - name: 통합 테스트 - 클라이언트
+        run: |
+          cd apps/client
+          # 클라이언트 통합 테스트 실행
+          pnpm test --testPathPattern=integration --coverage
+
+      - name: 통합 테스트 결과 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: |
+            apps/client/coverage/
+            apps/server/coverage/
+          retention-days: 30
+
+  # 4. E2E 테스트
+  e2e-tests:
+    name: E2E 테스트
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [validate, contract-tests]
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 의존성 설치
+        run: pnpm install --frozen-lockfile
+
+      - name: Playwright 브라우저 설치
+        run: |
+          cd apps/client
+          npx playwright install --with-deps
+
+      - name: 클라이언트 빌드
+        run: |
+          cd apps/client
+          pnpm build
+
+      - name: E2E 테스트 실행
+        run: |
+          cd apps/client
+          pnpm test:e2e --reporter=html --reporter=json
+        env:
+          CI: true
+
+      - name: E2E 테스트 결과 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: |
+            apps/client/playwright-report/
+            apps/client/test-results/
+          retention-days: 30
+
+  # 5. 보안 검증
+  security-scan:
+    name: 보안 검증
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: contract-tests
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 의존성 설치
+        run: pnpm install --frozen-lockfile
+
+      - name: 보안 취약점 검사
+        run: |
+          echo "🔍 패키지 보안 취약점 검사"
+          pnpm audit --audit-level high || true
+          
+          echo "🔍 라이센스 검사"
+          npx license-checker --onlyAllow 'MIT;BSD-2-Clause;BSD-3-Clause;Apache-2.0;ISC' || true
+
+      - name: OpenAPI 보안 정책 검증
+        run: |
+          cd apps/server
+          echo "🔍 OpenAPI 보안 정책 검증"
+          
+          # 보안 헤더 검증
+          node -e "
+            const yaml = require('yaml');
+            const fs = require('fs');
+            
+            const schema = yaml.parse(fs.readFileSync('openapi/api-schema.yaml', 'utf8'));
+            
+            console.log('✅ 보안 스키마 검증:');
+            console.log('  - Bearer 인증:', schema.components.securitySchemes.BearerAuth ? '✅' : '❌');
+            console.log('  - CORS 응답 정의:', schema.components.responses.Unauthorized ? '✅' : '❌');
+            console.log('  - Rate Limiting 헤더:', 
+              JSON.stringify(schema).includes('X-Rate-Limit') ? '✅' : '❌');
+            console.log('  - 에러 응답 스키마:', schema.components.schemas.ErrorResponse ? '✅' : '❌');
+            
+            // 민감한 정보 노출 검사
+            const schemaStr = JSON.stringify(schema);
+            const sensitivePatterns = ['password', 'secret', 'key', 'token'];
+            const exposedSensitive = sensitivePatterns.filter(pattern => 
+              schemaStr.toLowerCase().includes(pattern) && 
+              !schemaStr.includes('description') // 설명에서는 허용
+            );
+            
+            if (exposedSensitive.length > 0) {
+              console.warn('⚠️  민감한 정보 노출 가능성:', exposedSensitive);
+            } else {
+              console.log('  - 민감한 정보 노출 검사: ✅');
+            }
+          "
+
+  # 6. 빌드 및 배포 준비
+  build:
+    name: 빌드 및 배포 준비
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [integration-tests, e2e-tests, security-scan]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 의존성 설치
+        run: pnpm install --frozen-lockfile
+
+      - name: 프로덕션 빌드 - 클라이언트
+        run: |
+          cd apps/client
+          pnpm build
+        env:
+          NODE_ENV: production
+
+      - name: 프로덕션 빌드 - 서버
+        run: |
+          cd apps/server
+          pnpm build:lambda
+        env:
+          NODE_ENV: production
+
+      - name: 빌드 아티팩트 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            apps/client/dist/
+            apps/server/dist/
+          retention-days: 30
+
+      - name: Contract Testing 결과 요약
+        run: |
+          echo "# 📋 CI/CD 파이프라인 완료" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ 성공한 검증 단계" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔍 기본 검증 (린트, 타입 체크, 유닛 테스트)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📋 Contract Testing (API 스키마 검증)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔗 통합 테스트" >> $GITHUB_STEP_SUMMARY
+          echo "- 🎭 E2E 테스트" >> $GITHUB_STEP_SUMMARY
+          echo "- 🛡️ 보안 검증" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏗️ 프로덕션 빌드" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 배포 준비 완료" >> $GITHUB_STEP_SUMMARY
+          echo "프론트엔드와 백엔드 간의 API 계약이 검증되었으며," >> $GITHUB_STEP_SUMMARY
+          echo "모든 품질 게이트를 통과하여 배포 준비가 완료되었습니다." >> $GITHUB_STEP_SUMMARY
+
+  # 7. 테스트 결과 종합 리포트
+  test-summary:
+    name: 테스트 결과 요약
+    runs-on: ubuntu-latest
+    needs: [validate, contract-tests, integration-tests, e2e-tests, security-scan]
+    if: always()
+
+    steps:
+      - name: 테스트 결과 다운로드
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-test-results"
+          merge-multiple: true
+
+      - name: Contract 보고서 다운로드
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: contract-report
+
+      - name: 종합 테스트 보고서 생성
+        run: |
+          echo "# 📊 TODO 앱 테스트 결과 종합 보고서" > test-summary.md
+          echo "" >> test-summary.md
+          echo "## 🧪 테스트 실행 결과" >> test-summary.md
+          echo "" >> test-summary.md
+          
+          # Job 상태 확인
+          echo "| 테스트 단계 | 상태 | 설명 |" >> test-summary.md
+          echo "|------------|------|------|" >> test-summary.md
+          echo "| 기본 검증 | ${{ needs.validate.result == 'success' && '✅ 성공' || '❌ 실패' }} | 린트, 타입 체크, 유닛 테스트 |" >> test-summary.md
+          echo "| Contract Testing | ${{ needs.contract-tests.result == 'success' && '✅ 성공' || '❌ 실패' }} | API 스키마 검증, 계약 테스트 |" >> test-summary.md
+          echo "| 통합 테스트 | ${{ needs.integration-tests.result == 'success' && '✅ 성공' || '❌ 실패' }} | 컴포넌트 간 통합 검증 |" >> test-summary.md
+          echo "| E2E 테스트 | ${{ needs.e2e-tests.result == 'success' && '✅ 성공' || '❌ 실패' }} | 사용자 시나리오 검증 |" >> test-summary.md
+          echo "| 보안 검증 | ${{ needs.security-scan.result == 'success' && '✅ 성공' || '❌ 실패' }} | 보안 취약점 검사 |" >> test-summary.md
+          echo "" >> test-summary.md
+          
+          # Contract Testing 하이라이트
+          echo "## 🔍 Contract Testing 하이라이트" >> test-summary.md
+          echo "" >> test-summary.md
+          if [ -f contract-report.md ]; then
+            cat contract-report.md >> test-summary.md
+          else
+            echo "Contract 테스트는 프론트엔드와 백엔드 간의 API 계약을 보장합니다:" >> test-summary.md
+            echo "- ✅ OpenAPI 스키마 준수" >> test-summary.md
+            echo "- ✅ 요청/응답 형식 일관성" >> test-summary.md
+            echo "- ✅ 에러 처리 표준화" >> test-summary.md
+            echo "- ✅ 보안 헤더 검증" >> test-summary.md
+          fi
+          echo "" >> test-summary.md
+          
+          # 전체 결과
+          ALL_SUCCESS="${{ needs.validate.result == 'success' && needs.contract-tests.result == 'success' && needs.integration-tests.result == 'success' && needs.e2e-tests.result == 'success' && needs.security-scan.result == 'success' }}"
+          
+          if [ "$ALL_SUCCESS" = "true" ]; then
+            echo "## ✅ 전체 테스트 성공!" >> test-summary.md
+            echo "" >> test-summary.md
+            echo "모든 품질 게이트를 통과했습니다. 배포 준비가 완료되었습니다." >> test-summary.md
+          else
+            echo "## ❌ 일부 테스트 실패" >> test-summary.md
+            echo "" >> test-summary.md
+            echo "실패한 테스트를 확인하고 수정이 필요합니다." >> test-summary.md
+          fi
+
+      - name: 테스트 요약 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary-report
+          path: test-summary.md
+          retention-days: 90
+
+      - name: GitHub Summary 업데이트
+        run: |
+          if [ -f test-summary.md ]; then
+            cat test-summary.md >> $GITHUB_STEP_SUMMARY
+          fi

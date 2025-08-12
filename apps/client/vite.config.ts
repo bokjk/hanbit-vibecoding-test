@@ -23,6 +23,48 @@ export default defineConfig(({ mode }) => {
       sourcemap: false,
       minify: 'esbuild'
     },
+    server: {
+      port: 3000,
+      host: true,
+      headers: {
+        // 개발 환경에서도 보안 헤더 적용
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff',
+        'X-XSS-Protection': '1; mode=block',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        // 개발 환경용 CSP (느슨한 설정)
+        'Content-Security-Policy': [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // 개발 환경에서는 eval 허용
+          "style-src 'self' 'unsafe-inline'",
+          "img-src 'self' data: blob: https:",
+          "font-src 'self' data:",
+          "connect-src 'self' ws: wss: http: https:", // 개발 서버 WebSocket 허용
+          "frame-ancestors 'none'"
+        ].join('; ')
+      }
+    },
+    preview: {
+      port: 4173,
+      headers: {
+        // 프리뷰 환경용 보안 헤더 (프로덕션에 가까운 설정)
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff', 
+        'X-XSS-Protection': '1; mode=block',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Strict-Transport-Security': 'max-age=86400',
+        'Content-Security-Policy': [
+          "default-src 'self'",
+          "script-src 'self'",
+          "style-src 'self' 'unsafe-inline'", // Tailwind CSS 인라인 스타일 허용
+          "img-src 'self' data: https:",
+          "font-src 'self' data:",
+          "connect-src 'self' https:",
+          "frame-ancestors 'none'",
+          "base-uri 'self'"
+        ].join('; ')
+      }
+    },
     test: {
       environment: 'jsdom',
       globals: true,

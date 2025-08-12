@@ -1,0 +1,741 @@
+openapi: 3.0.3
+info:
+  title: TODO API
+  description: TODO 앱 RESTful API 스키마
+  version: '1.0.0'
+  contact:
+    name: Hanbit VibeCode
+    email: support@example.com
+
+servers:
+  - url: https://api.todo-app.example.com
+    description: Production server
+  - url: http://localhost:3001
+    description: Development server
+
+security:
+  - BearerAuth: []
+
+paths:
+  # TODO CRUD 엔드포인트
+  /todos:
+    get:
+      summary: 할일 목록 조회
+      tags: [Todos]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: 필터링할 상태
+          required: false
+          schema:
+            type: string
+            enum: [all, active, completed]
+            default: all
+        - name: priority
+          in: query
+          description: 우선순위 필터
+          required: false
+          schema:
+            $ref: '#/components/schemas/Priority'
+        - name: limit
+          in: query
+          description: 조회할 항목 수
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          description: 페이징 커서
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 할일 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoListResponse'
+          headers:
+            X-Rate-Limit-Limit:
+              description: 요청 제한 수
+              schema:
+                type: integer
+            X-Rate-Limit-Remaining:
+              description: 남은 요청 수
+              schema:
+                type: integer
+            X-Rate-Limit-Retry-After:
+              description: 다음 요청까지 대기 시간(초)
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      summary: 새로운 할일 생성
+      tags: [Todos]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTodoRequest'
+            examples:
+              basic:
+                summary: 기본 할일
+                value:
+                  title: "새로운 할일"
+                  priority: "medium"
+              with_due_date:
+                summary: 마감일이 있는 할일
+                value:
+                  title: "중요한 작업"
+                  priority: "high"
+                  dueDate: "2024-12-31T09:00:00Z"
+      responses:
+        '201':
+          description: 할일 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+          headers:
+            X-Rate-Limit-Limit:
+              description: 요청 제한 수
+              schema:
+                type: integer
+            X-Rate-Limit-Remaining:
+              description: 남은 요청 수
+              schema:
+                type: integer
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /todos/{id}:
+    get:
+      summary: 특정 할일 조회
+      tags: [Todos]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 할일 ID
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9-_]+$'
+      responses:
+        '200':
+          description: 할일 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    put:
+      summary: 할일 업데이트
+      tags: [Todos]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 할일 ID
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9-_]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTodoRequest'
+            examples:
+              complete_todo:
+                summary: 할일 완료 처리
+                value:
+                  completed: true
+              update_priority:
+                summary: 우선순위 변경
+                value:
+                  priority: "high"
+              update_title:
+                summary: 제목 변경
+                value:
+                  title: "수정된 할일 제목"
+      responses:
+        '200':
+          description: 할일 업데이트 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      summary: 할일 삭제
+      tags: [Todos]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 할일 ID
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9-_]+$'
+      responses:
+        '204':
+          description: 할일 삭제 성공
+          headers:
+            X-Rate-Limit-Limit:
+              description: 요청 제한 수
+              schema:
+                type: integer
+            X-Rate-Limit-Remaining:
+              description: 남은 요청 수
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  # 인증 엔드포인트
+  /auth/login:
+    post:
+      summary: 사용자 로그인
+      tags: [Authentication]
+      security: []  # 인증이 필요없는 엔드포인트
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              demo_user:
+                summary: 데모 사용자
+                value:
+                  username: "demo"
+                  password: "demo123"
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /auth/refresh:
+    post:
+      summary: 토큰 갱신
+      tags: [Authentication]
+      security: []  # Refresh token 사용
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: 토큰 갱신 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /auth/me:
+    get:
+      summary: 현재 사용자 정보 조회
+      tags: [Authentication]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 사용자 정보 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT 토큰을 Bearer 형식으로 전송
+
+  schemas:
+    # 기본 데이터 타입
+    Priority:
+      type: string
+      enum: [low, medium, high]
+      description: 할일 우선순위
+
+    # TODO 관련 스키마
+    Todo:
+      type: object
+      required:
+        - id
+        - title
+        - completed
+        - priority
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: 할일 고유 ID
+          example: "todo-123"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: 할일 제목
+          example: "프로젝트 문서 작성"
+        completed:
+          type: boolean
+          description: 완료 여부
+          example: false
+        priority:
+          $ref: '#/components/schemas/Priority'
+        dueDate:
+          type: string
+          format: date-time
+          description: 마감일 (ISO 8601 형식)
+          example: "2024-12-31T09:00:00Z"
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          description: 생성일시
+          example: "2024-01-01T09:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: 수정일시
+          example: "2024-01-01T09:00:00Z"
+
+    CreateTodoRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: 할일 제목
+          example: "새로운 할일"
+        priority:
+          $ref: '#/components/schemas/Priority'
+          default: medium
+        dueDate:
+          type: string
+          format: date-time
+          description: 마감일 (ISO 8601 형식)
+          example: "2024-12-31T09:00:00Z"
+
+    UpdateTodoRequest:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: 할일 제목
+          example: "수정된 할일"
+        completed:
+          type: boolean
+          description: 완료 여부
+          example: true
+        priority:
+          $ref: '#/components/schemas/Priority'
+        dueDate:
+          type: string
+          format: date-time
+          description: 마감일 (ISO 8601 형식)
+          example: "2024-12-31T09:00:00Z"
+          nullable: true
+
+    # 인증 관련 스키마
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: '^[a-zA-Z0-9_]+$'
+          description: 사용자명
+          example: "demo"
+        password:
+          type: string
+          minLength: 6
+          maxLength: 50
+          description: 비밀번호
+          example: "demo123"
+
+    RefreshRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+          description: 리프레시 토큰
+          example: "mock-refresh-token"
+
+    User:
+      type: object
+      required:
+        - id
+        - username
+      properties:
+        id:
+          type: string
+          description: 사용자 고유 ID
+          example: "user-123"
+        username:
+          type: string
+          description: 사용자명
+          example: "demo"
+
+    # 응답 스키마
+    ApiResponse:
+      type: object
+      required:
+        - success
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          description: 요청 성공 여부
+        timestamp:
+          type: string
+          format: date-time
+          description: 응답 생성 시간
+          example: "2024-01-01T09:00:00Z"
+
+    SuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              description: 응답 데이터
+
+    ErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required:
+            - error
+          properties:
+            error:
+              type: object
+              required:
+                - code
+                - message
+              properties:
+                code:
+                  type: string
+                  description: 에러 코드
+                  example: "ValidationError"
+                message:
+                  type: string
+                  description: 에러 메시지
+                  example: "검증 실패: title: 제목은 필수입니다"
+                details:
+                  description: 추가 에러 정보
+                  example: "Stack trace or validation details"
+
+    TodoResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Todo'
+
+    TodoListResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - todos
+                - total
+              properties:
+                todos:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Todo'
+                total:
+                  type: integer
+                  description: 전체 할일 개수
+                  example: 42
+                cursor:
+                  type: string
+                  description: 다음 페이지 커서
+                  example: "next-page-token"
+
+    LoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - accessToken
+                - refreshToken
+                - user
+              properties:
+                accessToken:
+                  type: string
+                  description: JWT 액세스 토큰
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken:
+                  type: string
+                  description: JWT 리프레시 토큰
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                user:
+                  $ref: '#/components/schemas/User'
+
+    TokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - accessToken
+                - refreshToken
+              properties:
+                accessToken:
+                  type: string
+                  description: 새로운 JWT 액세스 토큰
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken:
+                  type: string
+                  description: 새로운 JWT 리프레시 토큰
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    UserResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/User'
+
+  responses:
+    ValidationError:
+      description: 요청 데이터 검증 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            validation_error:
+              summary: 검증 오류 예시
+              value:
+                success: false
+                error:
+                  code: "ValidationError"
+                  message: "검증 실패: title: 제목은 필수입니다"
+                timestamp: "2024-01-01T09:00:00Z"
+
+    Unauthorized:
+      description: 인증 실패 또는 토큰 누락
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missing_token:
+              summary: 토큰 누락
+              value:
+                success: false
+                error:
+                  code: "UnauthorizedError"
+                  message: "Unauthorized"
+                timestamp: "2024-01-01T09:00:00Z"
+            invalid_credentials:
+              summary: 잘못된 인증 정보
+              value:
+                success: false
+                error:
+                  code: "UnauthorizedError"
+                  message: "사용자명 또는 비밀번호가 올바르지 않습니다"
+                timestamp: "2024-01-01T09:00:00Z"
+
+    Forbidden:
+      description: 권한 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            access_denied:
+              summary: 접근 권한 없음
+              value:
+                success: false
+                error:
+                  code: "ForbiddenError"
+                  message: "해당 리소스에 대한 접근 권한이 없습니다"
+                timestamp: "2024-01-01T09:00:00Z"
+
+    NotFound:
+      description: 리소스를 찾을 수 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            todo_not_found:
+              summary: 할일을 찾을 수 없음
+              value:
+                success: false
+                error:
+                  code: "NotFoundError"
+                  message: "Todo not found"
+                timestamp: "2024-01-01T09:00:00Z"
+
+    RateLimit:
+      description: 요청 한도 초과
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            rate_limit_exceeded:
+              summary: 요청 한도 초과
+              value:
+                success: false
+                error:
+                  code: "RateLimitError"
+                  message: "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요."
+                timestamp: "2024-01-01T09:00:00Z"
+      headers:
+        X-Rate-Limit-Limit:
+          description: 요청 제한 수
+          schema:
+            type: integer
+          example: 100
+        X-Rate-Limit-Remaining:
+          description: 남은 요청 수
+          schema:
+            type: integer
+          example: 0
+        X-Rate-Limit-Retry-After:
+          description: 다음 요청까지 대기 시간(초)
+          schema:
+            type: integer
+          example: 60
+
+    ServerError:
+      description: 서버 내부 오류
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            internal_server_error:
+              summary: 서버 내부 오류
+              value:
+                success: false
+                error:
+                  code: "InternalServerError"
+                  message: "An unexpected error occurred"
+                timestamp: "2024-01-01T09:00:00Z"
+
+tags:
+  - name: Todos
+    description: 할일 관리 API
+  - name: Authentication
+    description: 인증 및 사용자 관리 API

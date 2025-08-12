@@ -59,17 +59,17 @@ export function useAuth() {
     // 고급 기능 권한
     canExport: actions.hasPermission('export'),
     canImport: state.permissions && 'canImport' in state.permissions 
-      ? (state.permissions as any).canImport 
+      ? (state.permissions as Record<string, unknown>).canImport as boolean
       : false,
     canShare: state.permissions && 'canShare' in state.permissions 
-      ? (state.permissions as any).canShare 
+      ? (state.permissions as Record<string, unknown>).canShare as boolean
       : false,
     
     // 할당량 관리
     maxItems: state.permissions?.maxItems || 0,
     remainingQuota: actions.getRemainingQuota(),
     isUnlimited: state.permissions && 'unlimitedItems' in state.permissions 
-      ? (state.permissions as any).unlimitedItems 
+      ? (state.permissions as Record<string, unknown>).unlimitedItems as boolean 
       : false,
     
     // 권한 확인 함수

@@ -1,4 +1,4 @@
-import type { APIErrorResponse, APIErrorCode } from '../types/api.types';
+import type { APIErrorResponse } from '../types/api.types';
 
 /**
  * API 에러를 나타내는 커스텀 에러 클래스
@@ -185,7 +185,7 @@ export class APIError extends Error {
     try {
       const errorData: APIErrorResponse = await response.json();
       return new APIError(errorData, response.status);
-    } catch (parseError) {
+    } catch {
       // JSON 파싱에 실패한 경우 기본 에러 생성
       const errorResponse: APIErrorResponse = {
         success: false,

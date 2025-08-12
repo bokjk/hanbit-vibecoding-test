@@ -178,10 +178,11 @@ export abstract class AbstractStorageService {
         case 'title':
           comparison = a.title.localeCompare(b.title);
           break;
-        case 'priority':
+        case 'priority': {
           const priorityOrder = { high: 3, medium: 2, low: 1 };
           comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
           break;
+        }
       }
       
       return order === 'asc' ? comparison : -comparison;

@@ -76,9 +76,15 @@ export class TodoPage {
 
     await this.todoInput.fill(title);
     
-    // 우선순위 선택 (Select 컴포넌트 구조에 맞게 수정)
+    // 우선순위 선택 (shadcn/ui Select 컴포넌트 구조에 맞게 수정)
     await this.prioritySelect.click();
-    await this.page.locator(`[value="${priority}"]`).click();
+    
+    // SelectContent가 나타날 때까지 대기
+    await this.page.waitForSelector('[role="listbox"]', { timeout: 5000 });
+    
+    // 우선순위 값에 따른 SelectItem 클릭
+    const priorityText = priority === 'high' ? '높음' : priority === 'medium' ? '보통' : '낮음';
+    await this.page.locator(`[role="option"]:has-text("${priorityText}")`).click();
     
     // 추가 버튼 클릭
     await this.addButton.click();
@@ -170,12 +176,20 @@ export class TodoPage {
     // 정렬 기준 선택
     const sortBySelect = this.page.locator('[data-testid="sort-by-select"]');
     await sortBySelect.click();
-    await this.page.locator(`[data-value="${sortBy}"]`).click();
+    await this.page.waitForSelector('[role="listbox"]', { timeout: 5000 });
+    
+    // sortBy 값에 따른 텍스트 매핑
+    const sortByText = sortBy === 'createdAt' ? '생성일' : sortBy === 'priority' ? '우선순위' : '제목';
+    await this.page.locator(`[role="option"]:has-text("${sortByText}")`).click();
     
     // 정렬 순서 선택
     const sortOrderSelect = this.page.locator('[data-testid="sort-order-select"]');
     await sortOrderSelect.click();
-    await this.page.locator(`[data-value="${sortOrder}"]`).click();
+    await this.page.waitForSelector('[role="listbox"]', { timeout: 5000 });
+    
+    // sortOrder 값에 따른 텍스트 매핑
+    const sortOrderText = sortOrder === 'desc' ? '내림차순' : '오름차순';
+    await this.page.locator(`[role="option"]:has-text("${sortOrderText}")`).click();
     
     // 정렬이 적용될 때까지 대기
     await this.page.waitForTimeout(300);
