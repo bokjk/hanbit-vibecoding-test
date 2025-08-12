@@ -1,4 +1,4 @@
-import type { Todo, Priority, FilterType } from 'types/index';
+import type { Todo, Priority, FilterType } from "types/index";
 
 // ================================
 // 기본 API 응답 타입들
@@ -55,8 +55,8 @@ export interface GetTodosParams {
   limit?: number;
   cursor?: string;
   filter?: FilterType;
-  sortBy?: 'createdAt' | 'priority' | 'title';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "createdAt" | "priority" | "title";
+  sortOrder?: "asc" | "desc";
 }
 
 /**
@@ -207,7 +207,7 @@ export interface ExportDataResponse {
  * 데이터 가져오기 옵션
  */
 export interface ImportOptions {
-  mergeStrategy: 'replace' | 'merge';
+  mergeStrategy: "replace" | "merge";
   validateData: boolean;
 }
 
@@ -225,7 +225,7 @@ export interface ImportDataResponse {
  */
 export interface MigrationOptions {
   preserveIds: boolean;
-  mergeStrategy: 'replace' | 'merge';
+  mergeStrategy: "replace" | "merge";
 }
 
 /**
@@ -251,26 +251,26 @@ export interface MigrateDataResponse {
 
 export enum APIErrorCode {
   // 인증 관련
-  UNAUTHORIZED = 'UNAUTHORIZED',
-  FORBIDDEN = 'FORBIDDEN',
-  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
-  
+  UNAUTHORIZED = "UNAUTHORIZED",
+  FORBIDDEN = "FORBIDDEN",
+  TOKEN_EXPIRED = "TOKEN_EXPIRED",
+
   // 검증 관련
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  INVALID_REQUEST = 'INVALID_REQUEST',
-  
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  INVALID_REQUEST = "INVALID_REQUEST",
+
   // 리소스 관련
-  NOT_FOUND = 'NOT_FOUND',
-  CONFLICT = 'CONFLICT',
-  QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
-  
+  NOT_FOUND = "NOT_FOUND",
+  CONFLICT = "CONFLICT",
+  QUOTA_EXCEEDED = "QUOTA_EXCEEDED",
+
   // 서버 관련
-  INTERNAL_ERROR = 'INTERNAL_ERROR',
-  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
-  
+  INTERNAL_ERROR = "INTERNAL_ERROR",
+  SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE",
+
   // 네트워크 관련
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
+  NETWORK_ERROR = "NETWORK_ERROR",
+  TIMEOUT_ERROR = "TIMEOUT_ERROR",
 }
 
 // ================================
@@ -280,7 +280,7 @@ export enum APIErrorCode {
 /**
  * 대기 중인 액션 타입
  */
-export type PendingActionType = 'create' | 'update' | 'delete';
+export type PendingActionType = "create" | "update" | "delete";
 
 /**
  * 대기 중인 액션

@@ -1,4 +1,4 @@
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 /**
  * 클라이언트 사이드 보안 유틸리티
@@ -10,10 +10,10 @@ export class ClientSecurity {
    */
   static sanitizeUserInput(input: string): string {
     return DOMPurify.sanitize(input, {
-      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'br'], // 기본 텍스트 포맷팅만 허용
+      ALLOWED_TAGS: ["b", "i", "em", "strong", "br"], // 기본 텍스트 포맷팅만 허용
       ALLOWED_ATTR: [], // 속성은 허용하지 않음
       KEEP_CONTENT: true, // 태그는 제거하되 내용은 유지
-      ALLOW_DATA_ATTR: false // data 속성 차단
+      ALLOW_DATA_ATTR: false, // data 속성 차단
     });
   }
 
@@ -25,7 +25,7 @@ export class ClientSecurity {
     return DOMPurify.sanitize(input, {
       ALLOWED_TAGS: [], // 모든 태그 제거
       ALLOWED_ATTR: [],
-      KEEP_CONTENT: true
+      KEEP_CONTENT: true,
     });
   }
 
@@ -34,21 +34,21 @@ export class ClientSecurity {
    * API 응답을 표시하기 전 정화
    */
   static sanitizeServerResponse(data: unknown): unknown {
-    if (typeof data === 'string') {
+    if (typeof data === "string") {
       return this.sanitizeUserInput(data);
     }
-    
+
     if (Array.isArray(data)) {
-      return data.map(item => this.sanitizeServerResponse(item));
+      return data.map((item) => this.sanitizeServerResponse(item));
     }
-    
-    if (data && typeof data === 'object') {
+
+    if (data && typeof data === "object") {
       const sanitized: Record<string, unknown> = {};
-      
+
       for (const [key, value] of Object.entries(data)) {
-        if (typeof value === 'string') {
+        if (typeof value === "string") {
           // 제목, 설명 등 텍스트 필드 정화
-          if (['title', 'description', 'content'].includes(key)) {
+          if (["title", "description", "content"].includes(key)) {
             sanitized[key] = this.sanitizeUserInput(value);
           } else {
             sanitized[key] = this.sanitizePlainText(value);
@@ -57,10 +57,10 @@ export class ClientSecurity {
           sanitized[key] = this.sanitizeServerResponse(value);
         }
       }
-      
+
       return sanitized;
     }
-    
+
     return data;
   }
 
@@ -70,20 +70,21 @@ export class ClientSecurity {
   static isValidUrl(url: string, allowedDomains: string[] = []): boolean {
     try {
       const parsedUrl = new URL(url);
-      
+
       // 프로토콜 검증 (https, http만 허용)
-      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      if (!["http:", "https:"].includes(parsedUrl.protocol)) {
         return false;
       }
-      
+
       // 허용된 도메인 확인
       if (allowedDomains.length > 0) {
-        return allowedDomains.some(domain => 
-          parsedUrl.hostname === domain || 
-          parsedUrl.hostname.endsWith(`.${domain}`)
+        return allowedDomains.some(
+          (domain) =>
+            parsedUrl.hostname === domain ||
+            parsedUrl.hostname.endsWith(`.${domain}`),
         );
       }
-      
+
       return true;
     } catch {
       return false;
@@ -96,13 +97,13 @@ export class ClientSecurity {
    */
   static maskSensitiveData(data: string, visibleChars: number = 4): string {
     if (data.length <= visibleChars) {
-      return '*'.repeat(data.length);
+      return "*".repeat(data.length);
     }
-    
+
     const maskedLength = data.length - visibleChars;
     const visiblePart = data.slice(-visibleChars);
-    
-    return '*'.repeat(maskedLength) + visiblePart;
+
+    return "*".repeat(maskedLength) + visiblePart;
   }
 }
 
@@ -120,7 +121,7 @@ export function useSafeInput() {
 
   return {
     sanitizeInput,
-    sanitizePlainText
+    sanitizePlainText,
   };
 }
 
@@ -128,7 +129,7 @@ export function useSafeInput() {
  * 개발 모드에서 보안 경고 표시
  */
 export function logSecurityWarning(message: string, data?: unknown): void {
-  if (process.env.NODE_ENV === 'development') {
-    console.warn('🚨 Security Warning:', message, data);
+  if (process.env.NODE_ENV === "development") {
+    console.warn("🚨 Security Warning:", message, data);
   }
 }

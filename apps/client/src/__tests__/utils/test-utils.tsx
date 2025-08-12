@@ -2,10 +2,10 @@
  * React Testing Library 유틸리티 확장
  */
 /* eslint-disable react-refresh/only-export-components */
-import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { TodoProvider } from '@/contexts/TodoContext';
+import React, { ReactElement } from "react";
+import { render, RenderOptions } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { TodoProvider } from "@/contexts/TodoContext";
 
 // Provider로 감싸는 커스텀 렌더 함수
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
@@ -14,7 +14,7 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
 
 const customRender = (
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
+  options?: Omit<RenderOptions, "wrapper">,
 ) => {
   return {
     user: userEvent.setup(),
@@ -24,15 +24,15 @@ const customRender = (
 
 // React refresh 호환성을 위해 분리
 export { customRender as render };
-export * from '@testing-library/react';
+export * from "@testing-library/react";
 
 // 테스트 데이터 생성 헬퍼
 export const createMockTodo = (overrides = {}) => ({
-  id: 'test-todo-123',
-  title: 'Test Todo',
-  priority: 'medium' as const,
+  id: "test-todo-123",
+  title: "Test Todo",
+  priority: "medium" as const,
   completed: false,
-  userId: 'test-user-123',
+  userId: "test-user-123",
   isGuest: false,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -44,17 +44,17 @@ export const createMockTodos = (count: number) => {
     createMockTodo({
       id: `test-todo-${index}`,
       title: `Test Todo ${index + 1}`,
-      priority: ['high', 'medium', 'low'][index % 3],
+      priority: ["high", "medium", "low"][index % 3],
       completed: index % 2 === 0,
-    })
+    }),
   );
 };
 
 // 필터 테스트 헬퍼
 export const createMockFilter = (overrides = {}) => ({
-  type: 'all' as const,
-  sortBy: 'createdDate' as const,
-  sortOrder: 'desc' as const,
+  type: "all" as const,
+  sortBy: "createdDate" as const,
+  sortOrder: "desc" as const,
   priority: undefined,
   ...overrides,
 });
@@ -72,7 +72,7 @@ export const mockLocalStorage = () => {
       delete store[key];
     }),
     clear: vi.fn(() => {
-      Object.keys(store).forEach(key => delete store[key]);
+      Object.keys(store).forEach((key) => delete store[key]);
     }),
     get store() {
       return { ...store };
@@ -113,7 +113,7 @@ export const measurePerformance = async (fn: () => Promise<void> | void) => {
 
 // 접근성 테스트 헬퍼
 export const checkA11y = async (container: Element) => {
-  const { axe } = await import('@axe-core/react');
+  const { axe } = await import("@axe-core/react");
   const results = await axe(container);
   expect(results).toHaveNoViolations();
 };

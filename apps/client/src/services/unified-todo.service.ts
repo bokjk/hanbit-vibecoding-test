@@ -1,19 +1,19 @@
-import type { Todo, Priority, FilterType, TodoStats } from 'types/index';
-import { AbstractStorageService } from './storage/abstract-storage.service';
-import { LocalStorageService } from './localStorage.service';
-import { APIStorageService } from './storage/api-storage.service';
-import { TodoAPIClient } from './api/todo-api-client';
-import { authService } from './auth.service';
-import { appConfig } from '../config/app-config';
-import { APIError } from '../errors/api-error';
+import type { Todo, Priority, FilterType, TodoStats } from "types/index";
+import { AbstractStorageService } from "./storage/abstract-storage.service";
+import { LocalStorageService } from "./localStorage.service";
+import { APIStorageService } from "./storage/api-storage.service";
+import { TodoAPIClient } from "./api/todo-api-client";
+import { authService } from "./auth.service";
+import { appConfig } from "../config/app-config";
+import { APIError } from "../errors/api-error";
 
 /**
  * 스토리지 모드 열거형
  */
 export enum StorageMode {
-  LOCAL_STORAGE = 'localStorage',
-  API = 'api',
-  HYBRID = 'hybrid', // 향후 확장을 위한 예약
+  LOCAL_STORAGE = "localStorage",
+  API = "api",
+  HYBRID = "hybrid", // 향후 확장을 위한 예약
 }
 
 /**
@@ -31,14 +31,16 @@ export class UnifiedTodoService {
   private constructor() {
     // localStorage 서비스는 항상 백업용으로 유지
     this.localStorageService = new LocalStorageService();
-    
+
     // 초기 스토리지 모드 설정
     this.currentMode = this.determineStorageMode();
     this.currentStorage = this.createStorageService();
 
     // 설정 로그 출력
     if (appConfig.features.debugMode) {
-      console.log(`📦 UnifiedTodoService initialized with mode: ${this.currentMode}`);
+      console.log(
+        `📦 UnifiedTodoService initialized with mode: ${this.currentMode}`,
+      );
     }
   }
 
@@ -60,7 +62,7 @@ export class UnifiedTodoService {
     try {
       return await this.currentStorage.getTodos();
     } catch (error) {
-      return this.handleStorageError(error, 'getTodos');
+      return this.handleStorageError(error, "getTodos");
     }
   }
 
@@ -70,12 +72,16 @@ export class UnifiedTodoService {
    */
   async saveTodos(todos: Todo[]): Promise<void> {
     if (this.currentMode === StorageMode.LOCAL_STORAGE) {
-      await (this.currentStorage as {saveTodos: (todos: Todo[]) => Promise<void>}).saveTodos(todos);
+      await (
+        this.currentStorage as { saveTodos: (todos: Todo[]) => Promise<void> }
+      ).saveTodos(todos);
       return;
     }
 
     // API 모드에서는 지원하지 않음 (개별 CRUD 작업 사용 권장)
-    throw new Error('saveTodos is not supported in API mode. Use individual CRUD operations.');
+    throw new Error(
+      "saveTodos is not supported in API mode. Use individual CRUD operations.",
+    );
   }
 
   // ================================
@@ -89,18 +95,21 @@ export class UnifiedTodoService {
     try {
       return await this.currentStorage.getTodoById(id);
     } catch (error) {
-      return this.handleStorageError(error, 'getTodoById', null);
+      return this.handleStorageError(error, "getTodoById", null);
     }
   }
 
   /**
    * 새로운 TODO 생성
    */
-  async createTodo(title: string, priority: Priority = 'medium'): Promise<Todo> {
+  async createTodo(
+    title: string,
+    priority: Priority = "medium",
+  ): Promise<Todo> {
     try {
       return await this.currentStorage.createTodo(title, priority);
     } catch (error) {
-      throw this.handleStorageError(error, 'createTodo');
+      throw this.handleStorageError(error, "createTodo");
     }
   }
 
@@ -109,12 +118,12 @@ export class UnifiedTodoService {
    */
   async updateTodo(
     id: string,
-    updates: Partial<Pick<Todo, 'title' | 'completed' | 'priority'>>
+    updates: Partial<Pick<Todo, "title" | "completed" | "priority">>,
   ): Promise<Todo> {
     try {
       return await this.currentStorage.updateTodo(id, updates);
     } catch (error) {
-      throw this.handleStorageError(error, 'updateTodo');
+      throw this.handleStorageError(error, "updateTodo");
     }
   }
 
@@ -125,7 +134,7 @@ export class UnifiedTodoService {
     try {
       return await this.currentStorage.toggleTodo(id);
     } catch (error) {
-      throw this.handleStorageError(error, 'toggleTodo');
+      throw this.handleStorageError(error, "toggleTodo");
     }
   }
 
@@ -136,7 +145,7 @@ export class UnifiedTodoService {
     try {
       return await this.currentStorage.deleteTodo(id);
     } catch (error) {
-      throw this.handleStorageError(error, 'deleteTodo');
+      throw this.handleStorageError(error, "deleteTodo");
     }
   }
 
@@ -147,7 +156,7 @@ export class UnifiedTodoService {
     try {
       return await this.currentStorage.clearAllTodos();
     } catch (error) {
-      return this.handleStorageError(error, 'clearAllTodos', 0);
+      return this.handleStorageError(error, "clearAllTodos", 0);
     }
   }
 
@@ -158,7 +167,7 @@ export class UnifiedTodoService {
     try {
       return await this.currentStorage.clearCompletedTodos();
     } catch (error) {
-      return this.handleStorageError(error, 'clearCompletedTodos', 0);
+      return this.handleStorageError(error, "clearCompletedTodos", 0);
     }
   }
 
@@ -173,7 +182,7 @@ export class UnifiedTodoService {
     try {
       return await this.currentStorage.getFilteredTodos(filter);
     } catch (error) {
-      return this.handleStorageError(error, 'getFilteredTodos', []);
+      return this.handleStorageError(error, "getFilteredTodos", []);
     }
   }
 
@@ -184,11 +193,11 @@ export class UnifiedTodoService {
     try {
       return await this.currentStorage.getTodoStats();
     } catch (error) {
-      return this.handleStorageError(error, 'getTodoStats', {
+      return this.handleStorageError(error, "getTodoStats", {
         total: 0,
         active: 0,
         completed: 0,
-        byPriority: { high: 0, medium: 0, low: 0 }
+        byPriority: { high: 0, medium: 0, low: 0 },
       });
     }
   }
@@ -200,7 +209,7 @@ export class UnifiedTodoService {
     try {
       return await this.currentStorage.searchTodos(query);
     } catch (error) {
-      return this.handleStorageError(error, 'searchTodos', []);
+      return this.handleStorageError(error, "searchTodos", []);
     }
   }
 
@@ -211,7 +220,7 @@ export class UnifiedTodoService {
     try {
       return await this.currentStorage.getTodosByPriority(priority);
     } catch (error) {
-      return this.handleStorageError(error, 'getTodosByPriority', []);
+      return this.handleStorageError(error, "getTodosByPriority", []);
     }
   }
 
@@ -236,7 +245,7 @@ export class UnifiedTodoService {
 
     const oldMode = this.currentMode;
     this.currentMode = mode;
-    
+
     try {
       const newStorage = this.createStorageService();
       this.currentStorage = newStorage;
@@ -254,15 +263,19 @@ export class UnifiedTodoService {
   /**
    * localStorage에서 API로 데이터 마이그레이션
    */
-  async migrateToAPI(): Promise<{ success: boolean; migratedCount: number; error?: string }> {
+  async migrateToAPI(): Promise<{
+    success: boolean;
+    migratedCount: number;
+    error?: string;
+  }> {
     try {
       if (this.currentMode !== StorageMode.LOCAL_STORAGE) {
-        throw new Error('Migration is only available from localStorage mode');
+        throw new Error("Migration is only available from localStorage mode");
       }
 
       // localStorage 데이터 조회
       const localTodos = await this.localStorageService.getTodos();
-      
+
       if (localTodos.length === 0) {
         return { success: true, migratedCount: 0 };
       }
@@ -284,10 +297,13 @@ export class UnifiedTodoService {
 
       return { success: true, migratedCount };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error during migration';
-      
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Unknown error during migration";
+
       if (appConfig.features.debugMode) {
-        console.error('❌ Migration failed:', errorMessage);
+        console.error("❌ Migration failed:", errorMessage);
       }
 
       return { success: false, migratedCount: 0, error: errorMessage };
@@ -307,7 +323,7 @@ export class UnifiedTodoService {
     }
 
     try {
-      return await this.currentStorage.isSynced?.() ?? false;
+      return (await this.currentStorage.isSynced?.()) ?? false;
     } catch {
       return false;
     }
@@ -322,10 +338,10 @@ export class UnifiedTodoService {
     }
 
     try {
-      return await this.currentStorage.syncData?.() ?? 0;
+      return (await this.currentStorage.syncData?.()) ?? 0;
     } catch (error) {
       if (appConfig.features.debugMode) {
-        console.error('❌ Sync failed:', error);
+        console.error("❌ Sync failed:", error);
       }
       return 0;
     }
@@ -343,7 +359,7 @@ export class UnifiedTodoService {
     if (appConfig.features.apiMode) {
       return StorageMode.API;
     }
-    
+
     // 기본적으로 localStorage 사용
     return StorageMode.LOCAL_STORAGE;
   }
@@ -375,12 +391,18 @@ export class UnifiedTodoService {
   /**
    * 스토리지 에러 처리
    */
-  private handleStorageError<T>(error: unknown, operation: string, defaultValue?: T): T {
+  private handleStorageError<T>(
+    error: unknown,
+    operation: string,
+    defaultValue?: T,
+  ): T {
     if (error instanceof APIError && error.isNetworkError()) {
       // 네트워크 에러의 경우 localStorage로 폴백 (API 모드에서만)
       if (this.currentMode === StorageMode.API) {
-        console.warn(`⚠️ Network error in ${operation}, falling back to localStorage`);
-        
+        console.warn(
+          `⚠️ Network error in ${operation}, falling back to localStorage`,
+        );
+
         if (defaultValue !== undefined) {
           return defaultValue;
         }
@@ -417,8 +439,10 @@ export class UnifiedTodoService {
     };
 
     // API 스토리지 캐시 정보 추가
-    if (this.apiStorageService && 'getCacheInfo' in this.apiStorageService) {
-      (info as {cacheInfo?: unknown}).cacheInfo = (this.apiStorageService as {getCacheInfo: () => unknown}).getCacheInfo();
+    if (this.apiStorageService && "getCacheInfo" in this.apiStorageService) {
+      (info as { cacheInfo?: unknown }).cacheInfo = (
+        this.apiStorageService as { getCacheInfo: () => unknown }
+      ).getCacheInfo();
     }
 
     return info;
@@ -428,7 +452,7 @@ export class UnifiedTodoService {
    * 캐시 클리어 (API 모드에서만)
    */
   clearCache(): void {
-    if (this.apiStorageService && 'clearCache' in this.apiStorageService) {
+    if (this.apiStorageService && "clearCache" in this.apiStorageService) {
       this.apiStorageService.clearCache();
     }
   }
@@ -437,7 +461,7 @@ export class UnifiedTodoService {
    * 서비스 정리
    */
   dispose(): void {
-    if (this.apiStorageService && 'clearCache' in this.apiStorageService) {
+    if (this.apiStorageService && "clearCache" in this.apiStorageService) {
       this.apiStorageService.clearCache();
     }
     this.apiStorageService = null;

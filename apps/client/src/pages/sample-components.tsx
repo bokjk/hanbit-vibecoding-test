@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { 
-  LinearButton, 
-  LinearCard, 
-  LinearCardContent, 
-  LinearCardDescription, 
-  LinearCardFooter, 
-  LinearCardHeader, 
+import React, { useState } from "react";
+import {
+  LinearButton,
+  LinearCard,
+  LinearCardContent,
+  LinearCardDescription,
+  LinearCardFooter,
+  LinearCardHeader,
   LinearCardTitle,
-  LinearInput 
-} from '@hanbit/ui';
-import { MonitoringDemo } from '../components/MonitoringDemo';
+  LinearInput,
+} from "@hanbit/ui";
+import { MonitoringDemo } from "../components/MonitoringDemo";
 
 /**
  * Linear Design System 컴포넌트 데모 페이지
@@ -17,7 +17,7 @@ import { MonitoringDemo } from '../components/MonitoringDemo';
  */
 
 export function SampleComponents() {
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLoadingDemo = () => {
@@ -26,21 +26,57 @@ export function SampleComponents() {
   };
 
   const PlusIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 5V19M5 12H19"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
   const SearchIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-      <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="m21 21-4.35-4.35"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
   const HeartIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
@@ -52,8 +88,9 @@ export function SampleComponents() {
           Linear Design System
         </h1>
         <p className="text-lg text-white/70 max-w-2xl mx-auto">
-          프로젝트 전반에서 사용할 수 있는 재사용 가능한 컴포넌트 라이브러리입니다.
-          글래스모피즘 효과와 Linear.app에서 영감을 받은 디자인을 적용했습니다.
+          프로젝트 전반에서 사용할 수 있는 재사용 가능한 컴포넌트
+          라이브러리입니다. 글래스모피즘 효과와 Linear.app에서 영감을 받은
+          디자인을 적용했습니다.
         </p>
       </div>
 
@@ -68,7 +105,9 @@ export function SampleComponents() {
         <LinearCardContent className="space-y-6">
           {/* 기본 변형들 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">Variants</h4>
+            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">
+              Variants
+            </h4>
             <div className="flex flex-wrap gap-3">
               <LinearButton variant="primary">Primary</LinearButton>
               <LinearButton variant="secondary">Secondary</LinearButton>
@@ -92,20 +131,26 @@ export function SampleComponents() {
 
           {/* 아이콘과 상태 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">With Icons & States</h4>
+            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">
+              With Icons & States
+            </h4>
             <div className="flex flex-wrap gap-3">
               <LinearButton icon={<PlusIcon />} iconPosition="left">
                 Add Item
               </LinearButton>
-              <LinearButton variant="secondary" icon={<SearchIcon />} iconPosition="right">
+              <LinearButton
+                variant="secondary"
+                icon={<SearchIcon />}
+                iconPosition="right"
+              >
                 Search
               </LinearButton>
-              <LinearButton 
-                variant="success" 
-                loading={isLoading} 
+              <LinearButton
+                variant="success"
+                loading={isLoading}
                 onClick={handleLoadingDemo}
               >
-                {isLoading ? 'Loading...' : 'Click me'}
+                {isLoading ? "Loading..." : "Click me"}
               </LinearButton>
               <LinearButton disabled>Disabled</LinearButton>
               <LinearButton fullWidth variant="ghost">
@@ -235,20 +280,13 @@ export function SampleComponents() {
         <LinearCardContent className="space-y-6">
           {/* 기본 변형들 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">Variants</h4>
+            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">
+              Variants
+            </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <LinearInput 
-                placeholder="Default input"
-                variant="default"
-              />
-              <LinearInput 
-                placeholder="Ghost input"
-                variant="ghost"
-              />
-              <LinearInput 
-                placeholder="Solid input"
-                variant="solid"
-              />
+              <LinearInput placeholder="Default input" variant="default" />
+              <LinearInput placeholder="Ghost input" variant="ghost" />
+              <LinearInput placeholder="Solid input" variant="solid" />
             </div>
           </div>
 
@@ -256,18 +294,9 @@ export function SampleComponents() {
           <div>
             <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">Sizes</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <LinearInput 
-                placeholder="Small input"
-                size="sm"
-              />
-              <LinearInput 
-                placeholder="Default input"
-                size="default"
-              />
-              <LinearInput 
-                placeholder="Large input"
-                size="lg"
-              />
+              <LinearInput placeholder="Small input" size="sm" />
+              <LinearInput placeholder="Default input" size="default" />
+              <LinearInput placeholder="Large input" size="lg" />
             </div>
           </div>
 
@@ -275,24 +304,24 @@ export function SampleComponents() {
           <div>
             <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">States</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <LinearInput 
+              <LinearInput
                 label="성공 상태"
                 placeholder="입력해주세요"
                 state="success"
                 helperText="올바르게 입력되었습니다."
               />
-              <LinearInput 
+              <LinearInput
                 label="에러 상태"
                 placeholder="입력해주세요"
                 errorMessage="필수 입력 항목입니다."
               />
-              <LinearInput 
+              <LinearInput
                 label="경고 상태"
                 placeholder="입력해주세요"
                 state="warning"
                 helperText="주의가 필요합니다."
               />
-              <LinearInput 
+              <LinearInput
                 label="비활성화"
                 placeholder="입력할 수 없습니다"
                 disabled
@@ -302,16 +331,18 @@ export function SampleComponents() {
 
           {/* 아이콘과 기능들 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">With Icons</h4>
+            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">
+              With Icons
+            </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <LinearInput 
+              <LinearInput
                 label="검색"
                 placeholder="검색어를 입력하세요"
                 startIcon={<SearchIcon />}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
               />
-              <LinearInput 
+              <LinearInput
                 label="좋아요"
                 placeholder="메시지를 입력하세요"
                 endIcon={<HeartIcon />}
@@ -322,12 +353,13 @@ export function SampleComponents() {
       </LinearCard>
 
       {/* 모니터링 시스템 데모 */}
-      {import.meta.env.VITE_DEBUG === 'true' && (
+      {import.meta.env.VITE_DEBUG === "true" && (
         <LinearCard variant="glass">
           <LinearCardHeader>
             <LinearCardTitle>모니터링 시스템 데모</LinearCardTitle>
             <LinearCardDescription>
-              성능 모니터링 및 에러 리포팅 시스템을 테스트할 수 있습니다. (개발 환경에서만 표시)
+              성능 모니터링 및 에러 리포팅 시스템을 테스트할 수 있습니다. (개발
+              환경에서만 표시)
             </LinearCardDescription>
           </LinearCardHeader>
           <LinearCardContent>
@@ -347,13 +379,13 @@ export function SampleComponents() {
         <LinearCardContent>
           <div className="max-w-md mx-auto">
             <form className="space-y-4">
-              <LinearInput 
+              <LinearInput
                 label="이메일"
                 type="email"
                 placeholder="your@email.com"
                 required
               />
-              <LinearInput 
+              <LinearInput
                 label="비밀번호"
                 type="password"
                 placeholder="••••••••"

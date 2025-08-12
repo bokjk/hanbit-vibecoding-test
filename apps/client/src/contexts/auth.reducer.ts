@@ -1,4 +1,10 @@
-import type { AuthState, AuthAction, User, UserPermissions, TokenInfo } from '../types/auth.types';
+import type {
+  AuthState,
+  AuthAction,
+  User,
+  UserPermissions,
+  TokenInfo,
+} from "../types/auth.types";
 
 /**
  * 초기 인증 상태
@@ -44,14 +50,14 @@ const DEFAULT_GUEST_PERMISSIONS = {
 export function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     // 앱 초기화 관련
-    case 'AUTH_INIT_START':
+    case "AUTH_INIT_START":
       return {
         ...state,
         isLoading: true,
         error: null,
       };
 
-    case 'AUTH_INIT_SUCCESS':
+    case "AUTH_INIT_SUCCESS":
       return {
         ...state,
         isAuthenticated: true,
@@ -65,18 +71,18 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
         isInitialized: true,
       };
 
-    case 'AUTH_INIT_GUEST': {
+    case "AUTH_INIT_GUEST": {
       const guestUser: User = {
         id: `guest-${Date.now()}`,
-        username: 'Guest User',
+        username: "Guest User",
         isGuest: true,
         createdAt: new Date().toISOString(),
       };
 
       const guestTokenInfo: TokenInfo = {
         accessToken: action.payload.guestToken,
-        expiresAt: Date.now() + (action.payload.expiresIn * 1000),
-        tokenType: 'guest',
+        expiresAt: Date.now() + action.payload.expiresIn * 1000,
+        tokenType: "guest",
       };
 
       return {
@@ -84,7 +90,10 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
         isAuthenticated: false,
         isGuest: true,
         user: guestUser,
-        permissions: { ...DEFAULT_GUEST_PERMISSIONS, ...action.payload.permissions },
+        permissions: {
+          ...DEFAULT_GUEST_PERMISSIONS,
+          ...action.payload.permissions,
+        },
         tokenInfo: guestTokenInfo,
         tokenExpiration: new Date(guestTokenInfo.expiresAt),
         isLoading: false,
@@ -93,7 +102,7 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
       };
     }
 
-    case 'AUTH_INIT_FAILURE':
+    case "AUTH_INIT_FAILURE":
       return {
         ...state,
         isLoading: false,
@@ -102,14 +111,14 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
       };
 
     // 로그인 관련
-    case 'AUTH_LOGIN_START':
+    case "AUTH_LOGIN_START":
       return {
         ...state,
         isLoading: true,
         error: null,
       };
 
-    case 'AUTH_LOGIN_SUCCESS':
+    case "AUTH_LOGIN_SUCCESS":
       return {
         ...state,
         isAuthenticated: true,
@@ -122,7 +131,7 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
         error: null,
       };
 
-    case 'AUTH_LOGIN_FAILURE':
+    case "AUTH_LOGIN_FAILURE":
       return {
         ...state,
         isLoading: false,
@@ -130,14 +139,14 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
       };
 
     // 로그아웃
-    case 'AUTH_LOGOUT':
+    case "AUTH_LOGOUT":
       return {
         ...initialAuthState,
         isInitialized: true,
       };
 
     // 토큰 갱신 관련
-    case 'AUTH_TOKEN_REFRESH_SUCCESS': {
+    case "AUTH_TOKEN_REFRESH_SUCCESS": {
       if (!state.tokenInfo) {
         return state;
       }
@@ -156,7 +165,7 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
       };
     }
 
-    case 'AUTH_TOKEN_REFRESH_FAILURE':
+    case "AUTH_TOKEN_REFRESH_FAILURE":
       return {
         ...state,
         error: action.payload,
@@ -165,21 +174,21 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
       };
 
     // 권한 업데이트
-    case 'AUTH_PERMISSIONS_UPDATE':
+    case "AUTH_PERMISSIONS_UPDATE":
       return {
         ...state,
         permissions: action.payload,
       };
 
     // 에러 관리
-    case 'AUTH_ERROR_CLEAR':
+    case "AUTH_ERROR_CLEAR":
       return {
         ...state,
         error: null,
       };
 
     // 로딩 상태 설정
-    case 'AUTH_SET_LOADING':
+    case "AUTH_SET_LOADING":
       return {
         ...state,
         isLoading: action.payload,
@@ -207,12 +216,16 @@ export const authSelectors = {
   /**
    * 사용자가 로그인되어 있는지 확인 (게스트 포함)
    */
-  isLoggedIn: (state: AuthState): boolean => state.isAuthenticated || state.isGuest,
+  isLoggedIn: (state: AuthState): boolean =>
+    state.isAuthenticated || state.isGuest,
 
   /**
    * 특정 권한을 가지고 있는지 확인
    */
-  hasPermission: (state: AuthState, permission: keyof UserPermissions): boolean => {
+  hasPermission: (
+    state: AuthState,
+    permission: keyof UserPermissions,
+  ): boolean => {
     if (!state.permissions) return false;
     return Boolean(state.permissions[permission]);
   },
@@ -221,28 +234,28 @@ export const authSelectors = {
    * TODO 생성 권한 확인
    */
   canCreateTodos: (state: AuthState): boolean => {
-    return authSelectors.hasPermission(state, 'canCreate');
+    return authSelectors.hasPermission(state, "canCreate");
   },
 
   /**
    * TODO 수정 권한 확인
    */
   canUpdateTodos: (state: AuthState): boolean => {
-    return authSelectors.hasPermission(state, 'canUpdate');
+    return authSelectors.hasPermission(state, "canUpdate");
   },
 
   /**
    * TODO 삭제 권한 확인
    */
   canDeleteTodos: (state: AuthState): boolean => {
-    return authSelectors.hasPermission(state, 'canDelete');
+    return authSelectors.hasPermission(state, "canDelete");
   },
 
   /**
    * 데이터 내보내기 권한 확인
    */
   canExport: (state: AuthState): boolean => {
-    return authSelectors.hasPermission(state, 'canExport');
+    return authSelectors.hasPermission(state, "canExport");
   },
 
   /**
@@ -258,8 +271,12 @@ export const authSelectors = {
    */
   getRemainingQuota: (state: AuthState, currentCount: number): number => {
     const maxItems = authSelectors.getMaxTodos(state);
-    if ('unlimitedItems' in (state.permissions || {}) && 
-        state.permissions && 'unlimitedItems' in state.permissions && state.permissions.unlimitedItems) {
+    if (
+      "unlimitedItems" in (state.permissions || {}) &&
+      state.permissions &&
+      "unlimitedItems" in state.permissions &&
+      state.permissions.unlimitedItems
+    ) {
       return Infinity;
     }
     return Math.max(0, maxItems - currentCount);
@@ -294,9 +311,9 @@ export const authSelectors = {
    * 사용자 표시명 조회
    */
   getDisplayName: (state: AuthState): string => {
-    if (!state.user) return 'Unknown User';
-    if (state.user.isGuest) return 'Guest User';
-    return state.user.username || state.user.email || 'User';
+    if (!state.user) return "Unknown User";
+    if (state.user.isGuest) return "Guest User";
+    return state.user.username || state.user.email || "User";
   },
 
   /**

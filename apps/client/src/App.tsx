@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { TodoContainer } from './components/todo-container';
-import { AuthProvider } from './contexts/auth.context';
-import { MigrationDialog } from './components/auth/migration-dialog';
-import { AuthPromptBanner } from './components/auth/auth-prompt';
-import { useMigration } from './hooks/use-migration';
-import { Loader2 } from 'lucide-react';
-import './App.css';
+import { useState, useEffect } from "react";
+import { TodoContainer } from "./components/todo-container";
+import { AuthProvider } from "./contexts/auth.context";
+import { MigrationDialog } from "./components/auth/migration-dialog";
+import { AuthPromptBanner } from "./components/auth/auth-prompt";
+import { useMigration } from "./hooks/use-migration";
+import { Loader2 } from "lucide-react";
+import "./App.css";
 
 /**
  * 앱 초기화 상태 관리 컴포넌트
@@ -22,7 +22,7 @@ function AppContent() {
       try {
         // 마이그레이션 필요성 확인
         const migrationRequired = await migration.checkMigrationRequired();
-        
+
         if (migrationRequired) {
           setShowMigrationDialog(true);
         } else if (!migration.history.completed) {
@@ -30,7 +30,7 @@ function AppContent() {
           setShowAuthBanner(true);
         }
       } catch (error) {
-        console.error('App initialization failed:', error);
+        console.error("App initialization failed:", error);
       } finally {
         setIsInitializing(false);
       }
@@ -44,9 +44,9 @@ function AppContent() {
 
   // 마이그레이션 완료 처리
   const handleMigrationComplete = (result: unknown) => {
-    console.log('Migration completed:', result);
+    console.log("Migration completed:", result);
     setShowMigrationDialog(false);
-    
+
     // 성공 시 배너 숨김, 실패 시 배너 표시
     if (result.success) {
       setShowAuthBanner(false);
@@ -57,7 +57,7 @@ function AppContent() {
 
   // 마이그레이션 오류 처리
   const handleMigrationError = (error: string) => {
-    console.error('Migration error:', error);
+    console.error("Migration error:", error);
     // 오류 발생 시에도 다이얼로그는 닫고 배너 표시
     setShowMigrationDialog(false);
     setShowAuthBanner(true);
@@ -66,7 +66,7 @@ function AppContent() {
   // 배너 닫기 처리
   const handleBannerDismiss = () => {
     setShowAuthBanner(false);
-    localStorage.setItem('auth-banner-dismissed', 'true');
+    localStorage.setItem("auth-banner-dismissed", "true");
   };
 
   // 앱 초기화 중 로딩 표시
@@ -89,7 +89,7 @@ function AppContent() {
           <AuthPromptBanner
             onPromptOpen={() => {
               // TODO: AuthPrompt 다이얼로그 열기 (향후 구현)
-              console.log('Auth prompt requested');
+              console.log("Auth prompt requested");
             }}
             onDismiss={handleBannerDismiss}
           />
@@ -97,7 +97,7 @@ function AppContent() {
       )}
 
       {/* 메인 컨텐츠 */}
-      <div className={showAuthBanner ? 'pt-4' : ''}>
+      <div className={showAuthBanner ? "pt-4" : ""}>
         <TodoContainer />
       </div>
 

@@ -33,10 +33,7 @@
           "outputFile": "junit-results.xml"
         }
       ],
-      [
-        "list",
-        null
-      ]
+      ["list", null]
     ],
     "reportSlowTests": {
       "max": 5,
@@ -55,9 +52,7 @@
         "name": "chromium",
         "testDir": "D:/study/viveCoding/hanbit-vibecoding-test/apps/client/e2e",
         "testIgnore": [],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 30000
       },
       {
@@ -71,9 +66,7 @@
         "name": "firefox",
         "testDir": "D:/study/viveCoding/hanbit-vibecoding-test/apps/client/e2e",
         "testIgnore": [],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 30000
       },
       {
@@ -87,9 +80,7 @@
         "name": "webkit",
         "testDir": "D:/study/viveCoding/hanbit-vibecoding-test/apps/client/e2e",
         "testIgnore": [],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 30000
       },
       {
@@ -103,9 +94,7 @@
         "name": "Mobile Chrome",
         "testDir": "D:/study/viveCoding/hanbit-vibecoding-test/apps/client/e2e",
         "testIgnore": [],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 30000
       },
       {
@@ -119,9 +108,7 @@
         "name": "Mobile Safari",
         "testDir": "D:/study/viveCoding/hanbit-vibecoding-test/apps/client/e2e",
         "testIgnore": [],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 30000
       },
       {
@@ -135,9 +122,7 @@
         "name": "Tablet",
         "testDir": "D:/study/viveCoding/hanbit-vibecoding-test/apps/client/e2e",
         "testIgnore": [],
-        "testMatch": [
-          "**/*.spec.ts"
-        ],
+        "testMatch": ["**/*.spec.ts"],
         "timeout": 30000
       }
     ],

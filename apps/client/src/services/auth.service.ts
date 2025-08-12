@@ -1,6 +1,10 @@
-import { appConfig } from '../config/app-config';
-import type { GuestTokenResponse, RefreshTokenResponse, UserInfoResponse } from '../types/api.types';
-import { APIError } from '../errors/api-error';
+import { appConfig } from "../config/app-config";
+import type {
+  GuestTokenResponse,
+  RefreshTokenResponse,
+  UserInfoResponse,
+} from "../types/api.types";
+import { APIError } from "../errors/api-error";
 
 /**
  * 토큰 정보 인터페이스
@@ -9,7 +13,7 @@ interface TokenInfo {
   accessToken: string;
   refreshToken?: string;
   expiresAt: number;
-  tokenType: 'guest' | 'authenticated';
+  tokenType: "guest" | "authenticated";
 }
 
 /**
@@ -20,7 +24,7 @@ export class AuthService {
   private static instance: AuthService;
   private tokenInfo: TokenInfo | null = null;
   private refreshTimer: NodeJS.Timeout | null = null;
-  private readonly TOKEN_KEY = 'auth_token_info';
+  private readonly TOKEN_KEY = "auth_token_info";
   private readonly REFRESH_MARGIN = 5 * 60 * 1000; // 만료 5분 전에 갱신
 
   private constructor() {
@@ -47,14 +51,14 @@ export class AuthService {
    * 인증된 사용자인지 확인
    */
   isAuthenticated(): boolean {
-    return this.isTokenValid() && this.tokenInfo?.tokenType === 'authenticated';
+    return this.isTokenValid() && this.tokenInfo?.tokenType === "authenticated";
   }
 
   /**
    * 게스트 사용자인지 확인
    */
   isGuest(): boolean {
-    return this.isTokenValid() && this.tokenInfo?.tokenType === 'guest';
+    return this.isTokenValid() && this.tokenInfo?.tokenType === "guest";
   }
 
   /**
@@ -72,13 +76,16 @@ export class AuthService {
         await this.refreshToken();
       } catch (error) {
         // 갱신 실패 시 새로운 게스트 토큰 요청
-        console.warn('Token refresh failed, requesting new guest token:', error);
+        console.warn(
+          "Token refresh failed, requesting new guest token:",
+          error,
+        );
         await this.requestGuestToken();
       }
     }
 
     if (!this.tokenInfo) {
-      throw new Error('Unable to obtain valid token');
+      throw new Error("Unable to obtain valid token");
     }
 
     return this.tokenInfo.accessToken;
@@ -90,9 +97,9 @@ export class AuthService {
   async requestGuestToken(): Promise<GuestTokenResponse> {
     try {
       const response = await fetch(`${appConfig.api.baseURL}/auth/guest`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         signal: AbortSignal.timeout(appConfig.api.timeout),
       });
@@ -102,19 +109,19 @@ export class AuthService {
       }
 
       const data: GuestTokenResponse = await response.json();
-      
+
       // 토큰 정보 저장
       this.tokenInfo = {
         accessToken: data.guestToken,
-        expiresAt: Date.now() + (data.expiresIn * 1000),
-        tokenType: 'guest',
+        expiresAt: Date.now() + data.expiresIn * 1000,
+        tokenType: "guest",
       };
 
       this.saveTokenToStorage();
       this.setupRefreshTimer();
 
       if (appConfig.features.debugMode) {
-        console.log('🎫 Guest token obtained successfully');
+        console.log("🎫 Guest token obtained successfully");
       }
 
       return data;
@@ -122,7 +129,7 @@ export class AuthService {
       if (error instanceof TypeError) {
         throw APIError.createNetworkError(error);
       }
-      if (error.name === 'AbortError') {
+      if (error.name === "AbortError") {
         throw APIError.createTimeoutError();
       }
       throw error;
@@ -134,15 +141,15 @@ export class AuthService {
    */
   async refreshToken(): Promise<void> {
     if (!this.tokenInfo?.refreshToken) {
-      throw new Error('No refresh token available');
+      throw new Error("No refresh token available");
     }
 
     try {
       const response = await fetch(`${appConfig.api.baseURL}/auth/refresh`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${this.tokenInfo.refreshToken}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.tokenInfo.refreshToken}`,
+          "Content-Type": "application/json",
         },
         signal: AbortSignal.timeout(appConfig.api.timeout),
       });
@@ -152,25 +159,25 @@ export class AuthService {
       }
 
       const data: RefreshTokenResponse = await response.json();
-      
+
       // 토큰 정보 업데이트
       this.tokenInfo = {
         ...this.tokenInfo,
         accessToken: data.accessToken,
-        expiresAt: Date.now() + (data.expiresIn * 1000),
+        expiresAt: Date.now() + data.expiresIn * 1000,
       };
 
       this.saveTokenToStorage();
       this.setupRefreshTimer();
 
       if (appConfig.features.debugMode) {
-        console.log('🔄 Token refreshed successfully');
+        console.log("🔄 Token refreshed successfully");
       }
     } catch (error) {
       if (error instanceof TypeError) {
         throw APIError.createNetworkError(error);
       }
-      if (error.name === 'AbortError') {
+      if (error.name === "AbortError") {
         throw APIError.createTimeoutError();
       }
       throw error;
@@ -185,10 +192,10 @@ export class AuthService {
 
     try {
       const response = await fetch(`${appConfig.api.baseURL}/auth/me`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
         signal: AbortSignal.timeout(appConfig.api.timeout),
       });
@@ -202,7 +209,7 @@ export class AuthService {
       if (error instanceof TypeError) {
         throw APIError.createNetworkError(error);
       }
-      if (error.name === 'AbortError') {
+      if (error.name === "AbortError") {
         throw APIError.createTimeoutError();
       }
       throw error;
@@ -218,7 +225,7 @@ export class AuthService {
     this.clearRefreshTimer();
 
     if (appConfig.features.debugMode) {
-      console.log('👋 Logged out successfully');
+      console.log("👋 Logged out successfully");
     }
   }
 
@@ -243,7 +250,10 @@ export class AuthService {
     } catch (error) {
       // 갱신 실패 시 게스트 토큰 요청
       if (this.tokenInfo?.refreshToken) {
-        console.warn('Token refresh failed, requesting new guest token:', error);
+        console.warn(
+          "Token refresh failed, requesting new guest token:",
+          error,
+        );
         await this.requestGuestToken();
       } else {
         throw error;
@@ -259,15 +269,18 @@ export class AuthService {
 
     if (!this.tokenInfo || !this.isTokenValid()) return;
 
-    const refreshTime = this.tokenInfo.expiresAt - Date.now() - this.REFRESH_MARGIN;
-    
+    const refreshTime =
+      this.tokenInfo.expiresAt - Date.now() - this.REFRESH_MARGIN;
+
     if (refreshTime > 0) {
       this.refreshTimer = setTimeout(() => {
         this.refreshOrRequestGuestToken().catch(console.error);
       }, refreshTime);
 
       if (appConfig.features.debugMode) {
-        console.log(`⏰ Token refresh scheduled in ${Math.round(refreshTime / 1000)}s`);
+        console.log(
+          `⏰ Token refresh scheduled in ${Math.round(refreshTime / 1000)}s`,
+        );
       }
     }
   }
@@ -290,7 +303,7 @@ export class AuthService {
       const stored = localStorage.getItem(this.TOKEN_KEY);
       if (stored) {
         this.tokenInfo = JSON.parse(stored);
-        
+
         // 만료된 토큰은 제거
         if (!this.isTokenValid()) {
           this.clearTokenFromStorage();
@@ -298,7 +311,7 @@ export class AuthService {
         }
       }
     } catch (error) {
-      console.error('Failed to load token from storage:', error);
+      console.error("Failed to load token from storage:", error);
       this.clearTokenFromStorage();
     }
   }
@@ -312,7 +325,7 @@ export class AuthService {
         localStorage.setItem(this.TOKEN_KEY, JSON.stringify(this.tokenInfo));
       }
     } catch (error) {
-      console.error('Failed to save token to storage:', error);
+      console.error("Failed to save token to storage:", error);
     }
   }
 
@@ -323,7 +336,7 @@ export class AuthService {
     try {
       localStorage.removeItem(this.TOKEN_KEY);
     } catch (error) {
-      console.error('Failed to clear token from storage:', error);
+      console.error("Failed to clear token from storage:", error);
     }
   }
 }

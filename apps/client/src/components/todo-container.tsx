@@ -1,37 +1,36 @@
-
-import { useState } from 'react';
-import { TodoProvider } from '../contexts/todo.context';
-import { TodoInput } from './todo-input';
-import { TodoList } from './todo-list';
-import { TodoFilters } from './todo-filters';
-import { TodoStatsComponent, TodoProgressBar } from './todo-stats';
-import { TodoHeader } from './todo-header';
-import { MigrationStatus } from './auth/migration-dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useTodo, useTodoSync } from '../hooks/use-todo';
+import { useState } from "react";
+import { TodoProvider } from "../contexts/todo.context";
+import { TodoInput } from "./todo-input";
+import { TodoList } from "./todo-list";
+import { TodoFilters } from "./todo-filters";
+import { TodoStatsComponent, TodoProgressBar } from "./todo-stats";
+import { TodoHeader } from "./todo-header";
+import { MigrationStatus } from "./auth/migration-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useTodo, useTodoSync } from "../hooks/use-todo";
 // Priority import 제거 - 사용하지 않음
 
 function TodoContainerContent() {
-  const { 
-    todos: filteredTodos, 
-    stats, 
-    updateTodo, 
-    deleteTodo, 
+  const {
+    todos: filteredTodos,
+    stats,
+    updateTodo,
+    deleteTodo,
     toggleTodo,
     filter: filterHelpers,
-    metadata
+    metadata,
   } = useTodo();
-  
+
   const syncHelpers = useTodoSync();
   const [showFilterPanel, setShowFilterPanel] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleToggleTodo = async (id: string) => {
     try {
       await toggleTodo(id);
     } catch (error) {
-      console.error('Failed to toggle todo:', error);
+      console.error("Failed to toggle todo:", error);
     }
   };
 
@@ -39,7 +38,7 @@ function TodoContainerContent() {
     try {
       await deleteTodo(id);
     } catch (error) {
-      console.error('Failed to delete todo:', error);
+      console.error("Failed to delete todo:", error);
     }
   };
 
@@ -47,7 +46,7 @@ function TodoContainerContent() {
     try {
       await updateTodo(id, { title });
     } catch (error) {
-      console.error('Failed to edit todo:', error);
+      console.error("Failed to edit todo:", error);
     }
   };
 
@@ -60,9 +59,9 @@ function TodoContainerContent() {
   };
 
   // 검색 필터링 로직
-  const searchFilteredTodos = searchQuery.trim() 
-    ? filteredTodos.filter(todo => 
-        todo.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const searchFilteredTodos = searchQuery.trim()
+    ? filteredTodos.filter((todo) =>
+        todo.title.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : filteredTodos;
 
@@ -74,7 +73,6 @@ function TodoContainerContent() {
       {/* 메인 대시보드 */}
       <main className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto space-y-8">
-          
           {/* 마이그레이션 상태 표시 */}
           <section>
             <MigrationStatus className="mb-4" />
@@ -83,8 +81,12 @@ function TodoContainerContent() {
           {/* 상단 통계 대시보드 */}
           <section data-testid="todo-dashboard">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">대시보드 개요</h2>
-              <p className="text-gray-600">현재 진행 상황을 한눈에 확인하세요</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                대시보드 개요
+              </h2>
+              <p className="text-gray-600">
+                현재 진행 상황을 한눈에 확인하세요
+              </p>
             </div>
             <TodoStatsComponent stats={stats} />
           </section>
@@ -96,14 +98,17 @@ function TodoContainerContent() {
 
           {/* 빠른 작업 및 필터 패널 */}
           <section className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            
             {/* 왼쪽: 할 일 입력 */}
             <div className="lg:col-span-3">
               <Card className="bg-white/70 backdrop-blur-sm border-white/50 shadow-xl">
                 <CardContent className="p-6">
                   <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">새로운 할 일 추가</h3>
-                    <p className="text-sm text-gray-600">목표를 설정하고 우선순위를 정해보세요</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      새로운 할 일 추가
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      목표를 설정하고 우선순위를 정해보세요
+                    </p>
                   </div>
                   <TodoInput />
                 </CardContent>
@@ -115,20 +120,34 @@ function TodoContainerContent() {
               <Card className="bg-white/70 backdrop-blur-sm border-white/50 shadow-xl">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">필터 & 정렬</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      필터 & 정렬
+                    </h3>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={toggleFilterPanel}
                       className="lg:hidden"
                     >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
                       </svg>
                     </Button>
                   </div>
-                  
-                  <div className={`${showFilterPanel ? 'block' : 'hidden'} lg:block`}>
+
+                  <div
+                    className={`${showFilterPanel ? "block" : "hidden"} lg:block`}
+                  >
                     <TodoFilters
                       filter={filterHelpers}
                       onFilterChange={filterHelpers}
@@ -147,10 +166,9 @@ function TodoContainerContent() {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">할 일 목록</h2>
                 <p className="text-gray-600 mt-1">
-                  {searchFilteredTodos.length > 0 
+                  {searchFilteredTodos.length > 0
                     ? `총 ${searchFilteredTodos.length}개의 할 일이 있습니다`
-                    : '등록된 할 일이 없습니다'
-                  }
+                    : "등록된 할 일이 없습니다"}
                   {searchQuery && (
                     <span className="ml-2 text-blue-600 font-medium">
                       "{searchQuery}" 검색 결과
@@ -158,7 +176,7 @@ function TodoContainerContent() {
                   )}
                 </p>
               </div>
-              
+
               {/* 뷰 모드 선택 */}
               <div className="hidden md:flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm">
                 <Button
@@ -166,17 +184,33 @@ function TodoContainerContent() {
                   size="sm"
                   className="h-8 w-8 p-0 bg-blue-100 text-blue-600"
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                    />
                   </svg>
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                    />
                   </svg>
                 </Button>
               </div>
@@ -188,23 +222,34 @@ function TodoContainerContent() {
                 <CardContent className="p-12">
                   <div className="text-center">
                     <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-                      <svg className="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                      <svg
+                        className="h-10 w-10 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                        />
                       </svg>
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {searchQuery ? '검색 결과가 없습니다' : '할 일이 없습니다'}
+                      {searchQuery
+                        ? "검색 결과가 없습니다"
+                        : "할 일이 없습니다"}
                     </h3>
                     <p className="text-gray-600 max-w-md mx-auto">
-                      {searchQuery 
+                      {searchQuery
                         ? `"${searchQuery}"와 일치하는 할 일을 찾을 수 없습니다. 다른 키워드로 검색해보세요.`
-                        : '새로운 할 일을 추가해서 생산성을 높여보세요!'
-                      }
+                        : "새로운 할 일을 추가해서 생산성을 높여보세요!"}
                     </p>
                     {searchQuery && (
                       <Button
                         variant="outline"
-                        onClick={() => setSearchQuery('')}
+                        onClick={() => setSearchQuery("")}
                         className="mt-4"
                       >
                         검색 초기화

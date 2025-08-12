@@ -1,11 +1,16 @@
-
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Priority } from 'types/index';
-import { useTodoForm } from '../hooks/use-todo';
-import { useSafeInput, logSecurityWarning } from '../utils/client-security';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Priority } from "types/index";
+import { useTodoForm } from "../hooks/use-todo";
+import { useSafeInput, logSecurityWarning } from "../utils/client-security";
 
 interface TodoInputProps {
   // Props는 선택적이며, 커스텀 처리를 원할 경우 사용
@@ -13,10 +18,10 @@ interface TodoInputProps {
 }
 
 export function TodoInput({ onAddTodo }: TodoInputProps) {
-  const [title, setTitle] = useState('');
-  const [priority, setPriority] = useState<Priority>('medium');
+  const [title, setTitle] = useState("");
+  const [priority, setPriority] = useState<Priority>("medium");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const { createTodo, canCreate, loading } = useTodoForm();
   const { sanitizeInput } = useSafeInput();
 
@@ -25,18 +30,18 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
 
     try {
       setIsSubmitting(true);
-      
+
       // 입력 정화 (XSS 방지)
       const sanitizedTitle = sanitizeInput(title.trim());
-      
+
       // 보안 경고 로깅 (개발 모드에서만)
       if (sanitizedTitle !== title.trim()) {
-        logSecurityWarning('제목에서 위험한 내용이 정화되었습니다', {
+        logSecurityWarning("제목에서 위험한 내용이 정화되었습니다", {
           original: title.trim(),
-          sanitized: sanitizedTitle
+          sanitized: sanitizedTitle,
         });
       }
-      
+
       if (onAddTodo) {
         // 외부에서 제공된 핸들러 사용
         onAddTodo(sanitizedTitle, priority);
@@ -46,12 +51,12 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
           priority,
         });
       }
-      
+
       // 성공적으로 추가되면 폼 리셋
-      setTitle('');
-      setPriority('medium');
+      setTitle("");
+      setPriority("medium");
     } catch (error) {
-      console.error('Failed to add todo:', error);
+      console.error("Failed to add todo:", error);
       // 에러는 Context 레벨에서 처리되므로 여기서는 로깅만
     } finally {
       setIsSubmitting(false);
@@ -59,25 +64,25 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleAddClick();
     }
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    
+
     // 실시간 입력 정화 (타이핑 중에는 기본 정화만 적용)
     const sanitized = sanitizeInput(value);
-    
+
     // 보안 경고 (개발 모드에서만)
     if (sanitized !== value && value.length > 0) {
-      logSecurityWarning('입력 중 위험한 내용이 감지되어 정화되었습니다', {
+      logSecurityWarning("입력 중 위험한 내용이 감지되어 정화되었습니다", {
         original: value,
-        sanitized
+        sanitized,
       });
     }
-    
+
     setTitle(sanitized);
   };
 
@@ -94,7 +99,10 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
           onKeyDown={handleKeyDown}
           className="flex-1"
         />
-        <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
+        <Select
+          value={priority}
+          onValueChange={(value: Priority) => setPriority(value)}
+        >
           <SelectTrigger data-testid="priority-select" className="w-[140px]">
             <SelectValue placeholder="우선순위" />
           </SelectTrigger>
@@ -104,13 +112,13 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
             <SelectItem value="low">낮음</SelectItem>
           </SelectContent>
         </Select>
-        <Button 
-          data-testid="add-todo-button" 
-          onClick={handleAddClick} 
+        <Button
+          data-testid="add-todo-button"
+          onClick={handleAddClick}
           className="px-6"
           disabled={!canCreate || isSubmitting || loading || !title.trim()}
         >
-          {isSubmitting || loading ? '추가 중...' : '할 일 추가'}
+          {isSubmitting || loading ? "추가 중..." : "할 일 추가"}
         </Button>
       </div>
 
@@ -126,7 +134,10 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
             onKeyDown={handleKeyDown}
             className="flex-1"
           />
-          <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
+          <Select
+            value={priority}
+            onValueChange={(value: Priority) => setPriority(value)}
+          >
             <SelectTrigger className="w-20">
               <SelectValue />
             </SelectTrigger>
@@ -137,13 +148,13 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
             </SelectContent>
           </Select>
         </div>
-        <Button 
-          data-testid="add-todo-button" 
-          onClick={handleAddClick} 
+        <Button
+          data-testid="add-todo-button"
+          onClick={handleAddClick}
           className="w-full"
           disabled={!canCreate || isSubmitting || loading || !title.trim()}
         >
-          {isSubmitting || loading ? '추가 중...' : '추가'}
+          {isSubmitting || loading ? "추가 중..." : "추가"}
         </Button>
       </div>
     </div>

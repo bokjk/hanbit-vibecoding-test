@@ -2,17 +2,22 @@
  * Error Boundary 데모 및 테스트 컴포넌트
  * 개발 환경에서 Error Boundary의 동작을 테스트할 수 있습니다.
  */
-import React, { useState, useEffect } from 'react';
-import { Button } from '@vive/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@vive/ui';
-import { ErrorBoundary, withErrorBoundary, throwError, handleAsyncError } from './ErrorBoundary';
+import React, { useState, useEffect } from "react";
+import { Button } from "@vive/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@vive/ui";
+import {
+  ErrorBoundary,
+  withErrorBoundary,
+  throwError,
+  handleAsyncError,
+} from "./ErrorBoundary";
 
 /**
  * 의도적으로 에러를 발생시키는 테스트 컴포넌트
  */
 function ErrorThrowingComponent({ shouldThrow }: { shouldThrow: boolean }) {
   if (shouldThrow) {
-    throwError('테스트용 컴포넌트 에러입니다!');
+    throwError("테스트용 컴포넌트 에러입니다!");
   }
 
   return (
@@ -34,11 +39,11 @@ function AsyncErrorComponent() {
       // 의도적으로 실패하는 비동기 작업 시뮬레이션
       await new Promise((_, reject) => {
         setTimeout(() => {
-          reject(new Error('비동기 작업 중 에러가 발생했습니다!'));
+          reject(new Error("비동기 작업 중 에러가 발생했습니다!"));
         }, 1000);
       });
     } catch (error) {
-      handleAsyncError(error as Error, 'AsyncErrorComponent');
+      handleAsyncError(error as Error, "AsyncErrorComponent");
     } finally {
       setIsLoading(false);
     }
@@ -46,12 +51,12 @@ function AsyncErrorComponent() {
 
   return (
     <div className="space-y-2">
-      <Button 
-        onClick={handleAsyncOperation} 
+      <Button
+        onClick={handleAsyncOperation}
         disabled={isLoading}
         variant="outline"
       >
-        {isLoading ? '로딩 중...' : '비동기 에러 발생시키기'}
+        {isLoading ? "로딩 중..." : "비동기 에러 발생시키기"}
       </Button>
       {isLoading && (
         <div className="text-sm text-gray-600">
@@ -70,7 +75,7 @@ function EffectErrorComponent({ shouldThrow }: { shouldThrow: boolean }) {
     if (shouldThrow) {
       // useEffect 내부의 에러는 Error Boundary로 잡히지 않음
       setTimeout(() => {
-        throw new Error('useEffect에서 발생한 에러입니다!');
+        throw new Error("useEffect에서 발생한 에러입니다!");
       }, 100);
     }
   }, [shouldThrow]);
@@ -88,7 +93,7 @@ function EffectErrorComponent({ shouldThrow }: { shouldThrow: boolean }) {
 const WrappedComponent = withErrorBoundary(
   function TestComponent({ shouldThrow }: { shouldThrow: boolean }) {
     if (shouldThrow) {
-      throwError('HOC로 감싸진 컴포넌트에서 에러 발생!');
+      throwError("HOC로 감싸진 컴포넌트에서 에러 발생!");
     }
     return (
       <div className="p-4 bg-purple-100 rounded-md">
@@ -98,9 +103,9 @@ const WrappedComponent = withErrorBoundary(
   },
   {
     onError: (error) => {
-      console.log('HOC 에러 핸들러:', error.message);
-    }
-  }
+      console.log("HOC 에러 핸들러:", error.message);
+    },
+  },
 );
 
 /**
@@ -112,9 +117,7 @@ function CustomErrorUI(error: Error, _errorInfo: unknown, onRetry: () => void) {
       <h3 className="text-lg font-semibold text-red-800 mb-2">
         커스텀 에러 UI
       </h3>
-      <p className="text-red-600 mb-4">
-        {error.message}
-      </p>
+      <p className="text-red-600 mb-4">{error.message}</p>
       <Button onClick={onRetry} variant="outline" size="sm">
         다시 시도
       </Button>
@@ -134,9 +137,9 @@ export function ErrorBoundaryDemo() {
   });
 
   const toggleState = (key: keyof typeof testStates) => {
-    setTestStates(prev => ({
+    setTestStates((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }));
   };
 
@@ -157,7 +160,7 @@ export function ErrorBoundaryDemo() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-sm text-gray-600">
-            이 페이지는 Error Boundary의 다양한 기능을 테스트할 수 있습니다. 
+            이 페이지는 Error Boundary의 다양한 기능을 테스트할 수 있습니다.
             개발 환경에서만 사용하세요.
           </div>
 
@@ -165,10 +168,7 @@ export function ErrorBoundaryDemo() {
             <Button onClick={resetAll} variant="outline">
               전체 리셋
             </Button>
-            <Button 
-              onClick={() => window.location.reload()} 
-              variant="outline"
-            >
+            <Button onClick={() => window.location.reload()} variant="outline">
               페이지 새로고침
             </Button>
           </div>
@@ -181,13 +181,13 @@ export function ErrorBoundaryDemo() {
           <CardTitle>1. 기본 렌더링 에러 (Error Boundary로 포착)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button 
-            onClick={() => toggleState('renderError')}
+          <Button
+            onClick={() => toggleState("renderError")}
             variant={testStates.renderError ? "destructive" : "default"}
           >
-            {testStates.renderError ? '에러 해제' : '렌더링 에러 발생'}
+            {testStates.renderError ? "에러 해제" : "렌더링 에러 발생"}
           </Button>
-          
+
           <ErrorBoundary>
             <ErrorThrowingComponent shouldThrow={testStates.renderError} />
           </ErrorBoundary>
@@ -200,13 +200,13 @@ export function ErrorBoundaryDemo() {
           <CardTitle>2. 커스텀 Error UI</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button 
-            onClick={() => toggleState('asyncError')}
+          <Button
+            onClick={() => toggleState("asyncError")}
             variant={testStates.asyncError ? "destructive" : "default"}
           >
-            {testStates.asyncError ? '에러 해제' : '커스텀 UI 에러 발생'}
+            {testStates.asyncError ? "에러 해제" : "커스텀 UI 에러 발생"}
           </Button>
-          
+
           <ErrorBoundary fallback={CustomErrorUI}>
             <ErrorThrowingComponent shouldThrow={testStates.asyncError} />
           </ErrorBoundary>
@@ -220,7 +220,8 @@ export function ErrorBoundaryDemo() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-sm text-yellow-600">
-            ⚠️ 비동기 에러는 Error Boundary로 잡히지 않고 전역 에러 핸들러가 처리합니다.
+            ⚠️ 비동기 에러는 Error Boundary로 잡히지 않고 전역 에러 핸들러가
+            처리합니다.
           </div>
           <AsyncErrorComponent />
         </CardContent>
@@ -232,17 +233,17 @@ export function ErrorBoundaryDemo() {
           <CardTitle>4. useEffect 에러 (전역 핸들러가 처리)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button 
-            onClick={() => toggleState('effectError')}
+          <Button
+            onClick={() => toggleState("effectError")}
             variant={testStates.effectError ? "destructive" : "default"}
           >
-            {testStates.effectError ? '에러 해제' : 'useEffect 에러 발생'}
+            {testStates.effectError ? "에러 해제" : "useEffect 에러 발생"}
           </Button>
-          
+
           <div className="text-sm text-yellow-600">
             ⚠️ useEffect 내부의 에러는 Error Boundary로 잡히지 않습니다.
           </div>
-          
+
           <ErrorBoundary>
             <EffectErrorComponent shouldThrow={testStates.effectError} />
           </ErrorBoundary>
@@ -255,13 +256,13 @@ export function ErrorBoundaryDemo() {
           <CardTitle>5. HOC로 감싸진 컴포넌트</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button 
-            onClick={() => toggleState('hocError')}
+          <Button
+            onClick={() => toggleState("hocError")}
             variant={testStates.hocError ? "destructive" : "default"}
           >
-            {testStates.hocError ? '에러 해제' : 'HOC 컴포넌트 에러 발생'}
+            {testStates.hocError ? "에러 해제" : "HOC 컴포넌트 에러 발생"}
           </Button>
-          
+
           <WrappedComponent shouldThrow={testStates.hocError} />
         </CardContent>
       </Card>
@@ -275,10 +276,12 @@ export function ErrorBoundaryDemo() {
           <div className="text-sm text-gray-600 mb-2">
             브라우저 개발자 도구의 콘솔과 Local Storage를 확인해보세요.
           </div>
-          <Button 
+          <Button
             onClick={() => {
-              const logs = JSON.parse(localStorage.getItem('vive_error_logs') || '[]');
-              console.log('저장된 에러 로그:', logs);
+              const logs = JSON.parse(
+                localStorage.getItem("vive_error_logs") || "[]",
+              );
+              console.log("저장된 에러 로그:", logs);
               alert(`저장된 에러 로그: ${logs.length}개`);
             }}
             variant="outline"

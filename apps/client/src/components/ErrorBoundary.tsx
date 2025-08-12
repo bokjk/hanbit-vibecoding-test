@@ -1,6 +1,6 @@
-import React, { Component, ReactNode } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@vive/ui';
-import { Button } from '@vive/ui';
+import React, { Component, ReactNode } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@vive/ui";
+import { Button } from "@vive/ui";
 
 interface ErrorInfo {
   componentStack: string;
@@ -16,7 +16,11 @@ interface ErrorBoundaryState {
 
 interface ErrorBoundaryProps {
   children: ReactNode;
-  fallback?: (error: Error, errorInfo: ErrorInfo, onRetry: () => void) => ReactNode;
+  fallback?: (
+    error: Error,
+    errorInfo: ErrorInfo,
+    onRetry: () => void,
+  ) => ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   enableReporting?: boolean;
   reportEndpoint?: string;
@@ -27,13 +31,17 @@ interface ErrorBoundaryProps {
  */
 /* eslint-disable react-refresh/only-export-components */
 class ErrorReportingService {
-  private static readonly STORAGE_KEY = 'vive_error_logs';
+  private static readonly STORAGE_KEY = "vive_error_logs";
   private static readonly MAX_STORED_ERRORS = 10;
 
   /**
    * 에러를 로컬 스토리지에 저장
    */
-  static saveErrorToLocalStorage(error: Error, errorInfo: ErrorInfo, eventId: string): void {
+  static saveErrorToLocalStorage(
+    error: Error,
+    errorInfo: ErrorInfo,
+    eventId: string,
+  ): void {
     try {
       const errorLog = {
         id: eventId,
@@ -47,13 +55,16 @@ class ErrorReportingService {
       };
 
       const existingLogs = this.getStoredErrors();
-      const newLogs = [errorLog, ...existingLogs].slice(0, this.MAX_STORED_ERRORS);
-      
+      const newLogs = [errorLog, ...existingLogs].slice(
+        0,
+        this.MAX_STORED_ERRORS,
+      );
+
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(newLogs));
-      
-      console.warn('Error saved to localStorage:', errorLog);
+
+      console.warn("Error saved to localStorage:", errorLog);
     } catch (storageError) {
-      console.error('Failed to save error to localStorage:', storageError);
+      console.error("Failed to save error to localStorage:", storageError);
     }
   }
 
@@ -76,7 +87,7 @@ class ErrorReportingService {
     try {
       localStorage.removeItem(this.STORAGE_KEY);
     } catch (error) {
-      console.error('Failed to clear error logs:', error);
+      console.error("Failed to clear error logs:", error);
     }
   }
 
@@ -84,13 +95,13 @@ class ErrorReportingService {
    * 원격 서버로 에러 전송
    */
   static async reportToServer(
-    error: Error, 
-    errorInfo: ErrorInfo, 
-    eventId: string, 
-    endpoint?: string
+    error: Error,
+    errorInfo: ErrorInfo,
+    eventId: string,
+    endpoint?: string,
   ): Promise<boolean> {
     if (!endpoint) {
-      console.warn('No reporting endpoint configured');
+      console.warn("No reporting endpoint configured");
       return false;
     }
 
@@ -104,26 +115,26 @@ class ErrorReportingService {
         url: window.location.href,
         userAgent: navigator.userAgent,
         environment: process.env.NODE_ENV,
-        type: 'react_error_boundary',
+        type: "react_error_boundary",
       };
 
       const response = await fetch(endpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        console.info('Error reported successfully:', eventId);
+        console.info("Error reported successfully:", eventId);
         return true;
       } else {
-        console.error('Failed to report error:', response.statusText);
+        console.error("Failed to report error:", response.statusText);
         return false;
       }
     } catch (reportError) {
-      console.error('Error reporting failed:', reportError);
+      console.error("Error reporting failed:", reportError);
       return false;
     }
   }
@@ -141,32 +152,32 @@ interface DefaultErrorUIProps {
   storedErrorCount: number;
 }
 
-function DefaultErrorUI({ 
-  error, 
-  errorInfo, 
-  eventId, 
-  onRetry, 
-  onClearLogs, 
-  storedErrorCount 
+function DefaultErrorUI({
+  error,
+  errorInfo,
+  eventId,
+  onRetry,
+  onClearLogs,
+  storedErrorCount,
 }: DefaultErrorUIProps) {
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  
+  const isDevelopment = process.env.NODE_ENV === "development";
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle className="text-red-600 flex items-center gap-2">
-            <svg 
-              className="w-5 h-5" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z" 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
             문제가 발생했습니다
@@ -201,7 +212,7 @@ function DefaultErrorUI({
                       {error.message}
                     </pre>
                   </div>
-                  
+
                   {error.stack && (
                     <div className="bg-gray-50 p-3 rounded-md">
                       <strong className="text-gray-800">스택 추적:</strong>
@@ -210,7 +221,7 @@ function DefaultErrorUI({
                       </pre>
                     </div>
                   )}
-                  
+
                   <div className="bg-blue-50 p-3 rounded-md">
                     <strong className="text-blue-800">컴포넌트 스택:</strong>
                     <pre className="text-xs text-blue-600 mt-1 overflow-x-auto whitespace-pre-wrap">
@@ -224,46 +235,46 @@ function DefaultErrorUI({
 
           <div className="flex flex-wrap gap-2 pt-4 border-t">
             <Button onClick={onRetry} className="flex-1 sm:flex-none">
-              <svg 
-                className="w-4 h-4 mr-2" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
               다시 시도
             </Button>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               onClick={() => window.location.reload()}
               className="flex-1 sm:flex-none"
             >
-              <svg 
-                className="w-4 h-4 mr-2" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
               새로고침
             </Button>
 
             {storedErrorCount > 0 && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={onClearLogs}
                 className="flex-1 sm:flex-none text-sm"
               >
@@ -273,8 +284,8 @@ function DefaultErrorUI({
           </div>
 
           <div className="text-xs text-gray-500 pt-2 border-t">
-            이 문제가 계속 발생하면 브라우저의 캐시와 쿠키를 삭제하거나 
-            다른 브라우저를 사용해 보세요.
+            이 문제가 계속 발생하면 브라우저의 캐시와 쿠키를 삭제하거나 다른
+            브라우저를 사용해 보세요.
           </div>
         </CardContent>
       </Card>
@@ -286,7 +297,10 @@ function DefaultErrorUI({
  * React Error Boundary 컴포넌트
  * 하위 컴포넌트에서 발생하는 JavaScript 에러를 포착하고 처리합니다.
  */
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   private retryTimeoutId: number | null = null;
 
   constructor(props: ErrorBoundaryProps) {
@@ -306,7 +320,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     // 에러 ID 생성
     const eventId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     return {
       hasError: true,
       error,
@@ -329,17 +343,27 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       try {
         onError(error, errorInfo);
       } catch (handlerError) {
-        console.error('Error in custom error handler:', handlerError);
+        console.error("Error in custom error handler:", handlerError);
       }
     }
 
     // 모니터링 시스템에 React 에러 보고
     try {
-      if ((window as Window & { __reportReactError?: (error: Error, errorInfo: unknown) => void }).__reportReactError) {
-        (window as Window & { __reportReactError?: (error: Error, errorInfo: unknown) => void }).__reportReactError(error, errorInfo);
+      if (
+        (
+          window as Window & {
+            __reportReactError?: (error: Error, errorInfo: unknown) => void;
+          }
+        ).__reportReactError
+      ) {
+        (
+          window as Window & {
+            __reportReactError?: (error: Error, errorInfo: unknown) => void;
+          }
+        ).__reportReactError(error, errorInfo);
       }
     } catch (monitoringError) {
-      console.error('Failed to report to monitoring system:', monitoringError);
+      console.error("Failed to report to monitoring system:", monitoringError);
     }
 
     // 에러 로깅 및 리포팅 (기존 시스템 유지)
@@ -349,18 +373,22 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       // 원격 서버로 전송 (백그라운드에서 실행)
       if (reportEndpoint) {
-        ErrorReportingService.reportToServer(error, errorInfo, eventId, reportEndpoint)
-          .catch(reportError => {
-            console.error('Background error reporting failed:', reportError);
-          });
+        ErrorReportingService.reportToServer(
+          error,
+          errorInfo,
+          eventId,
+          reportEndpoint,
+        ).catch((reportError) => {
+          console.error("Background error reporting failed:", reportError);
+        });
       }
     }
 
     // 개발 환경에서는 콘솔에 상세 정보 출력
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       console.group(`🚨 Error Boundary Caught Error (${eventId})`);
-      console.error('Error:', error);
-      console.error('Component Stack:', errorInfo.componentStack);
+      console.error("Error:", error);
+      console.error("Component Stack:", errorInfo.componentStack);
       console.groupEnd();
     }
   }
@@ -398,8 +426,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   handleClearLogs = () => {
     ErrorReportingService.clearStoredErrors();
     // 사용자에게 피드백 제공 (옵션)
-    if (process.env.NODE_ENV === 'development') {
-      console.info('Error logs cleared');
+    if (process.env.NODE_ENV === "development") {
+      console.info("Error logs cleared");
     }
   };
 
@@ -413,14 +441,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         try {
           return fallback(error, errorInfo, this.handleRetry);
         } catch (fallbackError) {
-          console.error('Error in custom fallback component:', fallbackError);
+          console.error("Error in custom fallback component:", fallbackError);
           // fallback 컴포넌트에서 에러가 발생하면 기본 UI로 폴백
         }
       }
 
       // 기본 에러 UI 렌더링
       const storedErrorCount = ErrorReportingService.getStoredErrors().length;
-      
+
       return (
         <DefaultErrorUI
           error={error}
@@ -440,10 +468,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 /**
  * 함수형 컴포넌트를 위한 HOC (Higher Order Component)
  */
-/* eslint-disable react-refresh/only-export-components */
+
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
-  errorBoundaryProps?: Omit<ErrorBoundaryProps, 'children'>
+  errorBoundaryProps?: Omit<ErrorBoundaryProps, "children">,
 ) {
   const WrappedComponent = (props: P) => (
     <ErrorBoundary {...errorBoundaryProps}>
@@ -459,20 +487,25 @@ export function withErrorBoundary<P extends object>(
 /**
  * 수동으로 에러를 발생시키는 유틸리티 (테스트용)
  */
-export function throwError(message: string = 'Test error'): never {
+export function throwError(message: string = "Test error"): never {
   throw new Error(message);
 }
 
 /**
  * 비동기 에러를 처리하기 위한 유틸리티
  */
-export function handleAsyncError(error: Error, context: string = 'Async operation') {
+export function handleAsyncError(
+  error: Error,
+  context: string = "Async operation",
+) {
   console.error(`${context}:`, error);
-  
+
   // 에러를 전역 에러 핸들러에 전달
-  window.dispatchEvent(new ErrorEvent('error', {
-    error,
-    message: error.message,
-    filename: context,
-  }));
+  window.dispatchEvent(
+    new ErrorEvent("error", {
+      error,
+      message: error.message,
+      filename: context,
+    }),
+  );
 }

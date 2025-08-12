@@ -2,16 +2,16 @@
  * Error Boundary가 적용된 App 컴포넌트 통합 예시
  * 이 파일은 기존 App.tsx에 Error Boundary를 적용하는 방법을 보여줍니다.
  */
-import { useState, useEffect } from 'react';
-import { TodoContainer } from './todo-container';
-import { AuthProvider } from '../contexts/auth.context';
-import { MigrationDialog } from './auth/migration-dialog';
-import { AuthPromptBanner } from './auth/auth-prompt';
-import { useMigration } from '../hooks/use-migration';
-import { Loader2 } from 'lucide-react';
-import { ErrorBoundary } from './ErrorBoundary';
-import { initializeGlobalErrorHandler } from '../utils/global-error-handler';
-import '../App.css';
+import { useState, useEffect } from "react";
+import { TodoContainer } from "./todo-container";
+import { AuthProvider } from "../contexts/auth.context";
+import { MigrationDialog } from "./auth/migration-dialog";
+import { AuthPromptBanner } from "./auth/auth-prompt";
+import { useMigration } from "../hooks/use-migration";
+import { Loader2 } from "lucide-react";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { initializeGlobalErrorHandler } from "../utils/global-error-handler";
+import "../App.css";
 
 /**
  * 앱 초기화 상태 관리 컴포넌트
@@ -28,7 +28,7 @@ function AppContent() {
       try {
         // 마이그레이션 필요성 확인
         const migrationRequired = await migration.checkMigrationRequired();
-        
+
         if (migrationRequired) {
           setShowMigrationDialog(true);
         } else if (!migration.history.completed) {
@@ -36,7 +36,7 @@ function AppContent() {
           setShowAuthBanner(true);
         }
       } catch (error) {
-        console.error('App initialization failed:', error);
+        console.error("App initialization failed:", error);
       } finally {
         setIsInitializing(false);
       }
@@ -50,9 +50,9 @@ function AppContent() {
 
   // 마이그레이션 완료 처리
   const handleMigrationComplete = (result: unknown) => {
-    console.log('Migration completed:', result);
+    console.log("Migration completed:", result);
     setShowMigrationDialog(false);
-    
+
     // 성공 시 배너 숨김, 실패 시 배너 표시
     if (result.success) {
       setShowAuthBanner(false);
@@ -63,7 +63,7 @@ function AppContent() {
 
   // 마이그레이션 오류 처리
   const handleMigrationError = (error: string) => {
-    console.error('Migration error:', error);
+    console.error("Migration error:", error);
     // 오류 발생 시에도 다이얼로그는 닫고 배너 표시
     setShowMigrationDialog(false);
     setShowAuthBanner(true);
@@ -72,7 +72,7 @@ function AppContent() {
   // 배너 닫기 처리
   const handleBannerDismiss = () => {
     setShowAuthBanner(false);
-    localStorage.setItem('auth-banner-dismissed', 'true');
+    localStorage.setItem("auth-banner-dismissed", "true");
   };
 
   // 앱 초기화 중 로딩 표시
@@ -96,7 +96,7 @@ function AppContent() {
             <AuthPromptBanner
               onPromptOpen={() => {
                 // TODO: AuthPrompt 다이얼로그 열기 (향후 구현)
-                console.log('Auth prompt requested');
+                console.log("Auth prompt requested");
               }}
               onDismiss={handleBannerDismiss}
             />
@@ -110,8 +110,8 @@ function AppContent() {
         reportEndpoint="/api/errors" // 실제 에러 리포팅 엔드포인트
         onError={(error) => {
           // 커스텀 에러 핸들링 로직
-          console.warn('Main content error caught:', error.message);
-          
+          console.warn("Main content error caught:", error.message);
+
           // 사용자 분석 도구에 에러 전송 (예: Google Analytics, Sentry 등)
           // analytics.track('Error', {
           //   message: error.message,
@@ -119,7 +119,7 @@ function AppContent() {
           // });
         }}
       >
-        <div className={showAuthBanner ? 'pt-4' : ''}>
+        <div className={showAuthBanner ? "pt-4" : ""}>
           <TodoContainer />
         </div>
       </ErrorBoundary>
@@ -147,24 +147,26 @@ function AppWithErrorBoundary() {
   useEffect(() => {
     const globalHandler = initializeGlobalErrorHandler({
       enableConsoleLogging: true,
-      enableReporting: process.env.NODE_ENV === 'production',
-      reportEndpoint: '/api/errors/global',
+      enableReporting: process.env.NODE_ENV === "production",
+      reportEndpoint: "/api/errors/global",
       onError: (error) => {
         // 전역 에러에 대한 커스텀 처리
-        console.warn('Global error:', error.message);
-        
+        console.warn("Global error:", error.message);
+
         // 중요한 에러인 경우 사용자에게 알림
-        if (error.message.includes('ChunkLoadError') || 
-            error.message.includes('Loading CSS chunk')) {
+        if (
+          error.message.includes("ChunkLoadError") ||
+          error.message.includes("Loading CSS chunk")
+        ) {
           // 코드 스플리팅 관련 에러는 페이지 새로고침 권장
           const shouldReload = confirm(
-            '애플리케이션 업데이트가 있습니다. 페이지를 새로고침하시겠습니까?'
+            "애플리케이션 업데이트가 있습니다. 페이지를 새로고침하시겠습니까?",
           );
           if (shouldReload) {
             window.location.reload();
           }
         }
-      }
+      },
     });
 
     // 컴포넌트 언마운트 시 정리
@@ -179,12 +181,14 @@ function AppWithErrorBoundary() {
       enableReporting={true}
       reportEndpoint="/api/errors/app"
       onError={(error) => {
-        console.error('Top-level app error:', error.message);
-        
+        console.error("Top-level app error:", error.message);
+
         // 심각한 에러의 경우 사용자에게 안내
-        if (error.message.includes('Cannot read properties of undefined') ||
-            error.message.includes('TypeError')) {
-          console.warn('Critical application error detected');
+        if (
+          error.message.includes("Cannot read properties of undefined") ||
+          error.message.includes("TypeError")
+        ) {
+          console.warn("Critical application error detected");
         }
       }}
       fallback={(error, errorInfo, onRetry) => (

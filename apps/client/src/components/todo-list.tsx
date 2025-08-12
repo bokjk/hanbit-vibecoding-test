@@ -1,6 +1,5 @@
-
-import type { Todo } from 'types/index';
-import { TodoItem } from './todo-item';
+import type { Todo } from "types/index";
+import { TodoItem } from "./todo-item";
 
 interface TodoListProps {
   todos: Todo[];
@@ -9,7 +8,12 @@ interface TodoListProps {
   onEditTodo: (id: string, title: string) => void;
 }
 
-export function TodoList({ todos, onToggleTodo, onDeleteTodo, onEditTodo }: TodoListProps) {
+export function TodoList({
+  todos,
+  onToggleTodo,
+  onDeleteTodo,
+  onEditTodo,
+}: TodoListProps) {
   return (
     <div data-testid="todo-list">
       {todos.map((todo) => (

@@ -3,12 +3,12 @@
  * Beacon API를 사용한 안정적인 데이터 전송, 배치 처리, 재시도 메커니즘을 제공합니다.
  */
 
-import type { PerformanceMetric } from '../utils/performance-monitor';
-import type { ErrorReport } from '../utils/error-reporter';
+import type { PerformanceMetric } from "../utils/performance-monitor";
+import type { ErrorReport } from "../utils/error-reporter";
 
 export interface AnalyticsEvent {
   id: string;
-  type: 'performance' | 'error' | 'user_interaction' | 'custom';
+  type: "performance" | "error" | "user_interaction" | "custom";
   category: string;
   action: string;
   label?: string;
@@ -80,8 +80,8 @@ export class AnalyticsService {
       enableCompression: true,
       enableQueuePersistence: true,
       maxQueueSize: 1000,
-      enableDebugLogging: import.meta.env.VITE_DEBUG === 'true',
-      ...config
+      enableDebugLogging: import.meta.env.VITE_DEBUG === "true",
+      ...config,
     };
 
     this.sessionId = this.generateSessionId();
@@ -106,7 +106,8 @@ export class AnalyticsService {
    * Analytics 엔드포인트 조회
    */
   private getAnalyticsEndpoint(): string {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    const baseUrl =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
     return `${baseUrl}/analytics/events`;
   }
 
@@ -115,10 +116,10 @@ export class AnalyticsService {
    */
   private shouldEnableAnalytics(): boolean {
     // 환경변수로 제어
-    const isProduction = import.meta.env.MODE === 'production';
-    const isDebugMode = import.meta.env.VITE_DEBUG === 'true';
-    const enableAnalytics = import.meta.env.VITE_ENABLE_ANALYTICS !== 'false';
-    
+    const isProduction = import.meta.env.MODE === "production";
+    const isDebugMode = import.meta.env.VITE_DEBUG === "true";
+    const enableAnalytics = import.meta.env.VITE_ENABLE_ANALYTICS !== "false";
+
     // 개발 환경에서는 선택적으로, 프로덕션에서는 기본 활성화
     return enableAnalytics && (isProduction || isDebugMode);
   }
@@ -129,32 +130,34 @@ export class AnalyticsService {
   private initializeService(): void {
     // 페이지 로드 이벤트 추적
     this.trackEvent({
-      type: 'user_interaction',
-      category: 'page',
-      action: 'load',
-      label: window.location.pathname
+      type: "user_interaction",
+      category: "page",
+      action: "load",
+      label: window.location.pathname,
     });
 
     // 네트워크 상태 변경 추적
-    window.addEventListener('online', () => {
+    window.addEventListener("online", () => {
       this.trackEvent({
-        type: 'user_interaction',
-        category: 'network',
-        action: 'online'
+        type: "user_interaction",
+        category: "network",
+        action: "online",
       });
       // 온라인 상태가 되면 실패한 배치 재시도
       this.retryFailedBatches();
     });
 
-    window.addEventListener('offline', () => {
+    window.addEventListener("offline", () => {
       this.trackEvent({
-        type: 'user_interaction',
-        category: 'network',
-        action: 'offline'
+        type: "user_interaction",
+        category: "network",
+        action: "offline",
       });
     });
 
-    this.debugLog('Analytics service initialized', { sessionId: this.sessionId });
+    this.debugLog("Analytics service initialized", {
+      sessionId: this.sessionId,
+    });
   }
 
   /**
@@ -172,16 +175,16 @@ export class AnalyticsService {
 
     const event: AnalyticsEvent = {
       id: this.generateEventId(),
-      type: 'custom',
-      category: 'general',
-      action: 'unknown',
+      type: "custom",
+      category: "general",
+      action: "unknown",
       timestamp: Date.now(),
       sessionId: this.sessionId,
-      ...eventData
+      ...eventData,
     };
 
     this.addToQueue(event);
-    this.debugLog('Event tracked', event);
+    this.debugLog("Event tracked", event);
   }
 
   /**
@@ -192,8 +195,8 @@ export class AnalyticsService {
 
     const event: AnalyticsEvent = {
       id: this.generateEventId(),
-      type: 'performance',
-      category: 'performance',
+      type: "performance",
+      category: "performance",
       action: metric.name,
       value: metric.value,
       timestamp: metric.timestamp,
@@ -201,12 +204,15 @@ export class AnalyticsService {
       metadata: {
         url: metric.url,
         userAgent: metric.userAgent,
-        ...metric.metadata
-      }
+        ...metric.metadata,
+      },
     };
 
     this.addToQueue(event);
-    this.debugLog('Performance metric tracked', { name: metric.name, value: metric.value });
+    this.debugLog("Performance metric tracked", {
+      name: metric.name,
+      value: metric.value,
+    });
   }
 
   /**
@@ -217,8 +223,8 @@ export class AnalyticsService {
 
     const event: AnalyticsEvent = {
       id: this.generateEventId(),
-      type: 'error',
-      category: 'error',
+      type: "error",
+      category: "error",
       action: error.type,
       label: error.message.substring(0, 100), // 메시지 길이 제한
       timestamp: error.timestamp,
@@ -231,25 +237,34 @@ export class AnalyticsService {
         url: error.url,
         lineNumber: error.lineNumber,
         columnNumber: error.columnNumber,
-        context: this.sanitizeErrorContext(error.context)
-      }
+        context: this.sanitizeErrorContext(error.context),
+      },
     };
 
     this.addToQueue(event);
-    this.debugLog('Error tracked', { type: error.type, message: error.message });
+    this.debugLog("Error tracked", {
+      type: error.type,
+      message: error.message,
+    });
   }
 
   /**
    * 사용자 상호작용 추적
    */
-  trackUserInteraction(category: string, action: string, label?: string, value?: number, metadata?: Record<string, unknown>): void {
+  trackUserInteraction(
+    category: string,
+    action: string,
+    label?: string,
+    value?: number,
+    metadata?: Record<string, unknown>,
+  ): void {
     this.trackEvent({
-      type: 'user_interaction',
+      type: "user_interaction",
       category,
       action,
       label,
       value,
-      metadata
+      metadata,
     });
   }
 
@@ -258,30 +273,34 @@ export class AnalyticsService {
    */
   trackPageView(page?: string): void {
     const currentPage = page || window.location.pathname;
-    
+
     this.trackEvent({
-      type: 'user_interaction',
-      category: 'page',
-      action: 'view',
+      type: "user_interaction",
+      category: "page",
+      action: "view",
       label: currentPage,
       metadata: {
         title: document.title,
         referrer: document.referrer,
-        url: window.location.href
-      }
+        url: window.location.href,
+      },
     });
   }
 
   /**
    * 커스텀 메트릭 추적
    */
-  trackCustomMetric(name: string, value: number, metadata?: Record<string, unknown>): void {
+  trackCustomMetric(
+    name: string,
+    value: number,
+    metadata?: Record<string, unknown>,
+  ): void {
     this.trackEvent({
-      type: 'custom',
-      category: 'metric',
+      type: "custom",
+      category: "metric",
       action: name,
       value,
-      metadata
+      metadata,
     });
   }
 
@@ -293,13 +312,13 @@ export class AnalyticsService {
     if (this.eventQueue.length >= this.config.maxQueueSize) {
       // 오래된 이벤트 제거
       this.eventQueue.shift();
-      this.debugLog('Event queue overflow, removed oldest event');
+      this.debugLog("Event queue overflow, removed oldest event");
     }
 
     const queuedEvent: QueuedEvent = {
       event,
       retryCount: 0,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     this.eventQueue.push(queuedEvent);
@@ -338,35 +357,37 @@ export class AnalyticsService {
 
     const now = Date.now();
     const eventsToSend = this.eventQueue.splice(0, this.config.batchSize);
-    
+
     const payload: BatchPayload = {
       sessionId: this.sessionId,
       timestamp: now,
-      events: eventsToSend.map(qe => qe.event),
-      metadata: this.getSessionMetadata()
+      events: eventsToSend.map((qe) => qe.event),
+      metadata: this.getSessionMetadata(),
     };
 
-    this.debugLog('Flushing events', { count: payload.events.length });
+    this.debugLog("Flushing events", { count: payload.events.length });
 
     try {
       await this.sendBatch(payload);
       this.lastFlushTime = now;
-      
+
       // 큐 영속성 업데이트
       if (this.config.enableQueuePersistence) {
         this.persistQueue();
       }
     } catch (error) {
-      this.debugLog('Failed to send batch, adding to retry queue', error);
-      
+      this.debugLog("Failed to send batch, adding to retry queue", error);
+
       // 실패한 배치를 재시도 큐에 추가
       this.failedBatches.push(payload);
-      
+
       // 실패한 이벤트를 다시 큐에 추가 (재시도 카운트 증가)
-      const retriedEvents = eventsToSend.map(qe => ({
-        ...qe,
-        retryCount: qe.retryCount + 1
-      })).filter(qe => qe.retryCount <= this.config.maxRetries);
+      const retriedEvents = eventsToSend
+        .map((qe) => ({
+          ...qe,
+          retryCount: qe.retryCount + 1,
+        }))
+        .filter((qe) => qe.retryCount <= this.config.maxRetries);
 
       this.eventQueue.unshift(...retriedEvents);
     }
@@ -376,46 +397,48 @@ export class AnalyticsService {
    * 배치 전송
    */
   private async sendBatch(payload: BatchPayload): Promise<void> {
-    const data = this.config.enableCompression ? 
-      await this.compressPayload(payload) : 
-      JSON.stringify(payload);
+    const data = this.config.enableCompression
+      ? await this.compressPayload(payload)
+      : JSON.stringify(payload);
 
     // Beacon API를 우선 사용
-    if ('sendBeacon' in navigator && navigator.onLine) {
-      const blob = new Blob([data], { type: 'application/json' });
+    if ("sendBeacon" in navigator && navigator.onLine) {
+      const blob = new Blob([data], { type: "application/json" });
       const sent = navigator.sendBeacon(this.config.endpoint, blob);
-      
+
       if (sent) {
-        this.debugLog('Batch sent via Beacon API');
+        this.debugLog("Batch sent via Beacon API");
         return;
       } else {
-        this.debugLog('Beacon API failed, falling back to fetch');
+        this.debugLog("Beacon API failed, falling back to fetch");
       }
     }
 
     // Beacon API 실패시 fetch로 폴백
     const response = await fetch(this.config.endpoint, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        ...(this.config.enableCompression && { 'Content-Encoding': 'gzip' })
+        "Content-Type": "application/json",
+        ...(this.config.enableCompression && { "Content-Encoding": "gzip" }),
       },
       body: data,
-      keepalive: true // 페이지 unload 시에도 전송 유지
+      keepalive: true, // 페이지 unload 시에도 전송 유지
     });
 
     if (!response.ok) {
-      throw new Error(`Analytics request failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Analytics request failed: ${response.status} ${response.statusText}`,
+      );
     }
 
-    this.debugLog('Batch sent via fetch API');
+    this.debugLog("Batch sent via fetch API");
   }
 
   /**
    * 페이로드 압축
    */
   private async compressPayload(payload: BatchPayload): Promise<string> {
-    // 실제 환경에서는 CompressionStream을 사용하거나 
+    // 실제 환경에서는 CompressionStream을 사용하거나
     // gzip 라이브러리를 사용할 수 있습니다.
     // 여기서는 단순히 JSON.stringify를 반환
     return JSON.stringify(payload);
@@ -427,7 +450,9 @@ export class AnalyticsService {
   private async retryFailedBatches(): Promise<void> {
     if (!navigator.onLine || this.failedBatches.length === 0) return;
 
-    this.debugLog('Retrying failed batches', { count: this.failedBatches.length });
+    this.debugLog("Retrying failed batches", {
+      count: this.failedBatches.length,
+    });
 
     const batchesToRetry = [...this.failedBatches];
     this.failedBatches = [];
@@ -435,9 +460,9 @@ export class AnalyticsService {
     for (const batch of batchesToRetry) {
       try {
         await this.sendBatch(batch);
-        this.debugLog('Retry successful for batch');
+        this.debugLog("Retry successful for batch");
       } catch (error) {
-        this.debugLog('Retry failed for batch', error);
+        this.debugLog("Retry failed for batch", error);
         // 재시도 제한 확인 후 다시 큐에 추가
         this.failedBatches.push(batch);
       }
@@ -455,28 +480,28 @@ export class AnalyticsService {
       // 세션 종료 이벤트 추가
       const sessionEndEvent: AnalyticsEvent = {
         id: this.generateEventId(),
-        type: 'user_interaction',
-        category: 'session',
-        action: 'end',
+        type: "user_interaction",
+        category: "session",
+        action: "end",
         timestamp: Date.now(),
         sessionId: this.sessionId,
         metadata: {
-          sessionDuration: Date.now() - parseInt(this.sessionId.split('-')[0]),
-          url: window.location.href
-        }
+          sessionDuration: Date.now() - parseInt(this.sessionId.split("-")[0]),
+          url: window.location.href,
+        },
       };
 
       // 즉시 전송 (Beacon API 사용)
-      if ('sendBeacon' in navigator) {
+      if ("sendBeacon" in navigator) {
         const payload: BatchPayload = {
           sessionId: this.sessionId,
           timestamp: Date.now(),
-          events: [...this.eventQueue.map(qe => qe.event), sessionEndEvent],
-          metadata: this.getSessionMetadata()
+          events: [...this.eventQueue.map((qe) => qe.event), sessionEndEvent],
+          metadata: this.getSessionMetadata(),
         };
 
         const data = JSON.stringify(payload);
-        const blob = new Blob([data], { type: 'application/json' });
+        const blob = new Blob([data], { type: "application/json" });
         navigator.sendBeacon(this.config.endpoint, blob);
       }
 
@@ -486,12 +511,12 @@ export class AnalyticsService {
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('pagehide', handleBeforeUnload);
-    
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("pagehide", handleBeforeUnload);
+
     // 모바일 환경에서의 visibility change
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
         this.flush();
       }
     });
@@ -505,12 +530,12 @@ export class AnalyticsService {
       const queueData = {
         events: this.eventQueue,
         timestamp: Date.now(),
-        sessionId: this.sessionId
+        sessionId: this.sessionId,
       };
-      
-      localStorage.setItem('analytics_queue', JSON.stringify(queueData));
+
+      localStorage.setItem("analytics_queue", JSON.stringify(queueData));
     } catch (error) {
-      this.debugLog('Failed to persist queue', error);
+      this.debugLog("Failed to persist queue", error);
     }
   }
 
@@ -519,31 +544,36 @@ export class AnalyticsService {
    */
   private loadPersistedQueue(): void {
     try {
-      const stored = localStorage.getItem('analytics_queue');
+      const stored = localStorage.getItem("analytics_queue");
       if (!stored) return;
 
       const queueData = JSON.parse(stored);
-      
+
       // 세션이 다르거나 너무 오래된 데이터는 무시
       const maxAge = 24 * 60 * 60 * 1000; // 24시간
-      if (queueData.sessionId !== this.sessionId || 
-          Date.now() - queueData.timestamp > maxAge) {
-        localStorage.removeItem('analytics_queue');
+      if (
+        queueData.sessionId !== this.sessionId ||
+        Date.now() - queueData.timestamp > maxAge
+      ) {
+        localStorage.removeItem("analytics_queue");
         return;
       }
 
       // 유효한 이벤트만 복원
       if (Array.isArray(queueData.events)) {
-        this.eventQueue = queueData.events.filter((qe: QueuedEvent) => 
-          qe.event && qe.retryCount <= this.config.maxRetries
+        this.eventQueue = queueData.events.filter(
+          (qe: QueuedEvent) =>
+            qe.event && qe.retryCount <= this.config.maxRetries,
         );
-        this.debugLog('Restored queue from persistence', { count: this.eventQueue.length });
+        this.debugLog("Restored queue from persistence", {
+          count: this.eventQueue.length,
+        });
       }
 
-      localStorage.removeItem('analytics_queue');
+      localStorage.removeItem("analytics_queue");
     } catch (error) {
-      this.debugLog('Failed to load persisted queue', error);
-      localStorage.removeItem('analytics_queue');
+      this.debugLog("Failed to load persisted queue", error);
+      localStorage.removeItem("analytics_queue");
     }
   }
 
@@ -551,12 +581,17 @@ export class AnalyticsService {
    * 세션 메타데이터 생성
    */
   private getSessionMetadata() {
-    const nav = navigator as Navigator & { 
+    const nav = navigator as Navigator & {
       connection?: { effectiveType: string; downlink: number; rtt: number };
       mozConnection?: { effectiveType: string; downlink: number; rtt: number };
-      webkitConnection?: { effectiveType: string; downlink: number; rtt: number };
+      webkitConnection?: {
+        effectiveType: string;
+        downlink: number;
+        rtt: number;
+      };
     };
-    const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
+    const connection =
+      nav.connection || nav.mozConnection || nav.webkitConnection;
 
     return {
       userAgent: navigator.userAgent,
@@ -564,15 +599,15 @@ export class AnalyticsService {
       referrer: document.referrer,
       viewport: {
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       },
       ...(connection && {
         connection: {
           effectiveType: connection.effectiveType,
           downlink: connection.downlink,
-          rtt: connection.rtt
-        }
-      })
+          rtt: connection.rtt,
+        },
+      }),
     };
   }
 
@@ -580,22 +615,24 @@ export class AnalyticsService {
    * 에러 컨텍스트 정화 (개인정보 제거)
    */
   private sanitizeErrorContext(context: unknown): unknown {
-    if (!context || typeof context !== 'object') return context;
+    if (!context || typeof context !== "object") return context;
 
     const sanitized = { ...context };
-    
+
     // 민감한 필드 제거
     delete sanitized.localStorage;
     delete sanitized.sessionStorage;
-    
+
     // 사용자 액션에서 개인정보 제거
     if (sanitized.previousActions && Array.isArray(sanitized.previousActions)) {
-      sanitized.previousActions = sanitized.previousActions.map((action: { type?: string; timestamp?: number; target?: string }) => ({
-        type: action.type || 'unknown',
-        timestamp: action.timestamp || 0,
-        target: action.target || 'unknown'
-        // metadata는 개인정보가 포함될 수 있으므로 제외
-      }));
+      sanitized.previousActions = sanitized.previousActions.map(
+        (action: { type?: string; timestamp?: number; target?: string }) => ({
+          type: action.type || "unknown",
+          timestamp: action.timestamp || 0,
+          target: action.target || "unknown",
+          // metadata는 개인정보가 포함될 수 있으므로 제외
+        }),
+      );
     }
 
     return sanitized;
@@ -613,7 +650,7 @@ export class AnalyticsService {
    */
   private debugLog(message: string, data?: unknown): void {
     if (this.config.enableDebugLogging) {
-      console.log(`[Analytics] ${message}`, data || '');
+      console.log(`[Analytics] ${message}`, data || "");
     }
   }
 
@@ -621,7 +658,7 @@ export class AnalyticsService {
    * 지연 함수
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -634,7 +671,7 @@ export class AnalyticsService {
       failedBatchesCount: this.failedBatches.length,
       lastFlushTime: this.lastFlushTime,
       isEnabled: this.isEnabled,
-      config: this.config
+      config: this.config,
     };
   }
 

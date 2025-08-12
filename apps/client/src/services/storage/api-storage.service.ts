@@ -1,8 +1,8 @@
-import type { Todo, Priority, FilterType } from 'types/index';
-import { AbstractStorageService } from './abstract-storage.service';
-import { TodoAPIClient } from '../api/todo-api-client';
-import { APIError } from '../../errors/api-error';
-import { appConfig } from '../../config/app-config';
+import type { Todo, Priority, FilterType } from "types/index";
+import { AbstractStorageService } from "./abstract-storage.service";
+import { TodoAPIClient } from "../api/todo-api-client";
+import { APIError } from "../../errors/api-error";
+import { appConfig } from "../../config/app-config";
 
 /**
  * API 기반 스토리지 서비스
@@ -30,16 +30,16 @@ export class APIStorageService extends AbstractStorageService {
     try {
       const response = await this.apiClient.getTodos({
         filter,
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
+        sortBy: "createdAt",
+        sortOrder: "desc",
       });
 
       const todos = response.data.todos;
-      
+
       // 캐시 업데이트
       this.updateCache(todos);
       this.lastSyncTime = new Date();
-      
+
       return todos;
     } catch (error) {
       if (error instanceof APIError && error.isNetworkError()) {
@@ -63,21 +63,21 @@ export class APIStorageService extends AbstractStorageService {
 
       const response = await this.apiClient.getTodo(id);
       const todo = response.data.todo;
-      
+
       // 캐시에 저장
       this.cache.set(id, todo);
-      
+
       return todo;
     } catch (error) {
       if (error instanceof APIError && error.isNotFoundError()) {
         return null;
       }
-      
+
       if (error instanceof APIError && error.isNetworkError()) {
         // 네트워크 오류 시 캐시에서 반환
         return this.cache.get(id) || null;
       }
-      
+
       throw error;
     }
   }
@@ -95,14 +95,14 @@ export class APIStorageService extends AbstractStorageService {
       });
 
       const newTodo = response.data.todo;
-      
+
       // 캐시에 추가
       this.cache.set(newTodo.id, newTodo);
-      
+
       if (appConfig.features.debugMode) {
-        console.log('✅ Todo created via API:', newTodo.id);
+        console.log("✅ Todo created via API:", newTodo.id);
       }
-      
+
       return newTodo;
     } catch (error) {
       if (error instanceof APIError && error.isNetworkError()) {
@@ -118,15 +118,15 @@ export class APIStorageService extends AbstractStorageService {
    */
   async updateTodo(
     id: string,
-    updates: Partial<Pick<Todo, 'title' | 'completed' | 'priority'>>
+    updates: Partial<Pick<Todo, "title" | "completed" | "priority">>,
   ): Promise<Todo> {
     // 제목 업데이트 시 유효성 검사
     if (updates.title !== undefined) {
       if (!updates.title || updates.title.trim().length === 0) {
-        throw new Error('Todo title cannot be empty');
+        throw new Error("Todo title cannot be empty");
       }
       if (updates.title.trim().length > 200) {
-        throw new Error('Todo title cannot exceed 200 characters');
+        throw new Error("Todo title cannot exceed 200 characters");
       }
     }
 
@@ -137,14 +137,14 @@ export class APIStorageService extends AbstractStorageService {
       });
 
       const updatedTodo = response.data.todo;
-      
+
       // 캐시 업데이트
       this.cache.set(id, updatedTodo);
-      
+
       if (appConfig.features.debugMode) {
-        console.log('✅ Todo updated via API:', id);
+        console.log("✅ Todo updated via API:", id);
       }
-      
+
       return updatedTodo;
     } catch (error) {
       if (error instanceof APIError && error.isNetworkError()) {
@@ -161,14 +161,14 @@ export class APIStorageService extends AbstractStorageService {
   async deleteTodo(id: string): Promise<string> {
     try {
       await this.apiClient.deleteTodo(id);
-      
+
       // 캐시에서 제거
       this.cache.delete(id);
-      
+
       if (appConfig.features.debugMode) {
-        console.log('✅ Todo deleted via API:', id);
+        console.log("✅ Todo deleted via API:", id);
       }
-      
+
       return id;
     } catch (error) {
       if (error instanceof APIError && error.isNetworkError()) {
@@ -187,20 +187,20 @@ export class APIStorageService extends AbstractStorageService {
   async clearAllTodos(): Promise<number> {
     try {
       const todos = await this.getTodos();
-      
+
       // 배치 삭제 API가 있다면 사용, 없다면 개별 삭제
       if (todos.length > 0) {
-        const ids = todos.map(todo => todo.id);
+        const ids = todos.map((todo) => todo.id);
         await this.apiClient.deleteMultipleTodos(ids);
       }
-      
+
       // 캐시 클리어
       this.cache.clear();
-      
+
       if (appConfig.features.debugMode) {
         console.log(`✅ ${todos.length} todos cleared via API`);
       }
-      
+
       return todos.length;
     } catch (error) {
       if (error instanceof APIError && error.isNetworkError()) {
@@ -222,7 +222,7 @@ export class APIStorageService extends AbstractStorageService {
    */
   async exportData(): Promise<string> {
     try {
-      const response = await this.apiClient.exportData('json');
+      const response = await this.apiClient.exportData("json");
       return response.data.exportUrl;
     } catch (error) {
       if (error instanceof APIError && error.isNetworkError()) {
@@ -244,17 +244,19 @@ export class APIStorageService extends AbstractStorageService {
         localStorageData: data,
         migrationOptions: {
           preserveIds: false,
-          mergeStrategy: 'merge',
+          mergeStrategy: "merge",
         },
       });
 
       // 캐시 갱신을 위해 최신 데이터 다시 로드
       await this.getTodos();
-      
+
       return response.data.migratedCount;
     } catch (error) {
       if (error instanceof APIError && error.isNetworkError()) {
-        throw new Error('Cannot import data while offline. Please try again when online.');
+        throw new Error(
+          "Cannot import data while offline. Please try again when online.",
+        );
       }
       throw error;
     }
@@ -286,15 +288,15 @@ export class APIStorageService extends AbstractStorageService {
     }
 
     this.isSyncing = true;
-    
+
     try {
       // 서버에서 최신 데이터 가져오기
       const todos = await this.getTodos();
-      
+
       if (appConfig.features.debugMode) {
         console.log(`🔄 Synced ${todos.length} todos from API`);
       }
-      
+
       return todos.length;
     } finally {
       this.isSyncing = false;
@@ -311,7 +313,7 @@ export class APIStorageService extends AbstractStorageService {
   private updateCache(todos: Todo[]): void {
     // 기존 캐시 클리어 후 새 데이터로 업데이트
     this.cache.clear();
-    todos.forEach(todo => {
+    todos.forEach((todo) => {
       this.cache.set(todo.id, todo);
     });
   }
@@ -324,11 +326,11 @@ export class APIStorageService extends AbstractStorageService {
     const sortedTodos = this.sortTodos(allTodos);
 
     switch (filter) {
-      case 'active':
-        return sortedTodos.filter(todo => !todo.completed);
-      case 'completed':
-        return sortedTodos.filter(todo => todo.completed);
-      case 'all':
+      case "active":
+        return sortedTodos.filter((todo) => !todo.completed);
+      case "completed":
+        return sortedTodos.filter((todo) => todo.completed);
+      case "all":
       default:
         return sortedTodos;
     }
@@ -345,7 +347,7 @@ export class APIStorageService extends AbstractStorageService {
       completed: false,
       createdAt: this.getCurrentTimestamp(),
       updatedAt: this.getCurrentTimestamp(),
-      userId: '', // 게스트 사용자
+      userId: "", // 게스트 사용자
       isGuest: true,
     };
 
@@ -353,7 +355,7 @@ export class APIStorageService extends AbstractStorageService {
     this.cache.set(optimisticTodo.id, optimisticTodo);
 
     if (appConfig.features.debugMode) {
-      console.log('📝 Optimistic todo created (offline):', optimisticTodo.id);
+      console.log("📝 Optimistic todo created (offline):", optimisticTodo.id);
     }
 
     return optimisticTodo;
@@ -364,7 +366,7 @@ export class APIStorageService extends AbstractStorageService {
    */
   private updateOptimisticTodo(
     id: string,
-    updates: Partial<Pick<Todo, 'title' | 'completed' | 'priority'>>
+    updates: Partial<Pick<Todo, "title" | "completed" | "priority">>,
   ): Todo {
     const existingTodo = this.cache.get(id);
     if (!existingTodo) {
@@ -381,7 +383,7 @@ export class APIStorageService extends AbstractStorageService {
     this.cache.set(id, updatedTodo);
 
     if (appConfig.features.debugMode) {
-      console.log('📝 Optimistic todo updated (offline):', id);
+      console.log("📝 Optimistic todo updated (offline):", id);
     }
 
     return updatedTodo;
@@ -393,16 +395,20 @@ export class APIStorageService extends AbstractStorageService {
   clearCache(): void {
     this.cache.clear();
     this.lastSyncTime = null;
-    
+
     if (appConfig.features.debugMode) {
-      console.log('🧹 API cache cleared');
+      console.log("🧹 API cache cleared");
     }
   }
 
   /**
    * 캐시 상태 정보
    */
-  getCacheInfo(): { size: number; lastSyncTime: Date | null; isSyncing: boolean } {
+  getCacheInfo(): {
+    size: number;
+    lastSyncTime: Date | null;
+    isSyncing: boolean;
+  } {
     return {
       size: this.cache.size,
       lastSyncTime: this.lastSyncTime,

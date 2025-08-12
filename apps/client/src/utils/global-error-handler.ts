@@ -37,16 +37,22 @@ class GlobalErrorHandler {
    */
   initialize(): void {
     // JavaScript 런타임 에러 처리
-    window.addEventListener('error', this.handleGlobalError);
-    
-    // Promise rejection 처리
-    window.addEventListener('unhandledrejection', this.handleUnhandledRejection);
-    
-    // 리소스 로딩 에러 처리 (이미지, 스크립트 등)
-    window.addEventListener('error', this.handleResourceError, true);
+    window.addEventListener("error", this.handleGlobalError);
 
-    if (this.config.enableConsoleLogging && process.env.NODE_ENV === 'development') {
-      console.info('🛡️ Global Error Handler initialized');
+    // Promise rejection 처리
+    window.addEventListener(
+      "unhandledrejection",
+      this.handleUnhandledRejection,
+    );
+
+    // 리소스 로딩 에러 처리 (이미지, 스크립트 등)
+    window.addEventListener("error", this.handleResourceError, true);
+
+    if (
+      this.config.enableConsoleLogging &&
+      process.env.NODE_ENV === "development"
+    ) {
+      console.info("🛡️ Global Error Handler initialized");
     }
   }
 
@@ -54,9 +60,12 @@ class GlobalErrorHandler {
    * 전역 에러 리스너 제거
    */
   cleanup(): void {
-    window.removeEventListener('error', this.handleGlobalError);
-    window.removeEventListener('unhandledrejection', this.handleUnhandledRejection);
-    window.removeEventListener('error', this.handleResourceError, true);
+    window.removeEventListener("error", this.handleGlobalError);
+    window.removeEventListener(
+      "unhandledrejection",
+      this.handleUnhandledRejection,
+    );
+    window.removeEventListener("error", this.handleResourceError, true);
   }
 
   /**
@@ -75,10 +84,11 @@ class GlobalErrorHandler {
    * 처리되지 않은 Promise rejection 처리
    */
   private handleUnhandledRejection = (event: PromiseRejectionEvent): void => {
-    const error = event.reason instanceof Error 
-      ? event.reason 
-      : new Error(String(event.reason));
-    const context = 'Unhandled Promise Rejection';
+    const error =
+      event.reason instanceof Error
+        ? event.reason
+        : new Error(String(event.reason));
+    const context = "Unhandled Promise Rejection";
 
     this.logError(error, context);
     this.reportError(error, context);
@@ -93,10 +103,12 @@ class GlobalErrorHandler {
    */
   private handleResourceError = (event: Event): void => {
     const target = event.target as HTMLElement;
-    
+
     if (target && target !== window) {
-      const error = new Error(`Failed to load resource: ${this.getResourceInfo(target)}`);
-      const context = 'Resource Loading Error';
+      const error = new Error(
+        `Failed to load resource: ${this.getResourceInfo(target)}`,
+      );
+      const context = "Resource Loading Error";
 
       this.logError(error, context);
       this.reportError(error, context);
@@ -108,13 +120,13 @@ class GlobalErrorHandler {
    * 리소스 정보 추출
    */
   private getResourceInfo(element: HTMLElement): string {
-    if (element.tagName === 'IMG') {
+    if (element.tagName === "IMG") {
       return (element as HTMLImageElement).src;
     }
-    if (element.tagName === 'SCRIPT') {
+    if (element.tagName === "SCRIPT") {
       return (element as HTMLScriptElement).src;
     }
-    if (element.tagName === 'LINK') {
+    if (element.tagName === "LINK") {
       return (element as HTMLLinkElement).href;
     }
     return element.tagName.toLowerCase();
@@ -126,12 +138,12 @@ class GlobalErrorHandler {
   private logError(error: Error, context: string): void {
     if (this.config.enableConsoleLogging) {
       console.group(`🚨 ${context}`);
-      console.error('Error:', error.message);
-      console.error('Stack:', error.stack);
-      console.error('Context:', context);
-      console.error('Timestamp:', new Date().toISOString());
-      console.error('URL:', window.location.href);
-      console.error('User Agent:', navigator.userAgent);
+      console.error("Error:", error.message);
+      console.error("Stack:", error.stack);
+      console.error("Context:", context);
+      console.error("Timestamp:", new Date().toISOString());
+      console.error("URL:", window.location.href);
+      console.error("User Agent:", navigator.userAgent);
       console.groupEnd();
     }
   }
@@ -154,19 +166,19 @@ class GlobalErrorHandler {
         url: window.location.href,
         userAgent: navigator.userAgent,
         environment: process.env.NODE_ENV,
-        type: 'global_error',
+        type: "global_error",
       };
 
       await fetch(this.config.reportEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
     } catch (reportError) {
       if (this.config.enableConsoleLogging) {
-        console.error('Failed to report error:', reportError);
+        console.error("Failed to report error:", reportError);
       }
     }
   }
@@ -180,7 +192,7 @@ class GlobalErrorHandler {
         this.config.onError(error, context);
       } catch (handlerError) {
         if (this.config.enableConsoleLogging) {
-          console.error('Error in custom global error handler:', handlerError);
+          console.error("Error in custom global error handler:", handlerError);
         }
       }
     }
@@ -197,7 +209,9 @@ class GlobalErrorHandler {
 /**
  * 전역 에러 핸들러 초기화 함수
  */
-export function initializeGlobalErrorHandler(config?: GlobalErrorHandlerConfig): GlobalErrorHandler {
+export function initializeGlobalErrorHandler(
+  config?: GlobalErrorHandlerConfig,
+): GlobalErrorHandler {
   const handler = GlobalErrorHandler.getInstance(config);
   handler.initialize();
   return handler;
@@ -213,7 +227,10 @@ export function cleanupGlobalErrorHandler(): void {
 /**
  * 수동 에러 리포팅 함수
  */
-export function reportError(error: Error, context: string = 'Manual Report'): void {
+export function reportError(
+  error: Error,
+  context: string = "Manual Report",
+): void {
   const handler = GlobalErrorHandler.getInstance();
-  handler['reportError'](error, context);
+  handler["reportError"](error, context);
 }
