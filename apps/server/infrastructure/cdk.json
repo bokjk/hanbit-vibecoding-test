@@ -1,9 +1,7 @@
 {
   "app": "npx ts-node --prefer-ts-exts bin/app.ts",
   "watch": {
-    "include": [
-      "**"
-    ],
+    "include": ["**"],
     "exclude": [
       "README.md",
       "cdk*.json",
@@ -17,6 +15,44 @@
     ]
   },
   "context": {
+    "hanbit-todo:environments": {
+      "development": {
+        "account": null,
+        "region": "ap-northeast-2",
+        "stackName": "HanbitTodoStack-Dev",
+        "description": "개발 환경 - 로컬 개발 및 테스트용"
+      },
+      "dev": {
+        "account": null,
+        "region": "ap-northeast-2",
+        "stackName": "HanbitTodoStack-Dev",
+        "description": "개발 환경 - 로컬 개발 및 테스트용"
+      },
+      "test": {
+        "account": null,
+        "region": "ap-northeast-2",
+        "stackName": "HanbitTodoStack-Test",
+        "description": "테스트 환경 - QA 및 통합 테스트용"
+      },
+      "testing": {
+        "account": null,
+        "region": "ap-northeast-2",
+        "stackName": "HanbitTodoStack-Test",
+        "description": "테스트 환경 - QA 및 통합 테스트용"
+      },
+      "prod": {
+        "account": null,
+        "region": "ap-northeast-2",
+        "stackName": "HanbitTodoStack-Prod",
+        "description": "프로덕션 환경 - 실제 서비스 운영용"
+      },
+      "production": {
+        "account": null,
+        "region": "ap-northeast-2",
+        "stackName": "HanbitTodoStack-Prod",
+        "description": "프로덕션 환경 - 실제 서비스 운영용"
+      }
+    },
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
     "@aws-cdk/core:checkSecretUsage": true,
     "@aws-cdk/core:target-partitions": ["aws", "aws-cn"],

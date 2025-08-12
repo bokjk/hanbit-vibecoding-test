@@ -3,13 +3,13 @@
  * React 애플리케이션과 성능 모니터링 및 에러 리포팅 시스템의 통합을 담당합니다.
  */
 
-import { useEffect, useRef, useCallback, useMemo } from 'react';
-import PerformanceMonitor from '../utils/performance-monitor';
-import ErrorReporter from '../utils/error-reporter';
-import AnalyticsService from '../services/analytics.service';
-import type { PerformanceMetric } from '../utils/performance-monitor';
-import type { ErrorReport } from '../utils/error-reporter';
-import type { AnalyticsConfig } from '../services/analytics.service';
+import { useEffect, useRef, useCallback, useMemo } from "react";
+import PerformanceMonitor from "../utils/performance-monitor";
+import ErrorReporter from "../utils/error-reporter";
+import AnalyticsService from "../services/analytics.service";
+import type { PerformanceMetric } from "../utils/performance-monitor";
+import type { ErrorReport } from "../utils/error-reporter";
+import type { AnalyticsConfig } from "../services/analytics.service";
 
 export interface MonitoringConfig {
   performance?: {
@@ -68,35 +68,38 @@ export function useMonitoring(config?: MonitoringConfig) {
   const isInitializedRef = useRef(false);
 
   // 기본 설정
-  const defaultConfig: MonitoringConfig = useMemo(() => ({
-    performance: {
-      enabled: true,
-      trackWebVitals: true,
-      trackUserInteractions: true,
-      trackMemoryUsage: true,
-      trackNetworkRequests: true
-    },
-    errorReporting: {
-      enabled: true,
-      trackJavaScriptErrors: true,
-      trackResourceErrors: true,
-      trackApiErrors: true,
-      trackUnhandledRejections: true,
-      maxErrorsPerSession: 100
-    },
-    analytics: {
-      enabled: true,
-      batchSize: 20,
-      flushInterval: 10000,
-      maxRetries: 3,
-      retryDelay: 1000,
-      enableCompression: true,
-      enableQueuePersistence: true,
-      maxQueueSize: 1000,
-      enableDebugLogging: import.meta.env.VITE_DEBUG === 'true'
-    },
-    debug: import.meta.env.VITE_DEBUG === 'true'
-  }), []);
+  const defaultConfig: MonitoringConfig = useMemo(
+    () => ({
+      performance: {
+        enabled: true,
+        trackWebVitals: true,
+        trackUserInteractions: true,
+        trackMemoryUsage: true,
+        trackNetworkRequests: true,
+      },
+      errorReporting: {
+        enabled: true,
+        trackJavaScriptErrors: true,
+        trackResourceErrors: true,
+        trackApiErrors: true,
+        trackUnhandledRejections: true,
+        maxErrorsPerSession: 100,
+      },
+      analytics: {
+        enabled: true,
+        batchSize: 20,
+        flushInterval: 10000,
+        maxRetries: 3,
+        retryDelay: 1000,
+        enableCompression: true,
+        enableQueuePersistence: true,
+        maxQueueSize: 1000,
+        enableDebugLogging: import.meta.env.VITE_DEBUG === "true",
+      },
+      debug: import.meta.env.VITE_DEBUG === "true",
+    }),
+    [],
+  );
 
   // 설정 병합
   const mergedConfig = useMemo(() => {
@@ -104,26 +107,32 @@ export function useMonitoring(config?: MonitoringConfig) {
       ...defaultConfig,
       ...config,
       performance: { ...defaultConfig.performance, ...config?.performance },
-      errorReporting: { ...defaultConfig.errorReporting, ...config?.errorReporting },
-      analytics: { ...defaultConfig.analytics, ...config?.analytics }
+      errorReporting: {
+        ...defaultConfig.errorReporting,
+        ...config?.errorReporting,
+      },
+      analytics: { ...defaultConfig.analytics, ...config?.analytics },
     };
   }, [defaultConfig, config]);
 
   // 환경변수 기반 활성화 여부 확인
   const isEnabled = useMemo(() => {
-    const isProduction = import.meta.env.MODE === 'production';
-    const isDebugMode = import.meta.env.VITE_DEBUG === 'true';
-    const enableMonitoring = import.meta.env.VITE_ENABLE_MONITORING !== 'false';
-    
+    const isProduction = import.meta.env.MODE === "production";
+    const isDebugMode = import.meta.env.VITE_DEBUG === "true";
+    const enableMonitoring = import.meta.env.VITE_ENABLE_MONITORING !== "false";
+
     return enableMonitoring && (isProduction || isDebugMode);
   }, []);
 
   // 디버그 로깅
-  const debugLog = useCallback((message: string, data?: any) => {
-    if (mergedConfig.debug) {
-      console.log(`[Monitoring] ${message}`, data || '');
-    }
-  }, [mergedConfig.debug]);
+  const debugLog = useCallback(
+    (message: string, data?: unknown) => {
+      if (mergedConfig.debug) {
+        console.log(`[Monitoring] ${message}`, data || "");
+      }
+    },
+    [mergedConfig.debug],
+  );
 
   /**
    * 모니터링 시스템 초기화
@@ -131,53 +140,58 @@ export function useMonitoring(config?: MonitoringConfig) {
   const initializeMonitoring = useCallback(() => {
     if (!isEnabled || isInitializedRef.current) return;
 
-    debugLog('Initializing monitoring systems');
+    debugLog("Initializing monitoring systems");
 
     // Performance Monitor 초기화
     if (mergedConfig.performance?.enabled) {
       performanceMonitorRef.current = PerformanceMonitor.getInstance();
-      
+
       performanceMonitorRef.current.onMetric((metric: PerformanceMetric) => {
-        debugLog('Performance metric received', { name: metric.name, value: metric.value });
-        
+        debugLog("Performance metric received", {
+          name: metric.name,
+          value: metric.value,
+        });
+
         // Analytics 서비스로 전송
         if (analyticsServiceRef.current) {
           analyticsServiceRef.current.trackPerformanceMetric(metric);
         }
       });
 
-      debugLog('Performance monitoring enabled');
+      debugLog("Performance monitoring enabled");
     }
 
     // Error Reporter 초기화
     if (mergedConfig.errorReporting?.enabled) {
       errorReporterRef.current = ErrorReporter.getInstance();
-      
+
       errorReporterRef.current.onError((error: ErrorReport) => {
-        debugLog('Error report received', { 
-          type: error.type, 
-          message: error.message.substring(0, 50) + '...',
-          severity: error.severity
+        debugLog("Error report received", {
+          type: error.type,
+          message: error.message.substring(0, 50) + "...",
+          severity: error.severity,
         });
-        
+
         // Analytics 서비스로 전송
         if (analyticsServiceRef.current) {
           analyticsServiceRef.current.trackError(error);
         }
       });
 
-      debugLog('Error reporting enabled');
+      debugLog("Error reporting enabled");
     }
 
     // Analytics 서비스 초기화
     if (mergedConfig.analytics?.enabled) {
-      analyticsServiceRef.current = AnalyticsService.getInstance(mergedConfig.analytics);
-      debugLog('Analytics service enabled');
+      analyticsServiceRef.current = AnalyticsService.getInstance(
+        mergedConfig.analytics,
+      );
+      debugLog("Analytics service enabled");
     }
 
     configRef.current = mergedConfig;
     isInitializedRef.current = true;
-    debugLog('Monitoring initialization complete');
+    debugLog("Monitoring initialization complete");
   }, [isEnabled, mergedConfig, debugLog]);
 
   /**
@@ -186,7 +200,7 @@ export function useMonitoring(config?: MonitoringConfig) {
   const cleanupMonitoring = useCallback(() => {
     if (!isInitializedRef.current) return;
 
-    debugLog('Cleaning up monitoring systems');
+    debugLog("Cleaning up monitoring systems");
 
     if (performanceMonitorRef.current) {
       performanceMonitorRef.current.destroy();
@@ -204,115 +218,140 @@ export function useMonitoring(config?: MonitoringConfig) {
     }
 
     isInitializedRef.current = false;
-    debugLog('Monitoring cleanup complete');
+    debugLog("Monitoring cleanup complete");
   }, [debugLog]);
 
   // React Error Boundary 에러 리포팅
-  const reportReactError = useCallback((error: Error, errorInfo: any) => {
-    if (errorReporterRef.current) {
-      errorReporterRef.current.reportReactError(error, errorInfo);
-      debugLog('React error reported', { message: error.message });
-    }
-  }, [debugLog]);
+  const reportReactError = useCallback(
+    (error: Error, errorInfo: React.ErrorInfo) => {
+      if (errorReporterRef.current) {
+        errorReporterRef.current.reportReactError(error, errorInfo);
+        debugLog("React error reported", { message: error.message });
+      }
+    },
+    [debugLog],
+  );
 
   // API 에러 리포팅
-  const reportApiError = useCallback((
-    url: string,
-    method: string,
-    status: number,
-    statusText: string,
-    duration: number,
-    responseText?: string,
-    requestBody?: unknown
-  ) => {
-    if (errorReporterRef.current) {
-      errorReporterRef.current.reportApiError({
-        url,
-        method,
-        status,
-        statusText,
-        responseText,
-        requestBody,
-        timestamp: Date.now(),
-        duration
-      });
-      debugLog('API error reported', { url, method, status });
-    }
-  }, [debugLog]);
+  const reportApiError = useCallback(
+    (
+      url: string,
+      method: string,
+      status: number,
+      statusText: string,
+      duration: number,
+      responseText?: string,
+      requestBody?: unknown,
+    ) => {
+      if (errorReporterRef.current) {
+        errorReporterRef.current.reportApiError({
+          url,
+          method,
+          status,
+          statusText,
+          responseText,
+          requestBody,
+          timestamp: Date.now(),
+          duration,
+        });
+        debugLog("API error reported", { url, method, status });
+      }
+    },
+    [debugLog],
+  );
 
   // API 호출 성능 추적
-  const trackApiCall = useCallback((
-    url: string,
-    method: string,
-    duration: number,
-    status: number
-  ) => {
-    if (performanceMonitorRef.current) {
-      performanceMonitorRef.current.trackApiCall(url, method, duration, status);
-      debugLog('API call tracked', { url, method, duration, status });
-    }
-  }, [debugLog]);
+  const trackApiCall = useCallback(
+    (url: string, method: string, duration: number, status: number) => {
+      if (performanceMonitorRef.current) {
+        performanceMonitorRef.current.trackApiCall(
+          url,
+          method,
+          duration,
+          status,
+        );
+        debugLog("API call tracked", { url, method, duration, status });
+      }
+    },
+    [debugLog],
+  );
 
   // 사용자 상호작용 추적
-  const trackUserInteraction = useCallback((
-    category: string,
-    action: string,
-    label?: string,
-    value?: number,
-    metadata?: Record<string, unknown>
-  ) => {
-    if (analyticsServiceRef.current) {
-      analyticsServiceRef.current.trackUserInteraction(category, action, label, value, metadata);
-      debugLog('User interaction tracked', { category, action, label });
-    }
-  }, [debugLog]);
+  const trackUserInteraction = useCallback(
+    (
+      category: string,
+      action: string,
+      label?: string,
+      value?: number,
+      metadata?: Record<string, unknown>,
+    ) => {
+      if (analyticsServiceRef.current) {
+        analyticsServiceRef.current.trackUserInteraction(
+          category,
+          action,
+          label,
+          value,
+          metadata,
+        );
+        debugLog("User interaction tracked", { category, action, label });
+      }
+    },
+    [debugLog],
+  );
 
   // 페이지 뷰 추적
-  const trackPageView = useCallback((page?: string) => {
-    if (analyticsServiceRef.current) {
-      analyticsServiceRef.current.trackPageView(page);
-      debugLog('Page view tracked', { page: page || window.location.pathname });
-    }
-  }, [debugLog]);
+  const trackPageView = useCallback(
+    (page?: string) => {
+      if (analyticsServiceRef.current) {
+        analyticsServiceRef.current.trackPageView(page);
+        debugLog("Page view tracked", {
+          page: page || window.location.pathname,
+        });
+      }
+    },
+    [debugLog],
+  );
 
   // 커스텀 메트릭 추적
-  const trackCustomMetric = useCallback((
-    name: string,
-    value: number,
-    metadata?: Record<string, unknown>
-  ) => {
-    if (analyticsServiceRef.current) {
-      analyticsServiceRef.current.trackCustomMetric(name, value, metadata);
-      debugLog('Custom metric tracked', { name, value });
-    }
-  }, [debugLog]);
+  const trackCustomMetric = useCallback(
+    (name: string, value: number, metadata?: Record<string, unknown>) => {
+      if (analyticsServiceRef.current) {
+        analyticsServiceRef.current.trackCustomMetric(name, value, metadata);
+        debugLog("Custom metric tracked", { name, value });
+      }
+    },
+    [debugLog],
+  );
 
   // 커스텀 이벤트 추적
-  const trackEvent = useCallback((
-    category: string,
-    action: string,
-    label?: string,
-    value?: number,
-    metadata?: Record<string, unknown>
-  ) => {
-    if (analyticsServiceRef.current) {
-      analyticsServiceRef.current.trackEvent({
-        type: 'custom',
-        category,
-        action,
-        label,
-        value,
-        metadata
-      });
-      debugLog('Custom event tracked', { category, action, label });
-    }
-  }, [debugLog]);
+  const trackEvent = useCallback(
+    (
+      category: string,
+      action: string,
+      label?: string,
+      value?: number,
+      metadata?: Record<string, unknown>,
+    ) => {
+      if (analyticsServiceRef.current) {
+        analyticsServiceRef.current.trackEvent({
+          type: "custom",
+          category,
+          action,
+          label,
+          value,
+          metadata,
+        });
+        debugLog("Custom event tracked", { category, action, label });
+      }
+    },
+    [debugLog],
+  );
 
   // 즉시 데이터 전송
   const flushNow = useCallback(async () => {
     if (analyticsServiceRef.current) {
       await analyticsServiceRef.current.flushNow();
-      debugLog('Analytics data flushed');
+      debugLog("Analytics data flushed");
     }
   }, [debugLog]);
 
@@ -329,21 +368,23 @@ export function useMonitoring(config?: MonitoringConfig) {
         webVitals: performanceStats?.webVitals || {},
         interactionCount: performanceStats?.interactions.length || 0,
         networkRequestCount: performanceStats?.networkMetrics.length || 0,
-        memoryUsage: performanceStats?.memoryMetrics.length ? 
-          performanceStats.memoryMetrics[performanceStats.memoryMetrics.length - 1] : 
-          undefined
+        memoryUsage: performanceStats?.memoryMetrics.length
+          ? performanceStats.memoryMetrics[
+              performanceStats.memoryMetrics.length - 1
+            ]
+          : undefined,
       },
       errors: {
-        sessionId: errorStats?.sessionId || '',
+        sessionId: errorStats?.sessionId || "",
         errorCount: errorStats?.errorCount || 0,
-        sessionDuration: errorStats?.sessionDuration || 0
+        sessionDuration: errorStats?.sessionDuration || 0,
       },
       analytics: {
-        sessionId: analyticsStats?.sessionId || '',
+        sessionId: analyticsStats?.sessionId || "",
         queueSize: analyticsStats?.queueSize || 0,
         failedBatchesCount: analyticsStats?.failedBatchesCount || 0,
-        lastFlushTime: analyticsStats?.lastFlushTime || 0
-      }
+        lastFlushTime: analyticsStats?.lastFlushTime || 0,
+      },
     };
   }, []);
 
@@ -365,7 +406,7 @@ export function useMonitoring(config?: MonitoringConfig) {
 
     // URL 변경 감지 (SPA용)
     let currentUrl = window.location.href;
-    
+
     const checkUrlChange = () => {
       const newUrl = window.location.href;
       if (newUrl !== currentUrl) {
@@ -381,7 +422,7 @@ export function useMonitoring(config?: MonitoringConfig) {
 
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
 
     return () => {
@@ -394,26 +435,26 @@ export function useMonitoring(config?: MonitoringConfig) {
     isEnabled,
     isInitialized: isInitializedRef.current,
     config: configRef.current,
-    
+
     // 에러 리포팅
     reportReactError,
     reportApiError,
-    
+
     // 성능 추적
     trackApiCall,
-    
+
     // Analytics 추적
     trackUserInteraction,
     trackPageView,
     trackCustomMetric,
     trackEvent,
-    
+
     // 유틸리티
     flushNow,
     getStats,
-    
+
     // 디버그
-    debugLog
+    debugLog,
   };
 }
 
@@ -423,9 +464,12 @@ export function useMonitoring(config?: MonitoringConfig) {
 export function useErrorBoundaryReporting() {
   const { reportReactError } = useMonitoring();
 
-  const reportError = useCallback((error: Error, errorInfo: any) => {
-    reportReactError(error, errorInfo);
-  }, [reportReactError]);
+  const reportError = useCallback(
+    (error: Error, errorInfo: React.ErrorInfo) => {
+      reportReactError(error, errorInfo);
+    },
+    [reportReactError],
+  );
 
   return { reportError };
 }
@@ -436,37 +480,34 @@ export function useErrorBoundaryReporting() {
 export function useApiMonitoring() {
   const { reportApiError, trackApiCall } = useMonitoring();
 
-  const trackRequest = useCallback((
-    url: string,
-    method: string,
-    startTime: number,
-    response?: Response,
-    error?: Error
-  ) => {
-    const duration = Date.now() - startTime;
-    
-    if (response) {
-      trackApiCall(url, method, duration, response.status);
-      
-      if (!response.ok) {
-        reportApiError(
-          url,
-          method,
-          response.status,
-          response.statusText,
-          duration
-        );
+  const trackRequest = useCallback(
+    (
+      url: string,
+      method: string,
+      startTime: number,
+      response?: Response,
+      error?: Error,
+    ) => {
+      const duration = Date.now() - startTime;
+
+      if (response) {
+        trackApiCall(url, method, duration, response.status);
+
+        if (!response.ok) {
+          reportApiError(
+            url,
+            method,
+            response.status,
+            response.statusText,
+            duration,
+          );
+        }
+      } else if (error) {
+        reportApiError(url, method, 0, error.message, duration);
       }
-    } else if (error) {
-      reportApiError(
-        url,
-        method,
-        0,
-        error.message,
-        duration
-      );
-    }
-  }, [reportApiError, trackApiCall]);
+    },
+    [reportApiError, trackApiCall],
+  );
 
   return { trackRequest };
 }

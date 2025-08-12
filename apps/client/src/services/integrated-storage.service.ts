@@ -1,19 +1,19 @@
 /**
  * 통합 스토리지 서비스
- * 
+ *
  * localStorage와 API 서비스를 추상화하여 하나의 인터페이스로 제공
  * - 온라인/오프라인 상태에 따른 자동 전환
- * - 낙관적 업데이트 지원  
+ * - 낙관적 업데이트 지원
  * - 대기 중인 작업 큐 관리
  * - AuthContext와 연동하여 권한 기반 작업 처리
  */
 
-import type { Todo, CreateTodoRequest, UpdateTodoRequest } from 'types/index';
-import type { PendingOperation } from '../contexts/todo.reducer';
-import { offlineStorage } from './offline-storage';
-import { todoApiService } from './api/todo-api.service';
-import { authService } from './auth.service';
-import { syncManager } from './sync-manager';
+import type { Todo, CreateTodoRequest, UpdateTodoRequest } from "types/index";
+import type { PendingOperation } from "../contexts/todo.reducer";
+import { offlineStorage } from "./offline-storage";
+import { todoApiService } from "./api/todo-api.service";
+import { authService } from "./auth.service";
+import { syncManager } from "./sync-manager";
 
 /**
  * 스토리지 작업 결과
@@ -39,7 +39,7 @@ export interface StorageConfig {
 /**
  * 작업 우선순위
  */
-export type OperationPriority = 'high' | 'medium' | 'low';
+export type OperationPriority = "high" | "medium" | "low";
 
 /**
  * 통합 스토리지 서비스 클래스
@@ -70,19 +70,25 @@ class IntegratedStorageService {
 
   private initializeService(): void {
     // 네트워크 상태 모니터링
-    window.addEventListener('online', () => {
+    window.addEventListener("online", () => {
       this.isOnline = true;
       this.handleConnectionRestore();
     });
 
-    window.addEventListener('offline', () => {
+    window.addEventListener("offline", () => {
       this.isOnline = false;
     });
 
     // 동기화 매니저 이벤트 리스너 등록
-    syncManager.addEventListener('sync_success', this.handleSyncSuccess.bind(this));
-    syncManager.addEventListener('sync_error', this.handleSyncError.bind(this));
-    syncManager.addEventListener('sync_conflict', this.handleSyncConflict.bind(this));
+    syncManager.addEventListener(
+      "sync_success",
+      this.handleSyncSuccess.bind(this),
+    );
+    syncManager.addEventListener("sync_error", this.handleSyncError.bind(this));
+    syncManager.addEventListener(
+      "sync_conflict",
+      this.handleSyncConflict.bind(this),
+    );
   }
 
   private async handleConnectionRestore(): Promise<void> {
@@ -91,23 +97,23 @@ class IntegratedStorageService {
       try {
         await syncManager.triggerSync();
       } catch (error) {
-        console.warn('Auto sync failed after connection restore:', error);
+        console.warn("Auto sync failed after connection restore:", error);
       }
     }
   }
 
-  private handleSyncSuccess(event: string, data: unknown): void {
-    console.log('🔄 Sync completed successfully');
+  private handleSyncSuccess(): void {
+    console.log("🔄 Sync completed successfully");
     // 캐시 무효화
     this.cache.clear();
   }
 
   private handleSyncError(event: string, data: unknown): void {
-    console.error('🔄 Sync failed:', data);
+    console.error("🔄 Sync failed:", data);
   }
 
   private handleSyncConflict(event: string, data: unknown): void {
-    console.warn('🔄 Sync conflicts detected:', data);
+    console.warn("🔄 Sync conflicts detected:", data);
     // 충돌 해결 로직은 상위 레벨에서 처리
   }
 
@@ -142,8 +148,10 @@ class IntegratedStorageService {
   /**
    * TODO 목록 조회
    */
-  async getTodos(options?: { useCache?: boolean }): Promise<StorageOperationResult<Todo[]>> {
-    const cacheKey = 'todos';
+  async getTodos(options?: {
+    useCache?: boolean;
+  }): Promise<StorageOperationResult<Todo[]>> {
+    const cacheKey = "todos";
     const useCache = options?.useCache !== false;
 
     // 캐시 확인
@@ -164,7 +172,7 @@ class IntegratedStorageService {
         // 온라인: API에서 데이터 가져오기
         const apiResponse = await todoApiService.getAll();
         todos = apiResponse.data.todos || [];
-        
+
         // 로컬 스토리지에도 백업 저장
         offlineStorage.setTodos(todos);
       } else {
@@ -188,7 +196,7 @@ class IntegratedStorageService {
       return {
         success: false,
         data: localTodos,
-        error: error instanceof Error ? error.message : 'Failed to fetch todos',
+        error: error instanceof Error ? error.message : "Failed to fetch todos",
       };
     }
   }
@@ -198,7 +206,6 @@ class IntegratedStorageService {
    */
   async createTodo(
     todoData: CreateTodoRequest,
-    options?: { priority?: OperationPriority }
   ): Promise<StorageOperationResult<Todo>> {
     // 낙관적 업데이트를 위한 임시 TODO 생성
     const optimisticTodo: Todo = {
@@ -206,12 +213,12 @@ class IntegratedStorageService {
       title: todoData.title,
       completed: false,
       description: todoData.description,
-      priority: todoData.priority || 'medium',
+      priority: todoData.priority || "medium",
       dueDate: todoData.dueDate,
       tags: todoData.tags || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      userId: authService.getCurrentUserId() || 'guest',
+      userId: authService.getCurrentUserId() || "guest",
     };
 
     // 즉시 로컬 스토리지에 추가 (낙관적 업데이트)
@@ -234,17 +241,21 @@ class IntegratedStorageService {
           data: serverTodo,
           isOptimistic: false,
         };
-      } catch (error) {
+      } catch {
         // API 실패시 대기 큐에 추가
         const operationId = crypto.randomUUID();
-        const queued = syncManager.queueOperation('create', optimisticTodo.id, todoData);
-        
+        const queued = syncManager.queueOperation(
+          "create",
+          optimisticTodo.id,
+          todoData,
+        );
+
         if (!queued) {
           // 큐 추가 실패시 롤백
           offlineStorage.deleteTodo(optimisticTodo.id);
           return {
             success: false,
-            error: 'Failed to queue operation for later sync',
+            error: "Failed to queue operation for later sync",
           };
         }
 
@@ -253,13 +264,13 @@ class IntegratedStorageService {
           data: optimisticTodo,
           isOptimistic: true,
           operationId,
-          error: 'Queued for sync when online',
+          error: "Queued for sync when online",
         };
       }
     } else {
       // 오프라인: 대기 큐에 추가
       const operationId = crypto.randomUUID();
-      syncManager.queueOperation('create', optimisticTodo.id, todoData);
+      syncManager.queueOperation("create", optimisticTodo.id, todoData);
 
       return {
         success: true,
@@ -276,14 +287,13 @@ class IntegratedStorageService {
   async updateTodo(
     id: string,
     updates: UpdateTodoRequest,
-    options?: { priority?: OperationPriority }
   ): Promise<StorageOperationResult<Todo>> {
     // 기존 TODO 찾기
-    const existingTodo = offlineStorage.getTodos().find(t => t.id === id);
+    const existingTodo = offlineStorage.getTodos().find((t) => t.id === id);
     if (!existingTodo) {
       return {
         success: false,
-        error: 'Todo not found',
+        error: "Todo not found",
       };
     }
 
@@ -313,23 +323,23 @@ class IntegratedStorageService {
           data: serverTodo,
           isOptimistic: false,
         };
-      } catch (error) {
+      } catch {
         // API 실패시 대기 큐에 추가
         const operationId = crypto.randomUUID();
-        syncManager.queueOperation('update', id, updates);
+        syncManager.queueOperation("update", id, updates);
 
         return {
           success: true,
           data: updatedTodo,
           isOptimistic: true,
           operationId,
-          error: 'Queued for sync when online',
+          error: "Queued for sync when online",
         };
       }
     } else {
       // 오프라인: 대기 큐에 추가
       const operationId = crypto.randomUUID();
-      syncManager.queueOperation('update', id, updates);
+      syncManager.queueOperation("update", id, updates);
 
       return {
         success: true,
@@ -343,16 +353,13 @@ class IntegratedStorageService {
   /**
    * TODO 삭제
    */
-  async deleteTodo(
-    id: string,
-    options?: { priority?: OperationPriority }
-  ): Promise<StorageOperationResult<void>> {
+  async deleteTodo(id: string): Promise<StorageOperationResult<void>> {
     // 기존 TODO 백업 (롤백용)
-    const existingTodo = offlineStorage.getTodos().find(t => t.id === id);
+    const existingTodo = offlineStorage.getTodos().find((t) => t.id === id);
     if (!existingTodo) {
       return {
         success: false,
-        error: 'Todo not found',
+        error: "Todo not found",
       };
     }
 
@@ -371,25 +378,25 @@ class IntegratedStorageService {
           success: true,
           isOptimistic: false,
         };
-      } catch (error) {
+      } catch {
         // API 실패시 복원 및 대기 큐에 추가
         if (this.config.enableOptimisticUpdates) {
           offlineStorage.addTodo(existingTodo); // 롤백
         }
 
         const operationId = crypto.randomUUID();
-        syncManager.queueOperation('delete', id);
+        syncManager.queueOperation("delete", id);
 
         return {
           success: false,
           operationId,
-          error: 'Failed to delete, queued for retry',
+          error: "Failed to delete, queued for retry",
         };
       }
     } else {
       // 오프라인: 대기 큐에 추가
       const operationId = crypto.randomUUID();
-      syncManager.queueOperation('delete', id);
+      syncManager.queueOperation("delete", id);
 
       return {
         success: true,
@@ -403,11 +410,11 @@ class IntegratedStorageService {
    * TODO 완료 상태 토글
    */
   async toggleTodo(id: string): Promise<StorageOperationResult<Todo>> {
-    const existingTodo = offlineStorage.getTodos().find(t => t.id === id);
+    const existingTodo = offlineStorage.getTodos().find((t) => t.id === id);
     if (!existingTodo) {
       return {
         success: false,
-        error: 'Todo not found',
+        error: "Todo not found",
       };
     }
 
@@ -424,7 +431,7 @@ class IntegratedStorageService {
   async syncData(): Promise<StorageOperationResult<void>> {
     try {
       const result = await syncManager.triggerSync();
-      
+
       if (result.success) {
         this.cache.clear(); // 캐시 무효화
         return {
@@ -439,7 +446,7 @@ class IntegratedStorageService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Sync failed',
+        error: error instanceof Error ? error.message : "Sync failed",
       };
     }
   }
@@ -465,9 +472,13 @@ class IntegratedStorageService {
   /**
    * 게스트 데이터를 인증된 사용자 계정으로 마이그레이션
    */
-  async migrateGuestData(targetUserId: string): Promise<StorageOperationResult<number>> {
+  async migrateGuestData(
+    targetUserId: string,
+  ): Promise<StorageOperationResult<number>> {
     try {
-      const guestTodos = offlineStorage.getTodos().filter(todo => todo.userId === 'guest');
+      const guestTodos = offlineStorage
+        .getTodos()
+        .filter((todo) => todo.userId === "guest");
       let migratedCount = 0;
 
       if (this.canUseAPI()) {
@@ -506,7 +517,7 @@ class IntegratedStorageService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Migration failed',
+        error: error instanceof Error ? error.message : "Migration failed",
       };
     }
   }
@@ -557,7 +568,9 @@ export const storageUtils = {
   /**
    * 작업 결과가 성공인지 확인
    */
-  isSuccess<T>(result: StorageOperationResult<T>): result is StorageOperationResult<T> & { success: true; data: T } {
+  isSuccess<T>(
+    result: StorageOperationResult<T>,
+  ): result is StorageOperationResult<T> & { success: true; data: T } {
     return result.success && result.data !== undefined;
   },
 
@@ -572,7 +585,7 @@ export const storageUtils = {
    * 에러 메시지 추출
    */
   getErrorMessage<T>(result: StorageOperationResult<T>): string {
-    return result.error || 'Unknown error occurred';
+    return result.error || "Unknown error occurred";
   },
 
   /**

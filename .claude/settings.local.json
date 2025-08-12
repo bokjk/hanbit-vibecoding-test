@@ -1,6 +1,10 @@
 {
   "permissions": {
-    "allow": ["Bash(npm run type-check:*)", "Bash(npx eslint:*)"],
+    "allow": [
+      "Bash(npm run type-check:*)",
+      "Bash(npx eslint:*)",
+      "Bash(chmod:*)"
+    ],
     "deny": [],
     "ask": []
   }

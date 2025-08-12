@@ -1,0 +1,334 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "feature/*"
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "10.13.1"
+
+jobs:
+  # 환경 변수 및 설정 검증
+  validate-environment:
+    name: 환경 설정 검증
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.determine-env.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 환경 결정
+        id: determine-env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "environment=test" 
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 환경 설정 검증
+        run: |
+          node apps/server/infrastructure/scripts/env-check.js ${{ steps.determine-env.outputs.environment }}
+
+  # 코드 품질 검사
+  code-quality:
+    name: 코드 품질 검사
+    runs-on: ubuntu-latest
+    needs: validate-environment
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint check
+        run: pnpm run lint:all
+
+      - name: Type check
+        run: pnpm run type-check:all
+
+      - name: Format check
+        run: pnpm run format:all --check
+
+  # 단위 테스트
+  unit-tests:
+    name: 단위 테스트
+    runs-on: ubuntu-latest
+    needs: validate-environment
+    strategy:
+      matrix:
+        package: [client, server]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests - ${{ matrix.package }}
+        run: pnpm run test:${{ matrix.package }}
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ./apps/${{ matrix.package }}/coverage
+          flags: ${{ matrix.package }}
+          name: ${{ matrix.package }}-coverage
+        continue-on-error: true
+
+  # E2E 테스트
+  e2e-tests:
+    name: E2E 테스트
+    runs-on: ubuntu-latest
+    needs: [validate-environment, unit-tests]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @vive/client exec playwright install --with-deps
+
+      - name: Build application
+        run: pnpm run build:all
+
+      - name: Start development server
+        run: |
+          pnpm run dev &
+          sleep 10
+
+      - name: Run E2E tests
+        run: pnpm run test:e2e
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: apps/client/test-results/
+          retention-days: 7
+
+  # 빌드 검증
+  build-validation:
+    name: 빌드 검증
+    runs-on: ubuntu-latest
+    needs: [validate-environment, code-quality]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm run build:all
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ needs.validate-environment.outputs.environment }}
+          path: |
+            apps/client/dist/
+            apps/server/dist/
+            apps/server/infrastructure/dist/
+          retention-days: 7
+
+  # 보안 검사
+  security-scan:
+    name: 보안 검사
+    runs-on: ubuntu-latest
+    needs: validate-environment
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run security audit
+        run: pnpm audit --audit-level high
+        continue-on-error: true
+
+      - name: Run CodeQL analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+
+  # 배포 (develop/main 브랜치만)
+  deploy:
+    name: 배포 - ${{ needs.validate-environment.outputs.environment }}
+    runs-on: ubuntu-latest
+    needs:
+      - validate-environment
+      - code-quality
+      - unit-tests
+      - build-validation
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
+    environment: ${{ needs.validate-environment.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: 배포 전 검증
+        run: node apps/server/infrastructure/scripts/pre-deploy.js ${{ needs.validate-environment.outputs.environment }}
+
+      - name: CDK 배포
+        run: |
+          cd apps/server/infrastructure
+          chmod +x scripts/deploy.sh
+          ./scripts/deploy.sh ${{ needs.validate-environment.outputs.environment }} --force-approval
+
+      - name: 배포 후 검증
+        run: node apps/server/infrastructure/scripts/post-deploy.js ${{ needs.validate-environment.outputs.environment }}
+
+      - name: 배포 성공 알림
+        if: success()
+        run: |
+          echo "✅ ${{ needs.validate-environment.outputs.environment }} 환경 배포 성공!"
+          echo "배포 시간: $(date)"
+          echo "커밋: ${{ github.sha }}"
+
+      - name: 배포 실패 시 롤백
+        if: failure()
+        run: |
+          echo "❌ 배포 실패. 롤백을 시도합니다..."
+          echo "yes" | node apps/server/infrastructure/scripts/rollback.js ${{ needs.validate-environment.outputs.environment }}
+
+  # 배포 후 검증 (별도 작업)
+  post-deployment-validation:
+    name: 배포 후 통합 검증
+    runs-on: ubuntu-latest
+    needs: [validate-environment, deploy]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: 통합 테스트 실행
+        run: |
+          # 배포된 환경에 대한 통합 테스트
+          echo "배포된 API 엔드포인트 테스트 중..."
+          # TODO: 실제 API 엔드포인트 테스트 로직 추가
+
+      - name: 성능 모니터링 설정 확인
+        run: |
+          echo "CloudWatch 대시보드 및 알람 상태 확인 중..."
+          aws cloudwatch describe-alarms --query 'MetricAlarms[?StateValue!=`OK`]'
+
+      - name: 배포 결과 요약
+        run: |
+          echo "## 배포 완료 요약" >> $GITHUB_STEP_SUMMARY
+          echo "- 환경: ${{ needs.validate-environment.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 배포 시간: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- 커밋: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 브랜치: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY

@@ -1,20 +1,20 @@
 /**
  * 마이그레이션 상태 관리 훅
- * 
+ *
  * 데이터 마이그레이션의 상태를 관리하고 UI에 필요한 메서드들을 제공
  */
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { 
-  dataMigrationService, 
-  type MigrationState, 
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import {
+  dataMigrationService,
+  type MigrationState,
   type MigrationResult,
   type MigrationEvent,
   type MigrationEventListener,
-  migrationUtils 
-} from '../services/data-migration.service';
-import { useAuthContext } from '../contexts/auth.context';
-import { localStorageService } from '../services/localStorage.service';
+  migrationUtils,
+} from "../services/data-migration.service";
+import { useAuthContext } from "../contexts/auth.context";
+import { localStorageService } from "../services/localStorage.service";
 
 /**
  * 마이그레이션 훅 상태
@@ -22,13 +22,13 @@ import { localStorageService } from '../services/localStorage.service';
 export interface UseMigrationState {
   // 마이그레이션 상태
   migration: MigrationState;
-  
+
   // 유틸리티 상태
   isRequired: boolean;
   canStart: boolean;
   progress: number;
   statusMessage: string;
-  
+
   // 히스토리
   history: {
     completed: boolean;
@@ -46,19 +46,25 @@ export interface UseMigrationActions {
   cancelMigration: () => Promise<boolean>;
   resetMigration: () => void;
   checkMigrationRequired: () => Promise<boolean>;
-  
+
   // 유틸리티 액션
-  getStatusReport: () => ReturnType<typeof dataMigrationService.getStatusReport>;
+  getStatusReport: () => ReturnType<
+    typeof dataMigrationService.getStatusReport
+  >;
   restoreFromBackup: () => boolean;
-  
+
   // 옵션 설정
-  updateOptions: (options: Parameters<typeof dataMigrationService.updateOptions>[0]) => void;
+  updateOptions: (
+    options: Parameters<typeof dataMigrationService.updateOptions>[0],
+  ) => void;
 }
 
 /**
  * 마이그레이션 훅 반환 타입
  */
-export interface UseMigrationReturn extends UseMigrationState, UseMigrationActions {}
+export interface UseMigrationReturn
+  extends UseMigrationState,
+    UseMigrationActions {}
 
 /**
  * 마이그레이션 상태 관리 훅
@@ -66,11 +72,13 @@ export interface UseMigrationReturn extends UseMigrationState, UseMigrationActio
 export function useMigration(): UseMigrationReturn {
   const { state: authState } = useAuthContext();
   const [migrationState, setMigrationState] = useState<MigrationState>(
-    dataMigrationService.getState()
+    dataMigrationService.getState(),
   );
-  const [lastResult, setLastResult] = useState<MigrationResult | null>(null);
-  const eventListenersRef = useRef<Map<MigrationEvent, MigrationEventListener>>(new Map());
-  
+  // const [_lastResult, setLastResult] = useState<MigrationResult | null>(null);
+  const eventListenersRef = useRef<Map<MigrationEvent, MigrationEventListener>>(
+    new Map(),
+  );
+
   // ================================
   // 상태 업데이트
   // ================================
@@ -88,35 +96,35 @@ export function useMigration(): UseMigrationReturn {
    */
   useEffect(() => {
     const listeners = eventListenersRef.current;
-    
+
     // 이벤트 리스너 정의
     const onStageChange: MigrationEventListener = () => {
       syncMigrationState();
     };
-    
+
     const onProgress: MigrationEventListener = () => {
       syncMigrationState();
     };
-    
+
     const onComplete: MigrationEventListener = (_, data) => {
       syncMigrationState();
-      if (data && typeof data === 'object' && 'result' in data) {
+      if (data && typeof data === "object" && "result" in data) {
         setLastResult(data.result as MigrationResult);
       }
     };
-    
+
     const onError: MigrationEventListener = (_, data) => {
       syncMigrationState();
-      if (data && typeof data === 'object' && 'result' in data) {
+      if (data && typeof data === "object" && "result" in data) {
         setLastResult(data.result as MigrationResult);
       }
     };
 
     // 이벤트 리스너 등록
-    listeners.set('stage_change', onStageChange);
-    listeners.set('migration_progress', onProgress);
-    listeners.set('migration_complete', onComplete);
-    listeners.set('migration_error', onError);
+    listeners.set("stage_change", onStageChange);
+    listeners.set("migration_progress", onProgress);
+    listeners.set("migration_complete", onComplete);
+    listeners.set("migration_error", onError);
 
     listeners.forEach((listener, event) => {
       dataMigrationService.addEventListener(event, listener);
@@ -146,17 +154,19 @@ export function useMigration(): UseMigrationReturn {
   /**
    * 마이그레이션 시작 가능 여부
    */
-  const canStart = isRequired && 
-    !migrationState.isInProgress && 
+  const canStart =
+    isRequired &&
+    !migrationState.isInProgress &&
     !migrationState.isComplete &&
     authState.isInitialized;
 
   /**
    * 진행률 계산
    */
-  const progress = migrationState.totalItems > 0 
-    ? migrationState.migratedItems / migrationState.totalItems 
-    : 0;
+  const progress =
+    migrationState.totalItems > 0
+      ? migrationState.migratedItems / migrationState.totalItems
+      : 0;
 
   /**
    * 상태 메시지 생성
@@ -167,26 +177,31 @@ export function useMigration(): UseMigrationReturn {
     }
 
     switch (migrationState.stage) {
-      case 'checking':
-        return '마이그레이션 필요성을 확인하고 있습니다...';
-      case 'preparing':
-        return '마이그레이션을 준비하고 있습니다...';
-      case 'authenticating':
-        return '인증을 처리하고 있습니다...';
-      case 'migrating':
+      case "checking":
+        return "마이그레이션 필요성을 확인하고 있습니다...";
+      case "preparing":
+        return "마이그레이션을 준비하고 있습니다...";
+      case "authenticating":
+        return "인증을 처리하고 있습니다...";
+      case "migrating":
         return `데이터를 마이그레이션하고 있습니다... (${migrationState.migratedItems}/${migrationState.totalItems})`;
-      case 'syncing':
-        return '서버와 동기화하고 있습니다...';
-      case 'cleanup':
-        return '마이그레이션을 완료하고 있습니다...';
-      case 'complete':
-        return '마이그레이션이 완료되었습니다.';
-      case 'error':
-        return '마이그레이션 중 오류가 발생했습니다.';
+      case "syncing":
+        return "서버와 동기화하고 있습니다...";
+      case "cleanup":
+        return "마이그레이션을 완료하고 있습니다...";
+      case "complete":
+        return "마이그레이션이 완료되었습니다.";
+      case "error":
+        return "마이그레이션 중 오류가 발생했습니다.";
       default:
-        return '준비 중...';
+        return "준비 중...";
     }
-  }, [migrationState.stage, migrationState.error, migrationState.migratedItems, migrationState.totalItems]);
+  }, [
+    migrationState.stage,
+    migrationState.error,
+    migrationState.migratedItems,
+    migrationState.totalItems,
+  ]);
 
   /**
    * 마이그레이션 히스토리
@@ -204,7 +219,7 @@ export function useMigration(): UseMigrationReturn {
    */
   const startMigration = useCallback(async (): Promise<MigrationResult> => {
     if (!canStart) {
-      throw new Error('Cannot start migration: conditions not met');
+      throw new Error("Cannot start migration: conditions not met");
     }
 
     try {
@@ -214,7 +229,7 @@ export function useMigration(): UseMigrationReturn {
     } catch (error) {
       const errorResult: MigrationResult = {
         success: false,
-        message: error instanceof Error ? error.message : 'Migration failed',
+        message: error instanceof Error ? error.message : "Migration failed",
         migratedCount: migrationState.migratedItems,
         skippedCount: 0,
         errorCount: migrationState.totalItems - migrationState.migratedItems,
@@ -245,7 +260,8 @@ export function useMigration(): UseMigrationReturn {
    * 마이그레이션 필요성 확인
    */
   const checkMigrationRequired = useCallback(async (): Promise<boolean> => {
-    const required = await dataMigrationService.checkMigrationRequired(authState);
+    const required =
+      await dataMigrationService.checkMigrationRequired(authState);
     syncMigrationState();
     return required;
   }, [authState, syncMigrationState]);
@@ -271,9 +287,12 @@ export function useMigration(): UseMigrationReturn {
   /**
    * 마이그레이션 옵션 업데이트
    */
-  const updateOptions = useCallback((options: Parameters<typeof dataMigrationService.updateOptions>[0]) => {
-    dataMigrationService.updateOptions(options);
-  }, []);
+  const updateOptions = useCallback(
+    (options: Parameters<typeof dataMigrationService.updateOptions>[0]) => {
+      dataMigrationService.updateOptions(options);
+    },
+    [],
+  );
 
   // ================================
   // 자동 마이그레이션 확인
@@ -286,11 +305,15 @@ export function useMigration(): UseMigrationReturn {
     let isMounted = true;
 
     const checkMigration = async () => {
-      if (authState.isInitialized && !migrationState.isInProgress && !migrationState.isComplete) {
+      if (
+        authState.isInitialized &&
+        !migrationState.isInProgress &&
+        !migrationState.isComplete
+      ) {
         try {
           await checkMigrationRequired();
         } catch (error) {
-          console.error('Auto migration check failed:', error);
+          console.error("Auto migration check failed:", error);
         }
       }
     };
@@ -302,7 +325,14 @@ export function useMigration(): UseMigrationReturn {
     return () => {
       isMounted = false;
     };
-  }, [authState.isInitialized, authState.isAuthenticated, authState.isGuest, checkMigrationRequired, migrationState.isComplete, migrationState.isInProgress]);
+  }, [
+    authState.isInitialized,
+    authState.isAuthenticated,
+    authState.isGuest,
+    checkMigrationRequired,
+    migrationState.isComplete,
+    migrationState.isInProgress,
+  ]);
 
   // ================================
   // 반환값 구성
@@ -316,7 +346,7 @@ export function useMigration(): UseMigrationReturn {
     progress,
     statusMessage,
     history,
-    
+
     // 액션
     startMigration,
     cancelMigration,
@@ -370,7 +400,11 @@ export function useMigrationProgress(): {
   const [startTime, setStartTime] = useState<number | null>(null);
 
   useEffect(() => {
-    if (migration.isInProgress && migration.stage === 'migrating' && !startTime) {
+    if (
+      migration.isInProgress &&
+      migration.stage === "migrating" &&
+      !startTime
+    ) {
       setStartTime(Date.now());
     } else if (!migration.isInProgress) {
       setStartTime(null);
@@ -378,19 +412,31 @@ export function useMigrationProgress(): {
   }, [migration.isInProgress, migration.stage, startTime]);
 
   const eta = useMemo(() => {
-    if (!startTime || !migration.isInProgress || migration.migratedItems === 0) {
+    if (
+      !startTime ||
+      !migration.isInProgress ||
+      migration.migratedItems === 0
+    ) {
       return null;
     }
 
     const elapsed = Date.now() - startTime;
     const avgTimePerItem = elapsed / migration.migratedItems;
     const remainingItems = migration.totalItems - migration.migratedItems;
-    
+
     return Math.ceil((remainingItems * avgTimePerItem) / 1000);
-  }, [startTime, migration.isInProgress, migration.migratedItems, migration.totalItems]);
+  }, [
+    startTime,
+    migration.isInProgress,
+    migration.migratedItems,
+    migration.totalItems,
+  ]);
 
   return {
-    progress: migration.totalItems > 0 ? migration.migratedItems / migration.totalItems : 0,
+    progress:
+      migration.totalItems > 0
+        ? migration.migratedItems / migration.totalItems
+        : 0,
     stage: migration.stage,
     isActive: migration.isInProgress,
     eta,

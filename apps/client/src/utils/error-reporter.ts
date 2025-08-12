@@ -5,7 +5,12 @@
 
 export interface ErrorReport {
   id: string;
-  type: 'javascript' | 'resource' | 'api' | 'unhandled_rejection' | 'console_error';
+  type:
+    | "javascript"
+    | "resource"
+    | "api"
+    | "unhandled_rejection"
+    | "console_error";
   message: string;
   stack?: string;
   url: string;
@@ -16,7 +21,7 @@ export interface ErrorReport {
   sessionId: string;
   userId?: string;
   context: ErrorContext;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   fingerprint: string; // 동일한 에러 그룹화용
 }
 
@@ -33,12 +38,12 @@ export interface ErrorContext {
   localStorage: Record<string, unknown>;
   sessionStorage: Record<string, unknown>;
   memoryUsage?: MemoryUsage;
-  networkStatus: 'online' | 'offline';
+  networkStatus: "online" | "offline";
   batteryLevel?: number;
 }
 
 export interface UserAction {
-  type: 'click' | 'navigation' | 'form_submit' | 'api_call' | 'error';
+  type: "click" | "navigation" | "form_submit" | "api_call" | "error";
   target?: string;
   timestamp: number;
   metadata?: Record<string, unknown>;
@@ -122,10 +127,11 @@ export class ErrorReporter {
    */
   private shouldEnableReporting(): boolean {
     // 환경변수로 제어
-    const isDebugMode = import.meta.env.VITE_DEBUG === 'true';
-    const isProduction = import.meta.env.MODE === 'production';
-    const enableReporting = import.meta.env.VITE_ENABLE_ERROR_REPORTING !== 'false';
-    
+    const isDebugMode = import.meta.env.VITE_DEBUG === "true";
+    const isProduction = import.meta.env.MODE === "production";
+    const enableReporting =
+      import.meta.env.VITE_ENABLE_ERROR_REPORTING !== "false";
+
     return (isDebugMode || isProduction) && enableReporting;
   }
 
@@ -134,18 +140,22 @@ export class ErrorReporter {
    */
   private initializeErrorHandlers(): void {
     // Global error handler
-    window.addEventListener('error', (event) => {
+    window.addEventListener("error", (event) => {
       this.handleJavaScriptError({
         message: event.message,
         filename: event.filename,
         lineno: event.lineno,
         colno: event.colno,
-        error: event.error
+        error: event.error,
       });
     });
 
     // React Error Boundary와 통합 가능한 함수 제공
-    (window as Window & { __reportReactError?: (error: Error, errorInfo: unknown) => void }).__reportReactError = (error: Error, errorInfo: unknown) => {
+    (
+      window as Window & {
+        __reportReactError?: (error: Error, errorInfo: unknown) => void;
+      }
+    ).__reportReactError = (error: Error, errorInfo: unknown) => {
       this.reportReactError(error, errorInfo);
     };
   }
@@ -154,21 +164,31 @@ export class ErrorReporter {
    * 리소스 로딩 에러 핸들링
    */
   private initializeResourceErrorHandling(): void {
-    window.addEventListener('error', (event) => {
-      const target = event.target as HTMLElement;
-      
-      // 리소스 로딩 에러만 처리
-      if (target && target !== window && (target.tagName === 'IMG' || target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
-        this.handleResourceError(target, event);
-      }
-    }, true); // capture phase에서 처리
+    window.addEventListener(
+      "error",
+      (event) => {
+        const target = event.target as HTMLElement;
+
+        // 리소스 로딩 에러만 처리
+        if (
+          target &&
+          target !== window &&
+          (target.tagName === "IMG" ||
+            target.tagName === "SCRIPT" ||
+            target.tagName === "LINK")
+        ) {
+          this.handleResourceError(target, event);
+        }
+      },
+      true,
+    ); // capture phase에서 처리
   }
 
   /**
    * Unhandled Promise Rejection 핸들링
    */
   private initializeUnhandledRejectionHandling(): void {
-    window.addEventListener('unhandledrejection', (event) => {
+    window.addEventListener("unhandledrejection", (event) => {
       this.handleUnhandledRejection(event);
     });
   }
@@ -178,11 +198,11 @@ export class ErrorReporter {
    */
   private initializeConsoleErrorInterception(): void {
     const originalConsoleError = console.error;
-    
+
     console.error = (...args) => {
       // 원본 console.error 실행
       originalConsoleError.apply(console, args);
-      
+
       // 에러 리포팅
       this.handleConsoleError(args);
     };
@@ -193,27 +213,31 @@ export class ErrorReporter {
    */
   private trackUserActions(): void {
     // 클릭 추적
-    document.addEventListener('click', (event) => {
-      this.addUserAction({
-        type: 'click',
-        target: this.getElementSelector(event.target as Element),
-        timestamp: Date.now(),
-        metadata: {
-          x: event.clientX,
-          y: event.clientY
-        }
-      });
-    }, { passive: true });
+    document.addEventListener(
+      "click",
+      (event) => {
+        this.addUserAction({
+          type: "click",
+          target: this.getElementSelector(event.target as Element),
+          timestamp: Date.now(),
+          metadata: {
+            x: event.clientX,
+            y: event.clientY,
+          },
+        });
+      },
+      { passive: true },
+    );
 
     // 네비게이션 추적
     const trackNavigation = () => {
       this.addUserAction({
-        type: 'navigation',
+        type: "navigation",
         timestamp: Date.now(),
         metadata: {
           url: window.location.href,
-          referrer: document.referrer
-        }
+          referrer: document.referrer,
+        },
       });
     };
 
@@ -221,24 +245,24 @@ export class ErrorReporter {
     const originalPushState = history.pushState;
     const originalReplaceState = history.replaceState;
 
-    history.pushState = function(...args) {
+    history.pushState = function (...args) {
       originalPushState.apply(this, args);
       trackNavigation();
     };
 
-    history.replaceState = function(...args) {
+    history.replaceState = function (...args) {
       originalReplaceState.apply(this, args);
       trackNavigation();
     };
 
-    window.addEventListener('popstate', trackNavigation);
+    window.addEventListener("popstate", trackNavigation);
 
     // 폼 제출 추적
-    document.addEventListener('submit', (event) => {
+    document.addEventListener("submit", (event) => {
       this.addUserAction({
-        type: 'form_submit',
+        type: "form_submit",
         target: this.getElementSelector(event.target as Element),
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     });
   }
@@ -259,10 +283,10 @@ export class ErrorReporter {
 
     const error = errorEvent.error;
     const stack = error?.stack || new Error().stack;
-    
+
     const errorReport: ErrorReport = {
       id: this.generateErrorId(),
-      type: 'javascript',
+      type: "javascript",
       message: errorEvent.message,
       stack,
       url: errorEvent.filename || window.location.href,
@@ -272,8 +296,12 @@ export class ErrorReporter {
       userAgent: navigator.userAgent,
       sessionId: this.sessionId,
       context: this.getErrorContext(),
-      severity: this.calculateSeverity('javascript', errorEvent.message),
-      fingerprint: this.generateFingerprint('javascript', errorEvent.message, stack)
+      severity: this.calculateSeverity("javascript", errorEvent.message),
+      fingerprint: this.generateFingerprint(
+        "javascript",
+        errorEvent.message,
+        stack,
+      ),
     };
 
     this.reportError(errorReport);
@@ -282,14 +310,20 @@ export class ErrorReporter {
   /**
    * React 에러 처리
    */
-  reportReactError(error: Error, errorInfo: { componentStack?: string; errorBoundary?: { constructor: { name: string } } }): void {
+  reportReactError(
+    error: Error,
+    errorInfo: {
+      componentStack?: string;
+      errorBoundary?: { constructor: { name: string } };
+    },
+  ): void {
     if (this.errorCount >= this.maxErrorsPerSession) {
       return;
     }
 
     const errorReport: ErrorReport = {
       id: this.generateErrorId(),
-      type: 'javascript',
+      type: "javascript",
       message: error.message,
       stack: error.stack,
       url: window.location.href,
@@ -299,12 +333,16 @@ export class ErrorReporter {
       context: {
         ...this.getErrorContext(),
         reactErrorInfo: {
-          componentStack: errorInfo.componentStack || 'Unknown',
-          errorBoundary: errorInfo.errorBoundary?.constructor.name || 'Unknown'
-        }
+          componentStack: errorInfo.componentStack || "Unknown",
+          errorBoundary: errorInfo.errorBoundary?.constructor.name || "Unknown",
+        },
       },
-      severity: 'high',
-      fingerprint: this.generateFingerprint('react', error.message, error.stack)
+      severity: "high",
+      fingerprint: this.generateFingerprint(
+        "react",
+        error.message,
+        error.stack,
+      ),
     };
 
     this.reportError(errorReport);
@@ -313,16 +351,16 @@ export class ErrorReporter {
   /**
    * 리소스 에러 처리
    */
-  private handleResourceError(element: HTMLElement, event: ErrorEvent): void {
+  private handleResourceError(element: HTMLElement): void {
     if (this.errorCount >= this.maxErrorsPerSession) {
       return;
     }
 
     const source = this.getResourceSource(element);
-    
+
     const errorReport: ErrorReport = {
       id: this.generateErrorId(),
-      type: 'resource',
+      type: "resource",
       message: `Failed to load resource: ${source}`,
       url: window.location.href,
       timestamp: Date.now(),
@@ -333,11 +371,11 @@ export class ErrorReporter {
         resourceInfo: {
           tagName: element.tagName,
           source,
-          outerHTML: element.outerHTML.substring(0, 200)
-        }
+          outerHTML: element.outerHTML.substring(0, 200),
+        },
       },
       severity: this.calculateResourceSeverity(element.tagName),
-      fingerprint: this.generateFingerprint('resource', source)
+      fingerprint: this.generateFingerprint("resource", source),
     };
 
     this.reportError(errorReport);
@@ -352,13 +390,13 @@ export class ErrorReporter {
     }
 
     const reason = event.reason;
-    let message = 'Unhandled Promise Rejection';
+    let message = "Unhandled Promise Rejection";
     let stack: string | undefined;
 
     if (reason instanceof Error) {
       message = reason.message;
       stack = reason.stack;
-    } else if (typeof reason === 'string') {
+    } else if (typeof reason === "string") {
       message = reason;
     } else {
       message = JSON.stringify(reason);
@@ -366,7 +404,7 @@ export class ErrorReporter {
 
     const errorReport: ErrorReport = {
       id: this.generateErrorId(),
-      type: 'unhandled_rejection',
+      type: "unhandled_rejection",
       message,
       stack,
       url: window.location.href,
@@ -374,8 +412,12 @@ export class ErrorReporter {
       userAgent: navigator.userAgent,
       sessionId: this.sessionId,
       context: this.getErrorContext(),
-      severity: 'medium',
-      fingerprint: this.generateFingerprint('unhandled_rejection', message, stack)
+      severity: "medium",
+      fingerprint: this.generateFingerprint(
+        "unhandled_rejection",
+        message,
+        stack,
+      ),
     };
 
     this.reportError(errorReport);
@@ -389,9 +431,11 @@ export class ErrorReporter {
       return;
     }
 
-    const message = args.map(arg => 
-      typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-    ).join(' ');
+    const message = args
+      .map((arg) =>
+        typeof arg === "object" ? JSON.stringify(arg) : String(arg),
+      )
+      .join(" ");
 
     // React 개발 모드의 경고나 일반적인 로그는 제외
     if (this.shouldIgnoreConsoleError(message)) {
@@ -400,15 +444,15 @@ export class ErrorReporter {
 
     const errorReport: ErrorReport = {
       id: this.generateErrorId(),
-      type: 'console_error',
+      type: "console_error",
       message,
       url: window.location.href,
       timestamp: Date.now(),
       userAgent: navigator.userAgent,
       sessionId: this.sessionId,
       context: this.getErrorContext(),
-      severity: 'low',
-      fingerprint: this.generateFingerprint('console_error', message)
+      severity: "low",
+      fingerprint: this.generateFingerprint("console_error", message),
     };
 
     this.reportError(errorReport);
@@ -423,10 +467,10 @@ export class ErrorReporter {
     }
 
     const message = `API Error: ${apiError.method} ${apiError.url} - ${apiError.status} ${apiError.statusText}`;
-    
+
     const errorReport: ErrorReport = {
       id: this.generateErrorId(),
-      type: 'api',
+      type: "api",
       message,
       url: window.location.href,
       timestamp: Date.now(),
@@ -441,13 +485,17 @@ export class ErrorReporter {
           statusText: apiError.statusText,
           duration: apiError.duration,
           responseText: apiError.responseText?.substring(0, 1000), // 처음 1000자만
-          requestBody: typeof apiError.requestBody === 'string' 
-            ? apiError.requestBody.substring(0, 500)
-            : JSON.stringify(apiError.requestBody).substring(0, 500)
-        }
+          requestBody:
+            typeof apiError.requestBody === "string"
+              ? apiError.requestBody.substring(0, 500)
+              : JSON.stringify(apiError.requestBody).substring(0, 500),
+        },
       },
       severity: this.calculateApiSeverity(apiError.status),
-      fingerprint: this.generateFingerprint('api', `${apiError.method}_${apiError.url}_${apiError.status}`)
+      fingerprint: this.generateFingerprint(
+        "api",
+        `${apiError.method}_${apiError.url}_${apiError.status}`,
+      ),
     };
 
     this.reportError(errorReport);
@@ -458,7 +506,7 @@ export class ErrorReporter {
    */
   private addUserAction(action: UserAction): void {
     this.userActions.push(action);
-    
+
     // 최대 개수 제한
     if (this.userActions.length > this.maxActionsHistory) {
       this.userActions = this.userActions.slice(-this.maxActionsHistory);
@@ -470,53 +518,56 @@ export class ErrorReporter {
    */
   private getErrorContext(): ErrorContext {
     const now = Date.now();
-    
+
     return {
       url: window.location.href,
       userAgent: navigator.userAgent,
       viewport: {
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       },
       timestamp: now,
       sessionDuration: now - this.sessionStartTime,
       previousActions: [...this.userActions], // 복사본 생성
-      localStorage: this.getFilteredStorage('localStorage'),
-      sessionStorage: this.getFilteredStorage('sessionStorage'),
+      localStorage: this.getFilteredStorage("localStorage"),
+      sessionStorage: this.getFilteredStorage("sessionStorage"),
       memoryUsage: this.getMemoryUsage(),
-      networkStatus: navigator.onLine ? 'online' : 'offline',
-      batteryLevel: this.getBatteryLevel()
+      networkStatus: navigator.onLine ? "online" : "offline",
+      batteryLevel: this.getBatteryLevel(),
     };
   }
 
   /**
    * 필터링된 스토리지 데이터 조회 (개인정보 제외)
    */
-  private getFilteredStorage(storageType: 'localStorage' | 'sessionStorage'): Record<string, unknown> {
-    const storage = storageType === 'localStorage' ? localStorage : sessionStorage;
+  private getFilteredStorage(
+    storageType: "localStorage" | "sessionStorage",
+  ): Record<string, unknown> {
+    const storage =
+      storageType === "localStorage" ? localStorage : sessionStorage;
     const filtered: Record<string, unknown> = {};
-    
+
     // 민감한 키 제외
-    const excludeKeys = ['token', 'password', 'email', 'phone', 'user', 'auth'];
-    
+    const excludeKeys = ["token", "password", "email", "phone", "user", "auth"];
+
     for (let i = 0; i < storage.length; i++) {
       const key = storage.key(i);
       if (!key) continue;
-      
-      const shouldExclude = excludeKeys.some(excludeKey => 
-        key.toLowerCase().includes(excludeKey)
+
+      const shouldExclude = excludeKeys.some((excludeKey) =>
+        key.toLowerCase().includes(excludeKey),
       );
-      
+
       if (!shouldExclude) {
         try {
           const value = storage.getItem(key);
           filtered[key] = value ? JSON.parse(value) : value;
         } catch {
-          filtered[key] = '[unparseable]';
+          filtered[key] = "[unparseable]";
         }
       }
     }
-    
+
     return filtered;
   }
 
@@ -524,13 +575,21 @@ export class ErrorReporter {
    * 메모리 사용량 조회
    */
   private getMemoryUsage(): MemoryUsage | undefined {
-    const memory = (performance as Performance & { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory;
+    const memory = (
+      performance as Performance & {
+        memory?: {
+          usedJSHeapSize: number;
+          totalJSHeapSize: number;
+          jsHeapSizeLimit: number;
+        };
+      }
+    ).memory;
     if (!memory) return undefined;
 
     return {
       used: memory.usedJSHeapSize,
       total: memory.totalJSHeapSize,
-      limit: memory.jsHeapSizeLimit
+      limit: memory.jsHeapSizeLimit,
     };
   }
 
@@ -546,14 +605,14 @@ export class ErrorReporter {
    * Element selector 생성
    */
   private getElementSelector(element: Element | null): string {
-    if (!element) return 'unknown';
+    if (!element) return "unknown";
 
     if (element.id) {
       return `#${element.id}`;
     }
 
     if (element.className) {
-      const classes = Array.from(element.classList).slice(0, 2).join('.');
+      const classes = Array.from(element.classList).slice(0, 2).join(".");
       return `.${classes}`;
     }
 
@@ -564,68 +623,75 @@ export class ErrorReporter {
    * 리소스 소스 조회
    */
   private getResourceSource(element: HTMLElement): string {
-    if (element.tagName === 'IMG') {
+    if (element.tagName === "IMG") {
       return (element as HTMLImageElement).src;
     }
-    if (element.tagName === 'SCRIPT') {
+    if (element.tagName === "SCRIPT") {
       return (element as HTMLScriptElement).src;
     }
-    if (element.tagName === 'LINK') {
+    if (element.tagName === "LINK") {
       return (element as HTMLLinkElement).href;
     }
-    return 'unknown';
+    return "unknown";
   }
 
   /**
    * 심각도 계산
    */
-  private calculateSeverity(type: string, message: string): ErrorReport['severity'] {
+  private calculateSeverity(
+    type: string,
+    message: string,
+  ): ErrorReport["severity"] {
     const lowerMessage = message.toLowerCase();
-    
+
     // Critical 에러
-    if (lowerMessage.includes('cannot read property') || 
-        lowerMessage.includes('is not a function') ||
-        lowerMessage.includes('cannot access before initialization')) {
-      return 'critical';
+    if (
+      lowerMessage.includes("cannot read property") ||
+      lowerMessage.includes("is not a function") ||
+      lowerMessage.includes("cannot access before initialization")
+    ) {
+      return "critical";
     }
-    
+
     // High 에러
-    if (lowerMessage.includes('typeerror') || 
-        lowerMessage.includes('referenceerror')) {
-      return 'high';
+    if (
+      lowerMessage.includes("typeerror") ||
+      lowerMessage.includes("referenceerror")
+    ) {
+      return "high";
     }
-    
+
     // Medium 에러
-    if (type === 'unhandled_rejection') {
-      return 'medium';
+    if (type === "unhandled_rejection") {
+      return "medium";
     }
-    
-    return 'low';
+
+    return "low";
   }
 
   /**
    * 리소스 에러 심각도 계산
    */
-  private calculateResourceSeverity(tagName: string): ErrorReport['severity'] {
+  private calculateResourceSeverity(tagName: string): ErrorReport["severity"] {
     switch (tagName) {
-      case 'SCRIPT':
-        return 'high';
-      case 'LINK':
-        return 'medium';
-      case 'IMG':
-        return 'low';
+      case "SCRIPT":
+        return "high";
+      case "LINK":
+        return "medium";
+      case "IMG":
+        return "low";
       default:
-        return 'low';
+        return "low";
     }
   }
 
   /**
    * API 에러 심각도 계산
    */
-  private calculateApiSeverity(status: number): ErrorReport['severity'] {
-    if (status >= 500) return 'high';
-    if (status >= 400) return 'medium';
-    return 'low';
+  private calculateApiSeverity(status: number): ErrorReport["severity"] {
+    if (status >= 500) return "high";
+    if (status >= 400) return "medium";
+    return "low";
   }
 
   /**
@@ -633,12 +699,12 @@ export class ErrorReporter {
    */
   private shouldIgnoreConsoleError(message: string): boolean {
     const ignorePatterns = [
-      'Warning:', // React 경고
-      'You are running a production build of React', // React 정보 메시지
-      '%c' // styled console log
+      "Warning:", // React 경고
+      "You are running a production build of React", // React 정보 메시지
+      "%c", // styled console log
     ];
-    
-    return ignorePatterns.some(pattern => message.includes(pattern));
+
+    return ignorePatterns.some((pattern) => message.includes(pattern));
   }
 
   /**
@@ -651,13 +717,20 @@ export class ErrorReporter {
   /**
    * 에러 지문 생성 (동일한 에러 그룹화용)
    */
-  private generateFingerprint(type: string, message: string, stack?: string): string {
+  private generateFingerprint(
+    type: string,
+    message: string,
+    stack?: string,
+  ): string {
     const key = `${type}-${message}`;
     if (stack) {
       // 스택의 첫 번째 유의미한 라인만 사용
-      const stackLines = stack.split('\n');
-      const meaningfulLine = stackLines.find(line => 
-        line.includes('.js:') || line.includes('.ts:') || line.includes('.tsx:')
+      const stackLines = stack.split("\n");
+      const meaningfulLine = stackLines.find(
+        (line) =>
+          line.includes(".js:") ||
+          line.includes(".ts:") ||
+          line.includes(".tsx:"),
       );
       if (meaningfulLine) {
         return this.simpleHash(key + meaningfulLine);
@@ -673,7 +746,7 @@ export class ErrorReporter {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // 32bit integer로 변환
     }
     return Math.abs(hash).toString(36);
@@ -684,15 +757,15 @@ export class ErrorReporter {
    */
   private reportError(errorReport: ErrorReport): void {
     this.errorCount++;
-    
+
     // 사용자 액션에 에러 추가
     this.addUserAction({
-      type: 'error',
+      type: "error",
       timestamp: errorReport.timestamp,
       metadata: {
         errorType: errorReport.type,
-        message: errorReport.message.substring(0, 100)
-      }
+        message: errorReport.message.substring(0, 100),
+      },
     });
 
     if (this.onErrorCallback) {
@@ -708,7 +781,7 @@ export class ErrorReporter {
       sessionId: this.sessionId,
       sessionDuration: Date.now() - this.sessionStartTime,
       errorCount: this.errorCount,
-      userActionsCount: this.userActions.length
+      userActionsCount: this.userActions.length,
     };
   }
 
