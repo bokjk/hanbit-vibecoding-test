@@ -127,18 +127,21 @@ export class CSPNonce {
     allowUnsafeEval?: boolean;
     allowUnsafeInline?: boolean;
     allowedDomains?: string[];
+    additionalScriptSrc?: string[];
+    additionalStyleSrc?: string[];
+    allowInlineStyles?: boolean;
   }): string {
     const scriptSrc = [
       "'self'",
       ...(config.allowUnsafeEval ? ["'unsafe-eval'"] : []),
       ...(environment === 'development' ? ["'unsafe-inline'"] : []),
-      ...config.additionalScriptSrc
+      ...(config.additionalScriptSrc || [])
     ].join(' ');
 
     const styleSrc = [
       "'self'",
       ...(config.allowInlineStyles ? ["'unsafe-inline'"] : []),
-      ...config.additionalStyleSrc
+      ...(config.additionalStyleSrc || [])
     ].join(' ');
 
     const directives = [

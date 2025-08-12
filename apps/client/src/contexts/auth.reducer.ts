@@ -29,14 +29,14 @@ const DEFAULT_GUEST_PERMISSIONS = {
 /**
  * 기본 인증 사용자 권한
  */
-const DEFAULT_AUTH_PERMISSIONS = {
-  ...DEFAULT_GUEST_PERMISSIONS,
-  maxItems: 1000,
-  canExport: true,
-  canImport: true,
-  canShare: true,
-  unlimitedItems: false,
-};
+// const DEFAULT_AUTH_PERMISSIONS = {
+//   ...DEFAULT_GUEST_PERMISSIONS,
+//   maxItems: 1000,
+//   canExport: true,
+//   canImport: true,
+//   canShare: true,
+//   unlimitedItems: false,
+// };
 
 /**
  * 인증 상태 관리 리듀서

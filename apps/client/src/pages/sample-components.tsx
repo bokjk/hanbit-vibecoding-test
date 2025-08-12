@@ -9,6 +9,7 @@ import {
   LinearCardTitle,
   LinearInput 
 } from '@hanbit/ui';
+import { MonitoringDemo } from '../components/MonitoringDemo';
 
 /**
  * Linear Design System 컴포넌트 데모 페이지
@@ -319,6 +320,21 @@ export function SampleComponents() {
           </div>
         </LinearCardContent>
       </LinearCard>
+
+      {/* 모니터링 시스템 데모 */}
+      {import.meta.env.VITE_DEBUG === 'true' && (
+        <LinearCard variant="glass">
+          <LinearCardHeader>
+            <LinearCardTitle>모니터링 시스템 데모</LinearCardTitle>
+            <LinearCardDescription>
+              성능 모니터링 및 에러 리포팅 시스템을 테스트할 수 있습니다. (개발 환경에서만 표시)
+            </LinearCardDescription>
+          </LinearCardHeader>
+          <LinearCardContent>
+            <MonitoringDemo />
+          </LinearCardContent>
+        </LinearCard>
+      )}
 
       {/* 사용 예제 */}
       <LinearCard variant="solid">

@@ -193,7 +193,7 @@ export function useMigration(): UseMigrationReturn {
    */
   const history = useMemo(() => {
     return migrationUtils.getMigrationHistory();
-  }, [migrationState.isComplete, migrationUtils]);
+  }, []);
 
   // ================================
   // 액션 메서드들

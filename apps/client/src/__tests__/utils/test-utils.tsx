@@ -1,6 +1,7 @@
 /**
  * React Testing Library 유틸리티 확장
  */
+/* eslint-disable react-refresh/only-export-components */
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

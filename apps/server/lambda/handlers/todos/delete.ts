@@ -1,104 +1,62 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import {
+  AuthenticationError,
+  AuthorizationError,
+  NotFoundError,
   createSuccessResponse,
-  createErrorResponse,
-  createNotFoundResponse,
-} from '@/utils/response';
+  logger,
+  ErrorCode,
+} from '@/utils/error-handler';
+import { withLambdaWrapper, LambdaHandler } from '@/utils/lambda-wrapper';
 import { validatePathParams, IdParamSchema } from '@/utils/validation';
-import { logger } from '@/utils/logger';
 import { getTodoService, warmupContainer } from '@/utils/container';
 import { validateJWTToken } from '@/utils/token-validator';
 import { AuthError } from '@/services/todo.service';
 import { ItemNotFoundError } from '@/types/database.types';
-import { initializeXRay, addUserInfo, addAnnotation } from '@/utils/xray-tracer';
 
 // Lambda Cold Start 최적화
 warmupContainer();
 
-// X-Ray 초기화
-initializeXRay();
-
 /**
  * DELETE /todos/{id} - TODO 아이템 삭제
+ * 표준화된 에러 처리 시스템 적용
  */
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const timer = logger.startTimer();
-  const requestId = event.requestContext.requestId;
-
+const deleteTodoHandler: LambdaHandler = async (
+  event: APIGatewayProxyEvent,
+  context: Context,
+  correlationId: string
+): Promise<APIGatewayProxyResult> => {
   try {
-    logger.logRequest('DELETE', `/todos/{id}`, { requestId });
-
-    // 1. 사용자 인증 확인
+    // 인증, 검증, 삭제 로직을 간단히 처리
     const authHeader = event.headers.Authorization || event.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      logger.warn('Missing or invalid authorization header', { requestId });
-      return createErrorResponse(new Error('Unauthorized'), 401);
+    if (!authHeader?.startsWith('Bearer ')) {
+      throw new AuthenticationError('Missing authorization header', ErrorCode.MISSING_CREDENTIALS, {}, correlationId);
     }
 
-    const token = authHeader.substring(7);
-    const authContext = await validateJWTToken(token);
-
-    // X-Ray에 사용자 정보 추가
-    addUserInfo(authContext.userId, authContext.userType);
-    addAnnotation('operation', 'deleteTodo');
-
-    // 2. 경로 파라미터 검증
+    const authContext = await validateJWTToken(authHeader.substring(7));
     const { id } = validatePathParams(event.pathParameters, IdParamSchema);
 
-    logger.info('User authenticated and request validated', {
-      requestId,
-      userId: authContext.userId,
-      userType: authContext.userType,
-      todoId: id,
-    });
-
-    // 3. TODO 서비스를 통해 삭제
     const todoService = getTodoService();
-    await todoService.deleteTodo(authContext, id);
+    
+    try {
+      await todoService.deleteTodo(authContext, id);
+    } catch (error) {
+      if (error instanceof ItemNotFoundError) {
+        throw new NotFoundError(`TODO item with id ${id} not found`, ErrorCode.TODO_NOT_FOUND, {}, correlationId);
+      }
+      if (error instanceof AuthError) {
+        throw new AuthorizationError('Insufficient permissions', ErrorCode.INSUFFICIENT_PERMISSIONS, {}, correlationId);
+      }
+      throw error;
+    }
 
-    // 4. 성공 응답 반환
-    const result = {
-      message: 'TODO 아이템이 성공적으로 삭제되었습니다.',
-      deletedId: id,
-    };
-
-    const duration = timer();
-    logger.logResponse('DELETE', `/todos/${id}`, 200, duration, {
-      requestId,
-      todoId: id,
-    });
-
-    return createSuccessResponse(result);
+    logger.info('TODO deleted successfully', { correlationId, todoId: id });
+    return createSuccessResponse({ message: 'TODO deleted successfully' }, 204);
+    
   } catch (error) {
-    const duration = timer();
-    const todoId = event.pathParameters?.id || 'unknown';
-    logger.error('Error deleting todo', error as Error, {
-      requestId,
-      todoId,
-    });
-
-    // 에러 타입별 응답 처리
-    if (error instanceof ItemNotFoundError) {
-      logger.logResponse('DELETE', `/todos/${todoId}`, 404, duration, { requestId });
-      return createNotFoundResponse('TODO');
-    }
-
-    if (error instanceof AuthError) {
-      logger.logResponse('DELETE', `/todos/${todoId}`, 403, duration, { requestId });
-      return createErrorResponse(error, 403);
-    }
-
-    if (error instanceof Error && error.message.includes('Unauthorized')) {
-      logger.logResponse('DELETE', `/todos/${todoId}`, 401, duration, { requestId });
-      return createErrorResponse(error, 401);
-    }
-
-    if (error instanceof Error && error.message.includes('Access denied')) {
-      logger.logResponse('DELETE', `/todos/${todoId}`, 403, duration, { requestId });
-      return createErrorResponse(error, 403);
-    }
-
-    logger.logResponse('DELETE', `/todos/${todoId}`, 500, duration, { requestId });
-    return createErrorResponse(error as Error);
+    logger.error('TODO deletion failed', error as Error, { correlationId });
+    throw error;
   }
 };
+
+export const handler = withLambdaWrapper(deleteTodoHandler);

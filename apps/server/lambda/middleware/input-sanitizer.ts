@@ -45,7 +45,7 @@ export class InputSanitizer {
     
     return input
       // 허용되지 않은 태그 제거
-      .replace(/<(?!\/?(?:${allowedTags.join('|')})\b)[^>]*>/gi, '')
+      .replace(new RegExp(`<(?!\\/?(?:${allowedTags.join('|')})\\b)[^>]*>`, 'gi'), '')
       // 스크립트 및 위험한 패턴 제거
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/javascript:/gi, '')

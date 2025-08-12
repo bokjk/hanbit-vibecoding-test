@@ -1,51 +1,84 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { createSuccessResponse, createErrorResponse } from '@/utils/response';
-import { logger } from '@/utils/logger';
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import {
+  AuthenticationError,
+  AuthorizationError,
+  ValidationError,
+  createSuccessResponse,
+  logger,
+  ErrorCode,
+} from '@/utils/error-handler';
+import { withLambdaWrapper, LambdaHandler } from '@/utils/lambda-wrapper';
 import { getTodoService, warmupContainer } from '@/utils/container';
 import { validateJWTToken } from '@/utils/token-validator';
 import { AuthError } from '@/services/todo.service';
 import { Priority } from '@/types/constants';
 import { ListTodosRequest } from '@/types/api.types';
-import { initializeXRay, addUserInfo, addAnnotation } from '@/utils/xray-tracer';
 
 // Lambda Cold Start 최적화
 warmupContainer();
 
-// X-Ray 초기화
-initializeXRay();
-
 /**
  * GET /todos - TODO 목록 조회 (필터링 및 페이지네이션 지원)
+ * 표준화된 에러 처리 시스템 적용
  */
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const timer = logger.startTimer();
-  const requestId = event.requestContext.requestId;
+const listTodosHandler: LambdaHandler = async (
+  event: APIGatewayProxyEvent,
+  context: Context,
+  correlationId: string
+): Promise<APIGatewayProxyResult> => {
+  const startTime = Date.now();
 
   try {
-    logger.logRequest('GET', '/todos', {
-      requestId,
+    logger.info('Listing TODO items', {
+      correlationId,
+      method: event.httpMethod,
+      path: event.path,
       queryParams: event.queryStringParameters,
     });
 
     // 1. 사용자 인증 확인
     const authHeader = event.headers.Authorization || event.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      logger.warn('Missing or invalid authorization header', { requestId });
-      return createErrorResponse(new Error('Unauthorized'), 401);
+      logger.warn('Authentication failed - missing or invalid header', {
+        correlationId,
+        reason: 'missing_or_invalid_header',
+        endpoint: '/todos',
+        method: 'GET',
+      });
+      
+      throw new AuthenticationError(
+        'Missing or invalid authorization header',
+        ErrorCode.MISSING_CREDENTIALS,
+        { reason: 'missing_or_invalid_header' },
+        correlationId
+      );
     }
 
     const token = authHeader.substring(7);
-    const authContext = await validateJWTToken(token);
+    let authContext;
+    
+    try {
+      authContext = await validateJWTToken(token);
+    } catch (error) {
+      logger.warn('JWT token validation failed', {
+        correlationId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      
+      throw new AuthenticationError(
+        'Invalid or expired token',
+        ErrorCode.INVALID_TOKEN,
+        { originalError: error instanceof Error ? error.message : 'Unknown error' },
+        correlationId
+      );
+    }
 
     logger.info('User authenticated successfully', {
-      requestId,
+      correlationId,
       userId: authContext.userId,
       userType: authContext.userType,
+      operation: 'list_todos',
     });
-
-    // X-Ray에 사용자 정보 추가
-    addUserInfo(authContext.userId, authContext.userType);
-    addAnnotation('operation', 'listTodos');
 
     // 2. 쿼리 파라미터 파싱
     const queryParams = event.queryStringParameters || {};
@@ -76,14 +109,40 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       listRequest.cursor = queryParams.cursor;
     }
 
-    logger.info('Query parameters parsed', {
-      requestId,
+    logger.debug('Query parameters parsed', {
+      correlationId,
       listRequest,
     });
 
     // 3. TODO 서비스를 통해 목록 조회
     const todoService = getTodoService();
-    const result = await todoService.listTodos(authContext, listRequest);
+    let result;
+    
+    try {
+      result = await todoService.listTodos(authContext, listRequest);
+    } catch (error) {
+      logger.error('Failed to list TODO items', error as Error, {
+        correlationId,
+        userId: authContext.userId,
+        listRequest,
+      });
+
+      if (error instanceof AuthError) {
+        throw new AuthorizationError(
+          'Insufficient permissions to list TODO items',
+          ErrorCode.INSUFFICIENT_PERMISSIONS,
+          { originalError: (error as Error).message },
+          correlationId
+        );
+      }
+
+      throw new ValidationError(
+        'Failed to retrieve TODO items',
+        ErrorCode.INVALID_OPERATION,
+        { originalError: error instanceof Error ? error.message : 'Unknown error' },
+        correlationId
+      );
+    }
 
     // 4. 응답 데이터 변환 (DynamoDB 내부 필드 제거)
     const responseData = {
@@ -104,29 +163,30 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       },
     };
 
-    const duration = timer();
-    logger.logResponse('GET', '/todos', 200, duration, {
-      requestId,
+    const duration = Date.now() - startTime;
+    logger.info('TODO listing completed successfully', {
+      correlationId,
+      duration,
       todosCount: result.count,
+      success: true,
     });
 
     return createSuccessResponse(responseData);
   } catch (error) {
-    const duration = timer();
-    logger.error('Error listing todos', error as Error, { requestId });
+    const duration = Date.now() - startTime;
+    const errorInstance = error instanceof Error ? error : new Error(String(error));
+    
+    logger.error('TODO listing failed', errorInstance, {
+      correlationId,
+      duration,
+      operation: 'list_todos',
+      errorType: errorInstance.constructor.name,
+    });
 
-    // 에러 타입별 응답 처리
-    if (error instanceof AuthError) {
-      logger.logResponse('GET', '/todos', 403, duration, { requestId });
-      return createErrorResponse(error, 403);
-    }
-
-    if (error instanceof Error && error.message.includes('Unauthorized')) {
-      logger.logResponse('GET', '/todos', 401, duration, { requestId });
-      return createErrorResponse(error, 401);
-    }
-
-    logger.logResponse('GET', '/todos', 500, duration, { requestId });
-    return createErrorResponse(error as Error);
+    // 에러를 다시 던져서 wrapper에서 처리하도록 함
+    throw error;
   }
 };
+
+// 표준화된 Lambda wrapper가 적용된 핸들러 export
+export const handler = withLambdaWrapper(listTodosHandler);

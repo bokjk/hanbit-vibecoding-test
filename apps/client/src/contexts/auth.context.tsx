@@ -1,13 +1,12 @@
 import { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { 
-  AuthState, 
   AuthContextType, 
-  LoginRequest, 
-  RegisterRequest, 
-  PasswordResetRequest,
-  PasswordChangeRequest,
-  ProfileUpdateRequest,
+  // LoginRequest, 
+  // RegisterRequest, 
+  // PasswordResetRequest,
+  // PasswordChangeRequest,
+  // ProfileUpdateRequest,
   AuthEvent,
   AuthEventListener,
   AuthInitOptions
@@ -61,8 +60,8 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
       listeners.forEach(listener => {
         try {
           listener(event, data);
-        } catch (_error) {
-          console.error('AuthEvent listener error:', error);
+        } catch (listenerError) {
+          console.error('AuthEvent listener error:', listenerError);
         }
       });
     }
@@ -119,9 +118,9 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
             });
             emitEvent('login', { user: userInfoResponse.data.user, isGuest: false });
           }
-        } catch (_error) {
+        } catch (userInfoError) {
           // 사용자 정보 조회 실패 시 게스트 토큰으로 폴백
-          console.warn('Failed to get user info, falling back to guest token');
+          console.warn('Failed to get user info, falling back to guest token', userInfoError);
           await requestGuestAccess();
         }
       } else {
@@ -135,8 +134,8 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
           });
         }
       }
-    } catch (_error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize auth';
+    } catch (initError) {
+      const errorMessage = initError instanceof Error ? initError.message : 'Failed to initialize auth';
       dispatch({
         type: 'AUTH_INIT_FAILURE',
         payload: errorMessage,
@@ -164,13 +163,13 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
       });
 
       emitEvent('login', { isGuest: true });
-    } catch (_error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to get guest token';
+    } catch (guestError) {
+      const errorMessage = guestError instanceof Error ? guestError.message : 'Failed to get guest token';
       dispatch({
         type: 'AUTH_INIT_FAILURE',
         payload: errorMessage,
       });
-      throw error;
+      throw loginError;
     }
   }, [initOptions, emitEvent]);
 
@@ -178,35 +177,35 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
   // 인증 관련 메서드들
   // ================================
 
-  const login = useCallback(async (credentials: LoginRequest) => {
+  const login = useCallback(async () => {
     dispatch({ type: 'AUTH_LOGIN_START' });
 
     try {
       // TODO: 실제 로그인 API 구현
       // 현재는 게스트 토큰만 지원하므로 에러 처리
       throw new Error('Full authentication is not yet implemented. Using guest mode.');
-    } catch (_error) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+    } catch (loginError) {
+      const errorMessage = loginError instanceof Error ? loginError.message : 'Login failed';
       dispatch({
         type: 'AUTH_LOGIN_FAILURE',
         payload: errorMessage,
       });
       emitEvent('login', { error: errorMessage });
-      throw error;
+      throw loginError;
     }
   }, [emitEvent]);
 
-  const register = useCallback(async (data: RegisterRequest) => {
+  const register = useCallback(async () => {
     dispatch({ type: 'AUTH_SET_LOADING', payload: true });
 
     try {
       // TODO: 실제 회원가입 API 구현
       throw new Error('User registration is not yet implemented');
-    } catch (_error) {
-      const errorMessage = error instanceof Error ? error.message : 'Registration failed';
+    } catch (registerError) {
+      const errorMessage = registerError instanceof Error ? registerError.message : 'Registration failed';
       dispatch({ type: 'AUTH_SET_LOADING', payload: false });
       dispatch({ type: 'AUTH_LOGIN_FAILURE', payload: errorMessage });
-      throw error;
+      throw loginError;
     }
   }, []);
 
@@ -224,11 +223,11 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
       if (!initOptions?.skipGuestToken) {
         await requestGuestAccess();
       }
-    } catch (_error) {
-      console.error('Logout error:', error);
+    } catch (logoutError) {
+      console.error('Logout error:', logoutError);
       // 로그아웃은 실패하더라도 로컬 상태는 정리
       dispatch({ type: 'AUTH_LOGOUT' });
-      emitEvent('logout', { error });
+      emitEvent('logout', { error: logoutError });
     }
   }, [requestGuestAccess, initOptions, emitEvent]);
 
@@ -252,14 +251,14 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
       });
 
       emitEvent('token_refreshed');
-    } catch (_error) {
-      const errorMessage = error instanceof Error ? error.message : 'Token refresh failed';
+    } catch (refreshError) {
+      const errorMessage = refreshError instanceof Error ? refreshError.message : 'Token refresh failed';
       dispatch({
         type: 'AUTH_TOKEN_REFRESH_FAILURE',
         payload: errorMessage,
       });
       emitEvent('token_expired', { error: errorMessage });
-      throw error;
+      throw loginError;
     }
   }, [emitEvent]);
 
@@ -267,15 +266,15 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
   // 사용자 관리 메서드들 (미구현)
   // ================================
 
-  const updateProfile = useCallback(async (data: ProfileUpdateRequest) => {
+  const updateProfile = useCallback(async () => {
     throw new Error('Profile update is not yet implemented');
   }, []);
 
-  const changePassword = useCallback(async (data: PasswordChangeRequest) => {
+  const changePassword = useCallback(async () => {
     throw new Error('Password change is not yet implemented');
   }, []);
 
-  const requestPasswordReset = useCallback(async (data: PasswordResetRequest) => {
+  const requestPasswordReset = useCallback(async () => {
     throw new Error('Password reset is not yet implemented');
   }, []);
 
@@ -283,7 +282,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
   // 권한 확인 메서드들
   // ================================
 
-  const hasPermission = useCallback((action: string, resource?: string): boolean => {
+  const hasPermission = useCallback((action: string): boolean => {
     // 간단한 권한 확인 로직
     switch (action) {
       case 'create':
@@ -381,6 +380,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
 /**
  * AuthContext를 사용하는 훅
  */
+/* eslint-disable react-refresh/only-export-components */
 export function useAuthContext(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
