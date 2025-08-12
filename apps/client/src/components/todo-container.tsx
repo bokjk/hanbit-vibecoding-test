@@ -10,14 +10,12 @@ import { MigrationStatus } from './auth/migration-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTodo, useTodoSync } from '../hooks/use-todo';
-import type { Priority } from 'types/index';
+// Priority import 제거 - 사용하지 않음
 
 function TodoContainerContent() {
   const { 
     todos: filteredTodos, 
     stats, 
-    loading,
-    error,
     updateTodo, 
     deleteTodo, 
     toggleTodo,

@@ -118,7 +118,7 @@ export function TodoProvider({ children, enableAutoSync = true }: TodoProviderPr
   const [state, dispatch] = useReducer(todoReducer, initialTodoState);
   const { state: authState } = useAuthContext();
   const isInitialized = useRef(false);
-  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const _syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // ================================
   // 초기화 및 이벤트 리스너

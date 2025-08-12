@@ -88,7 +88,6 @@ export function AuthPrompt({
   onRegister,
   onContinueAsGuest,
   showBenefits = true,
-  className = '',
 }: AuthPromptProps) {
   const { state: authState } = useAuth();
   const migrationCheck = useQuickMigrationCheck();

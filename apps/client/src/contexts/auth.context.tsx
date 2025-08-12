@@ -61,7 +61,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
       listeners.forEach(listener => {
         try {
           listener(event, data);
-        } catch (error) {
+        } catch (_error) {
           console.error('AuthEvent listener error:', error);
         }
       });
@@ -119,7 +119,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
             });
             emitEvent('login', { user: userInfoResponse.data.user, isGuest: false });
           }
-        } catch (error) {
+        } catch (_error) {
           // 사용자 정보 조회 실패 시 게스트 토큰으로 폴백
           console.warn('Failed to get user info, falling back to guest token');
           await requestGuestAccess();
@@ -135,7 +135,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
           });
         }
       }
-    } catch (error) {
+    } catch (_error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to initialize auth';
       dispatch({
         type: 'AUTH_INIT_FAILURE',
@@ -164,7 +164,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
       });
 
       emitEvent('login', { isGuest: true });
-    } catch (error) {
+    } catch (_error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to get guest token';
       dispatch({
         type: 'AUTH_INIT_FAILURE',
@@ -185,7 +185,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
       // TODO: 실제 로그인 API 구현
       // 현재는 게스트 토큰만 지원하므로 에러 처리
       throw new Error('Full authentication is not yet implemented. Using guest mode.');
-    } catch (error) {
+    } catch (_error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       dispatch({
         type: 'AUTH_LOGIN_FAILURE',
@@ -202,7 +202,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
     try {
       // TODO: 실제 회원가입 API 구현
       throw new Error('User registration is not yet implemented');
-    } catch (error) {
+    } catch (_error) {
       const errorMessage = error instanceof Error ? error.message : 'Registration failed';
       dispatch({ type: 'AUTH_SET_LOADING', payload: false });
       dispatch({ type: 'AUTH_LOGIN_FAILURE', payload: errorMessage });
@@ -224,7 +224,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
       if (!initOptions?.skipGuestToken) {
         await requestGuestAccess();
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Logout error:', error);
       // 로그아웃은 실패하더라도 로컬 상태는 정리
       dispatch({ type: 'AUTH_LOGOUT' });
@@ -252,7 +252,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
       });
 
       emitEvent('token_refreshed');
-    } catch (error) {
+    } catch (_error) {
       const errorMessage = error instanceof Error ? error.message : 'Token refresh failed';
       dispatch({
         type: 'AUTH_TOKEN_REFRESH_FAILURE',

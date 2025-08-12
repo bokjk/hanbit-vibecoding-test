@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useTodoContext } from '../contexts/todo.context';
 import { useTodoService } from './use-todo-service';
-import type { Todo, Priority, FilterType } from 'types/index';
+import type { Todo, Priority } from 'types/index';
 import { appConfig } from '../config/app-config';
 
 /**

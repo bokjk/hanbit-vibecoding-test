@@ -144,9 +144,7 @@ describe('TodoFilters Component', () => {
       />
     );
 
-    const allFilter = screen.getByTestId('filter-all');
     const activeFilterButton = screen.getByTestId('filter-active');
-    const completedFilter = screen.getByTestId('filter-completed');
 
     // 활성 필터는 default variant, 나머지는 outline
     expect(activeFilterButton).toHaveClass('bg-gradient-to-r');

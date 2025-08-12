@@ -240,7 +240,7 @@ describe('TodoInput Component', () => {
   });
 
   it('should sanitize on submit', async () => {
-    mockSanitizeInput.mockImplementation((input: string) => 'cleaned input');
+    mockSanitizeInput.mockImplementation(() => 'cleaned input');
 
     render(<TodoInput />);
     const titleInput = screen.getAllByTestId('todo-input')[0];
