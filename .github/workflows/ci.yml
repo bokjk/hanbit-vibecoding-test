@@ -1,18 +1,39 @@
-name: CI/CD Pipeline
+name: 강화된 품질 게이트 CI/CD
 
 on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: "테스트 건너뛰기"
+        required: false
+        default: "false"
+        type: boolean
+      environment:
+        description: "품질 게이트 환경"
+        required: false
+        default: "development"
+        type: choice
+        options:
+          - development
+          - staging
+          - production
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9'
+  NODE_VERSION: "20"
+  PNPM_VERSION: "10.13.1"
+  # 품질 게이트 임계값
+  COVERAGE_THRESHOLD: 85
+  PERFORMANCE_THRESHOLD: 90
+  SECURITY_THRESHOLD: 85
+  ACCESSIBILITY_THRESHOLD: 95
 
 jobs:
   # 1. 기본 검증 (린트, 타입 체크, 유닛 테스트)
@@ -34,7 +55,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: 의존성 설치
         run: pnpm install --frozen-lockfile
@@ -87,7 +108,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: 의존성 설치
         run: pnpm install --frozen-lockfile
@@ -164,7 +185,7 @@ jobs:
           echo "- ✅ 보안 헤더 검증" >> contract-report.md
           echo "- ✅ CORS 정책 검증" >> contract-report.md
           echo "" >> contract-report.md
-          
+
           if [ -f contract-test-results.json ]; then
             node -e "
               const results = require('./contract-test-results.json');
@@ -236,7 +257,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: 의존성 설치
         run: pnpm install --frozen-lockfile
@@ -327,7 +348,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: 의존성 설치
         run: pnpm install --frozen-lockfile
@@ -379,7 +400,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: 의존성 설치
         run: pnpm install --frozen-lockfile
@@ -388,7 +409,7 @@ jobs:
         run: |
           echo "🔍 패키지 보안 취약점 검사"
           pnpm audit --audit-level high || true
-          
+
           echo "🔍 라이센스 검사"
           npx license-checker --onlyAllow 'MIT;BSD-2-Clause;BSD-3-Clause;Apache-2.0;ISC' || true
 
@@ -396,7 +417,7 @@ jobs:
         run: |
           cd apps/server
           echo "🔍 OpenAPI 보안 정책 검증"
-          
+
           # 보안 헤더 검증
           node -e "
             const yaml = require('yaml');
@@ -447,7 +468,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: 의존성 설치
         run: pnpm install --frozen-lockfile
@@ -495,7 +516,8 @@ jobs:
   test-summary:
     name: 테스트 결과 요약
     runs-on: ubuntu-latest
-    needs: [validate, contract-tests, integration-tests, e2e-tests, security-scan]
+    needs:
+      [validate, contract-tests, integration-tests, e2e-tests, security-scan]
     if: always()
 
     steps:
@@ -517,7 +539,7 @@ jobs:
           echo "" >> test-summary.md
           echo "## 🧪 테스트 실행 결과" >> test-summary.md
           echo "" >> test-summary.md
-          
+
           # Job 상태 확인
           echo "| 테스트 단계 | 상태 | 설명 |" >> test-summary.md
           echo "|------------|------|------|" >> test-summary.md
@@ -527,7 +549,7 @@ jobs:
           echo "| E2E 테스트 | ${{ needs.e2e-tests.result == 'success' && '✅ 성공' || '❌ 실패' }} | 사용자 시나리오 검증 |" >> test-summary.md
           echo "| 보안 검증 | ${{ needs.security-scan.result == 'success' && '✅ 성공' || '❌ 실패' }} | 보안 취약점 검사 |" >> test-summary.md
           echo "" >> test-summary.md
-          
+
           # Contract Testing 하이라이트
           echo "## 🔍 Contract Testing 하이라이트" >> test-summary.md
           echo "" >> test-summary.md
@@ -541,10 +563,10 @@ jobs:
             echo "- ✅ 보안 헤더 검증" >> test-summary.md
           fi
           echo "" >> test-summary.md
-          
+
           # 전체 결과
           ALL_SUCCESS="${{ needs.validate.result == 'success' && needs.contract-tests.result == 'success' && needs.integration-tests.result == 'success' && needs.e2e-tests.result == 'success' && needs.security-scan.result == 'success' }}"
-          
+
           if [ "$ALL_SUCCESS" = "true" ]; then
             echo "## ✅ 전체 테스트 성공!" >> test-summary.md
             echo "" >> test-summary.md

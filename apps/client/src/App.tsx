@@ -1,11 +1,46 @@
-import { useState, useEffect } from "react";
-import { TodoContainer } from "./components/todo-container";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { AuthProvider } from "./contexts/auth.context";
-import { MigrationDialog } from "./components/auth/migration-dialog";
-import { AuthPromptBanner } from "./components/auth/auth-prompt";
 import { useMigration } from "./hooks/use-migration";
 import { Loader2 } from "lucide-react";
+import {
+  initializeServiceWorker,
+  showUpdateNotification,
+  setupOfflineHandling,
+} from "./utils/service-worker";
 import "./App.css";
+
+// 코드 스플리팅을 위한 lazy import
+const TodoContainer = lazy(() =>
+  import("./components/todo-container").then((module) => ({
+    default: module.TodoContainer,
+  })),
+);
+
+const MigrationDialog = lazy(() =>
+  import("./components/auth/migration-dialog").then((module) => ({
+    default: module.MigrationDialog,
+  })),
+);
+
+const AuthPromptBanner = lazy(() =>
+  import("./components/auth/auth-prompt").then((module) => ({
+    default: module.AuthPromptBanner,
+  })),
+);
+
+/**
+ * 코드 스플리팅 로딩 fallback 컴포넌트
+ */
+function LoadingFallback({ message = "로딩 중..." }: { message?: string }) {
+  return (
+    <div className="flex items-center justify-center p-8">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+        <p className="text-sm text-gray-600">{message}</p>
+      </div>
+    </div>
+  );
+}
 
 /**
  * 앱 초기화 상태 관리 컴포넌트
@@ -20,6 +55,11 @@ function AppContent() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        // Service Worker 및 PWA 기능 초기화
+        await initializeServiceWorker();
+        showUpdateNotification();
+        setupOfflineHandling();
+
         // 마이그레이션 필요성 확인
         const migrationRequired = await migration.checkMigrationRequired();
 
@@ -83,32 +123,44 @@ function AppContent() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* 인증 유도 배너 */}
+      {/* 인증 유도 배너 - 독립적으로 로딩 */}
       {showAuthBanner && (
-        <div className="sticky top-0 z-10 p-4">
-          <AuthPromptBanner
-            onPromptOpen={() => {
-              // TODO: AuthPrompt 다이얼로그 열기 (향후 구현)
-              console.log("Auth prompt requested");
-            }}
-            onDismiss={handleBannerDismiss}
-          />
-        </div>
+        <Suspense fallback={<LoadingFallback message="배너를 로딩 중..." />}>
+          <div className="sticky top-0 z-10 p-4">
+            <AuthPromptBanner
+              onPromptOpen={() => {
+                // TODO: AuthPrompt 다이얼로그 열기 (향후 구현)
+                console.log("Auth prompt requested");
+              }}
+              onDismiss={handleBannerDismiss}
+            />
+          </div>
+        </Suspense>
       )}
 
-      {/* 메인 컨텐츠 */}
+      {/* 메인 컨텐츠 - 독립적으로 로딩 */}
       <div className={showAuthBanner ? "pt-4" : ""}>
-        <TodoContainer />
+        <Suspense fallback={<LoadingFallback message="TODO 앱을 로딩 중..." />}>
+          <TodoContainer />
+        </Suspense>
       </div>
 
-      {/* 마이그레이션 다이얼로그 */}
-      <MigrationDialog
-        isOpen={showMigrationDialog}
-        onClose={() => setShowMigrationDialog(false)}
-        autoStart={true}
-        onComplete={handleMigrationComplete}
-        onError={handleMigrationError}
-      />
+      {/* 마이그레이션 다이얼로그 - 필요시에만 로딩 */}
+      {showMigrationDialog && (
+        <Suspense
+          fallback={
+            <LoadingFallback message="마이그레이션 도구를 로딩 중..." />
+          }
+        >
+          <MigrationDialog
+            isOpen={showMigrationDialog}
+            onClose={() => setShowMigrationDialog(false)}
+            autoStart={true}
+            onComplete={handleMigrationComplete}
+            onError={handleMigrationError}
+          />
+        </Suspense>
+      )}
     </main>
   );
 }

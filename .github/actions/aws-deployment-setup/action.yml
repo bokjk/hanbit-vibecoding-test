@@ -1,0 +1,127 @@
+name: "AWS Deployment Setup"
+description: "AWS CDK 배포를 위한 환경을 설정합니다"
+
+inputs:
+  aws-region:
+    description: "AWS 리전"
+    required: false
+    default: "us-east-1"
+  aws-account-id:
+    description: "AWS 계정 ID"
+    required: true
+  environment:
+    description: "배포 환경 (dev|test|prod)"
+    required: true
+  node-version:
+    description: "Node.js 버전"
+    required: false
+    default: "20"
+  pnpm-version:
+    description: "pnpm 버전"
+    required: false
+    default: "10.13.1"
+
+outputs:
+  cdk-version:
+    description: "설치된 CDK 버전"
+    value: ${{ steps.cdk-info.outputs.version }}
+  bootstrap-status:
+    description: "CDK 부트스트랩 상태"
+    value: ${{ steps.bootstrap-check.outputs.status }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js and pnpm
+      uses: ./.github/actions/setup-node-pnpm
+      with:
+        node-version: ${{ inputs.node-version }}
+        pnpm-version: ${{ inputs.pnpm-version }}
+        install-dependencies: "true"
+        cache-key-suffix: "cdk-${{ inputs.environment }}"
+
+    - name: AWS 환경 정보 출력
+      shell: bash
+      run: |
+        echo "🌍 AWS 배포 환경 설정"
+        echo "├─ 리전: ${{ inputs.aws-region }}"
+        echo "├─ 계정 ID: ${{ inputs.aws-account-id }}"
+        echo "├─ 환경: ${{ inputs.environment }}"
+        echo "└─ CDK 컨텍스트: environment=${{ inputs.environment }}"
+
+    - name: CDK 정보 확인
+      id: cdk-info
+      shell: bash
+      working-directory: apps/server/infrastructure
+      run: |
+        CDK_VERSION=$(npx cdk --version 2>/dev/null || echo "설치되지 않음")
+        echo "version=$CDK_VERSION" >> $GITHUB_OUTPUT
+        echo "📦 CDK 버전: $CDK_VERSION"
+
+    - name: CDK 부트스트랩 상태 확인
+      id: bootstrap-check
+      shell: bash
+      run: |
+        echo "🔍 CDK 부트스트랩 상태 확인 중..."
+
+        # CDKToolkit 스택 존재 여부 확인
+        if aws cloudformation describe-stacks \
+           --stack-name CDKToolkit \
+           --region ${{ inputs.aws-region }} \
+           --query 'Stacks[0].StackStatus' \
+           --output text >/dev/null 2>&1; then
+          echo "status=bootstrapped" >> $GITHUB_OUTPUT
+          echo "✅ CDK 부트스트랩 완료됨"
+        else
+          echo "status=not-bootstrapped" >> $GITHUB_OUTPUT
+          echo "⚠️ CDK 부트스트랩 필요"
+        fi
+
+    - name: CDK 부트스트랩 (필요시)
+      if: steps.bootstrap-check.outputs.status == 'not-bootstrapped'
+      shell: bash
+      working-directory: apps/server/infrastructure
+      run: |
+        echo "🚀 CDK 부트스트랩 실행 중..."
+        npx cdk bootstrap \
+          aws://${{ inputs.aws-account-id }}/${{ inputs.aws-region }} \
+          --context environment=${{ inputs.environment }} \
+          --require-approval never
+        echo "✅ CDK 부트스트랩 완료"
+
+    - name: CDK 합성 (템플릿 생성)
+      shell: bash
+      working-directory: apps/server/infrastructure
+      run: |
+        echo "🔨 CloudFormation 템플릿 합성 중..."
+        npx cdk synth \
+          --context environment=${{ inputs.environment }} \
+          --quiet
+        echo "✅ 템플릿 합성 완료"
+
+    - name: CDK Diff (변경사항 확인)
+      shell: bash
+      working-directory: apps/server/infrastructure
+      run: |
+        echo "📋 배포 변경사항 확인 중..."
+        echo "::group::CDK Diff Output"
+        npx cdk diff \
+          --context environment=${{ inputs.environment }} \
+          --require-approval never || true
+        echo "::endgroup::"
+        echo "✅ 변경사항 확인 완료"
+
+    - name: 배포 준비 상태 요약
+      shell: bash
+      run: |
+        echo "## 🚀 AWS CDK 배포 준비 완료" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| 항목 | 값 |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|-----|" >> $GITHUB_STEP_SUMMARY
+        echo "| AWS 리전 | ${{ inputs.aws-region }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| AWS 계정 | ${{ inputs.aws-account-id }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 배포 환경 | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| CDK 버전 | ${{ steps.cdk-info.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 부트스트랩 상태 | ${{ steps.bootstrap-check.outputs.status }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "배포가 준비되었습니다! 🎉" >> $GITHUB_STEP_SUMMARY

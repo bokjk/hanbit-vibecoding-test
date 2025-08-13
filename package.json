@@ -62,11 +62,32 @@
     "scripts:post-deploy": "node apps/server/infrastructure/scripts/post-deploy.js",
     "scripts:rollback": "node apps/server/infrastructure/scripts/rollback.js",
     "scripts:env-check": "node apps/server/infrastructure/scripts/env-check.js",
+    "// === 품질 게이트 ===": "",
+    "quality": "pnpm quality:all",
+    "quality:all": "node scripts/run-quality-suite.js",
+    "quality:fast": "node scripts/run-quality-suite.js --skip-tests",
+    "quality:performance": "node scripts/performance-benchmark.js",
+    "quality:security": "node scripts/security-scanner.js",
+    "quality:accessibility": "node scripts/accessibility-tester.js",
+    "quality:dashboard": "node scripts/quality-dashboard.js",
+    "quality:dev": "node scripts/run-quality-suite.js --environment development --baseUrl http://localhost:4173",
+    "quality:staging": "node scripts/run-quality-suite.js --environment staging --baseUrl https://staging.example.com",
+    "quality:prod": "node scripts/run-quality-suite.js --environment production --baseUrl https://production.example.com",
+    "// === 성능 테스트 ===": "",
+    "performance": "pnpm performance:test",
+    "performance:test": "node scripts/performance-test.js",
+    "performance:report": "node scripts/performance-test.js && cat performance-report.json",
+    "// === 테스트 커버리지 ===": "",
+    "test:coverage": "pnpm test:coverage:all",
+    "test:coverage:all": "pnpm test:coverage:client && pnpm test:coverage:server",
+    "test:coverage:client": "pnpm --filter @vive/client test:coverage",
+    "test:coverage:server": "pnpm --filter @vive/server test:coverage --run",
     "// === 정리 ===": "",
     "clean": "pnpm clean:all",
     "clean:all": "pnpm clean:client && pnpm clean:server",
     "clean:client": "pnpm --filter @vive/client clean || rm -rf apps/client/dist apps/client/node_modules/.vite",
-    "clean:server": "pnpm --filter @vive/server clean || rm -rf apps/server/dist"
+    "clean:server": "pnpm --filter @vive/server clean || rm -rf apps/server/dist",
+    "clean:reports": "rm -rf quality-reports dashboard performance-reports security-reports accessibility-reports"
   },
   "keywords": [
     "todo",
@@ -85,7 +106,11 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "axe-core": "^4.8.3",
+    "chrome-launcher": "^1.1.0",
+    "lighthouse": "^11.4.0",
+    "playwright": "^1.40.1"
   },
   "lint-staged": {
     "apps/client/**/*.{ts,tsx,js,jsx}": [

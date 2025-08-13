@@ -1,0 +1,408 @@
+name: 프로덕션 배포 승인 워크플로우
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/server/**"
+      - "packages/**"
+  workflow_dispatch:
+    inputs:
+      deployment_type:
+        description: "배포 타입"
+        required: true
+        default: "deploy"
+        type: choice
+        options:
+          - deploy
+          - hotfix
+          - rollback
+      rollback_target:
+        description: "롤백 대상 (롤백 시만 필요)"
+        required: false
+        type: string
+      force_deploy:
+        description: "강제 배포 (승인 없이)"
+        required: false
+        default: false
+        type: boolean
+
+env:
+  AWS_REGION: ap-northeast-2
+  ENVIRONMENT: prod
+
+jobs:
+  # 1단계: 사전 검증
+  pre-deployment-checks:
+    name: 배포 사전 검증
+    runs-on: ubuntu-latest
+    outputs:
+      deployment-id: ${{ steps.generate-id.outputs.deployment-id }}
+      approval-required: ${{ steps.check-approval.outputs.approval-required }}
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 배포 ID 생성
+        id: generate-id
+        run: |
+          DEPLOYMENT_ID="deploy-$(date +%Y%m%d-%H%M%S)-${GITHUB_SHA:0:8}"
+          echo "deployment-id=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
+          echo "🆔 배포 ID: $DEPLOYMENT_ID"
+
+      - name: 변경사항 분석
+        id: analyze-changes
+        run: |
+          # 변경된 파일 목록 생성
+          if [ "${{ github.event_name }}" = "push" ]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          fi
+
+          echo "변경된 파일:"
+          echo "$CHANGED_FILES"
+
+          # 중요 파일 변경 여부 확인
+          CRITICAL_FILES=$(echo "$CHANGED_FILES" | grep -E "(infrastructure/|lambda/|package\.json)" || true)
+
+          if [ -n "$CRITICAL_FILES" ]; then
+            echo "critical-changes=true" >> $GITHUB_OUTPUT
+            echo "⚠️ 중요 파일 변경 감지"
+          else
+            echo "critical-changes=false" >> $GITHUB_OUTPUT
+            echo "✅ 일반 파일 변경"
+          fi
+
+          echo "changed-files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: 승인 필요 여부 확인
+        id: check-approval
+        run: |
+          FORCE_DEPLOY="${{ github.event.inputs.force_deploy }}"
+          DEPLOYMENT_TYPE="${{ github.event.inputs.deployment_type }}"
+          CRITICAL_CHANGES="${{ steps.analyze-changes.outputs.critical-changes }}"
+
+          if [ "$FORCE_DEPLOY" = "true" ]; then
+            echo "approval-required=false" >> $GITHUB_OUTPUT
+            echo "🚀 강제 배포 모드"
+          elif [ "$DEPLOYMENT_TYPE" = "hotfix" ]; then
+            echo "approval-required=false" >> $GITHUB_OUTPUT
+            echo "🔥 핫픽스 배포 - 승인 생략"
+          elif [ "$CRITICAL_CHANGES" = "true" ] || [ "$DEPLOYMENT_TYPE" = "deploy" ]; then
+            echo "approval-required=true" >> $GITHUB_OUTPUT
+            echo "✋ 승인 필요"
+          else
+            echo "approval-required=false" >> $GITHUB_OUTPUT
+            echo "✅ 자동 배포 가능"
+          fi
+
+      - name: 보안 스캔
+        run: |
+          echo "🔍 보안 스캔 실행"
+          # 실제 보안 스캔 도구 실행 (예: npm audit, snyk 등)
+          cd apps/server
+          npm audit --audit-level moderate
+
+          echo "✅ 보안 스캔 완료"
+
+      - name: 배포 시작 알림
+        uses: 8398a7/action-slack@v3
+        if: success()
+        with:
+          status: custom
+          custom_payload: |
+            {
+              text: "🚀 프로덕션 배포 시작",
+              attachments: [{
+                color: "warning",
+                fields: [
+                  { title: "배포 ID", value: "${{ steps.generate-id.outputs.deployment-id }}", short: true },
+                  { title: "배포 타입", value: "${{ github.event.inputs.deployment_type || 'deploy' }}", short: true },
+                  { title: "커밋", value: "${{ github.sha }}", short: true },
+                  { title: "승인 필요", value: "${{ steps.check-approval.outputs.approval-required }}", short: true },
+                  { title: "변경사항", value: "${{ steps.analyze-changes.outputs.changed-files }}", short: false }
+                ]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # 2단계: 승인 요청 (필요시)
+  approval-gate:
+    name: 배포 승인 요청
+    runs-on: ubuntu-latest
+    needs: pre-deployment-checks
+    if: needs.pre-deployment-checks.outputs.approval-required == 'true'
+    environment:
+      name: production-approval
+      url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: 승인 대기
+        run: |
+          echo "⏳ 배포 승인 대기 중..."
+          echo "배포 ID: ${{ needs.pre-deployment-checks.outputs.deployment-id }}"
+          echo "승인자가 GitHub Environment에서 승인해야 합니다."
+
+      - name: 승인 완료 알림
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: "✅ 프로덕션 배포 승인 완료 - ${{ needs.pre-deployment-checks.outputs.deployment-id }}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # 3단계: 실제 배포
+  deploy-to-production:
+    name: 프로덕션 배포 실행
+    runs-on: ubuntu-latest
+    needs: [pre-deployment-checks, approval-gate]
+    if: always() && (needs.approval-gate.result == 'success' || needs.pre-deployment-checks.outputs.approval-required == 'false')
+    environment: production
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: AWS 자격증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 의존성 설치
+        run: |
+          cd apps/server
+          npm ci
+
+      - name: 배포 기록 시작
+        id: record-start
+        run: |
+          # 배포 시작 정보를 DynamoDB에 기록
+          aws dynamodb put-item \
+            --region ${{ env.AWS_REGION }} \
+            --table-name deployment-history-prod \
+            --item '{
+              "deploymentId": {"S": "${{ needs.pre-deployment-checks.outputs.deployment-id }}"},
+              "timestamp": {"S": "'$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)'"},
+              "environment": {"S": "prod"},
+              "status": {"S": "in_progress"},
+              "deploymentType": {"S": "${{ github.event.inputs.deployment_type || 'deploy' }}"},
+              "commitSha": {"S": "${{ github.sha }}"},
+              "deployedBy": {"S": "${{ github.actor }}"},
+              "details": {"S": "{\"trigger\": \"${{ github.event_name }}\", \"ref\": \"${{ github.ref }}\"}"},
+              "ttl": {"N": "'$(($(date +%s) + 7776000))'"}
+            }' || echo "배포 기록 실패 (계속 진행)"
+
+      - name: CDK 배포
+        id: cdk-deploy
+        run: |
+          cd apps/server/infrastructure
+
+          # CDK 설치
+          npm install -g aws-cdk
+          npm ci
+
+          echo "🚀 CDK 배포 시작"
+          DEPLOY_START_TIME=$(date +%s)
+
+          # 배포 실행
+          cdk deploy HanbitTodoStack-prod \
+            --require-approval never \
+            --outputs-file outputs.json \
+            --context environment=prod
+
+          DEPLOY_END_TIME=$(date +%s)
+          DEPLOY_DURATION=$((DEPLOY_END_TIME - DEPLOY_START_TIME))
+
+          echo "deploy-duration=$DEPLOY_DURATION" >> $GITHUB_OUTPUT
+          echo "✅ CDK 배포 완료 (소요시간: ${DEPLOY_DURATION}초)"
+
+      - name: 배포 후 헬스체크
+        id: health-check
+        run: |
+          echo "🏥 배포 후 헬스체크 시작"
+
+          # CDK 출력에서 API 엔드포인트 추출
+          if [ -f apps/server/infrastructure/outputs.json ]; then
+            API_ENDPOINT=$(cat apps/server/infrastructure/outputs.json | jq -r '.["HanbitTodoStack-prod"].ApiEndpointProd // empty')
+          fi
+
+          if [ -z "$API_ENDPOINT" ]; then
+            # 대체 방법으로 CloudFormation 스택에서 추출
+            API_ENDPOINT=$(aws cloudformation describe-stacks \
+              --region ${{ env.AWS_REGION }} \
+              --stack-name HanbitTodoStack-prod \
+              --query 'Stacks[0].Outputs[?OutputKey==`ApiEndpointProd`].OutputValue' \
+              --output text)
+          fi
+
+          if [ -z "$API_ENDPOINT" ]; then
+            echo "❌ API 엔드포인트를 찾을 수 없습니다"
+            exit 1
+          fi
+
+          echo "API 엔드포인트: $API_ENDPOINT"
+
+          # 헬스체크 수행 (최대 5분 대기)
+          for i in {1..30}; do
+            echo "헬스체크 시도 $i/30"
+            
+            if curl -f --max-time 10 "${API_ENDPOINT}/health" > /dev/null 2>&1; then
+              echo "✅ 헬스체크 성공"
+              echo "health-check-passed=true" >> $GITHUB_OUTPUT
+              break
+            fi
+            
+            if [ $i -eq 30 ]; then
+              echo "❌ 헬스체크 실패 - 자동 롤백 트리거"
+              echo "health-check-passed=false" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+            
+            sleep 10
+          done
+
+      - name: 배포 성공 기록
+        if: success()
+        run: |
+          # 배포 성공 정보 업데이트
+          aws dynamodb update-item \
+            --region ${{ env.AWS_REGION }} \
+            --table-name deployment-history-prod \
+            --key '{
+              "deploymentId": {"S": "${{ needs.pre-deployment-checks.outputs.deployment-id }}"},
+              "timestamp": {"S": "'$(aws dynamodb get-item --table-name deployment-history-prod --key "{\"deploymentId\": {\"S\": \"${{ needs.pre-deployment-checks.outputs.deployment-id }}\"}}" --query 'Item.timestamp.S' --output text)'"'}
+            }' \
+            --update-expression "SET #status = :status, duration = :duration, details = :details" \
+            --expression-attribute-names '{"#status": "status"}' \
+            --expression-attribute-values '{
+              ":status": {"S": "success"},
+              ":duration": {"N": "${{ steps.cdk-deploy.outputs.deploy-duration }}"},
+              ":details": {"S": "{\"healthCheckPassed\": true, \"deployDuration\": ${{ steps.cdk-deploy.outputs.deploy-duration }}}"}
+            }' || echo "배포 성공 기록 실패"
+
+      - name: 배포 성공 알림
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: |
+            🎉 프로덕션 배포 성공!
+
+            배포 ID: ${{ needs.pre-deployment-checks.outputs.deployment-id }}
+            소요시간: ${{ steps.cdk-deploy.outputs.deploy-duration }}초
+            커밋: ${{ github.sha }}
+            배포자: ${{ github.actor }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # 4단계: 롤백 처리 (실패시)
+  rollback-on-failure:
+    name: 자동 롤백
+    runs-on: ubuntu-latest
+    needs: [pre-deployment-checks, deploy-to-production]
+    if: failure()
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: AWS 자격증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 자동 롤백 실행
+        run: |
+          echo "🔄 자동 롤백 시작"
+
+          # Lambda 함수를 통한 롤백 트리거
+          aws lambda invoke \
+            --region ${{ env.AWS_REGION }} \
+            --function-name "HanbitTodoStack-prod-DeploymentMonitoring-RollbackFunction" \
+            --payload '{"deploymentId": "${{ needs.pre-deployment-checks.outputs.deployment-id }}", "reason": "deployment_failure"}' \
+            rollback-response.json
+
+          echo "롤백 응답:"
+          cat rollback-response.json
+
+      - name: 배포 실패 기록
+        run: |
+          # 배포 실패 정보 기록
+          aws dynamodb update-item \
+            --region ${{ env.AWS_REGION }} \
+            --table-name deployment-history-prod \
+            --key '{
+              "deploymentId": {"S": "${{ needs.pre-deployment-checks.outputs.deployment-id }}"},
+              "timestamp": {"S": "'$(aws dynamodb get-item --table-name deployment-history-prod --key "{\"deploymentId\": {\"S\": \"${{ needs.pre-deployment-checks.outputs.deployment-id }}\"}}" --query 'Item.timestamp.S' --output text)'"'}
+            }' \
+            --update-expression "SET #status = :status, errorMessage = :error, details = :details" \
+            --expression-attribute-names '{"#status": "status"}' \
+            --expression-attribute-values '{
+              ":status": {"S": "failure"},
+              ":error": {"S": "Deployment failed, automatic rollback triggered"},
+              ":details": {"S": "{\"autoRollback\": true, \"failureReason\": \"deployment_failure\"}"}
+            }' || echo "배포 실패 기록 실패"
+
+      - name: 배포 실패 알림
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: |
+            🚨 프로덕션 배포 실패!
+
+            배포 ID: ${{ needs.pre-deployment-checks.outputs.deployment-id }}
+            커밋: ${{ github.sha }}
+            배포자: ${{ github.actor }}
+
+            자동 롤백이 실행되었습니다.
+            즉시 확인이 필요합니다!
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # 5단계: 배포 후 모니터링
+  post-deployment-monitoring:
+    name: 배포 후 모니터링
+    runs-on: ubuntu-latest
+    needs: [pre-deployment-checks, deploy-to-production]
+    if: success()
+    steps:
+      - name: AWS 자격증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 지속적 헬스체크 시작
+        run: |
+          echo "🔍 지속적 헬스체크 시작 (10분간)"
+
+          # Lambda 함수를 통한 지속적 모니터링 트리거
+          aws lambda invoke \
+            --region ${{ env.AWS_REGION }} \
+            --function-name "HanbitTodoStack-prod-DeploymentMonitoring-HealthCheckFunction" \
+            --payload '{"deploymentId": "${{ needs.pre-deployment-checks.outputs.deployment-id }}", "monitoringDuration": 600}' \
+            monitoring-response.json
+
+          echo "모니터링 응답:"
+          cat monitoring-response.json
+
+      - name: 모니터링 완료 알림
+        run: |
+          echo "✅ 배포 후 모니터링 완료"
+          echo "배포 ID: ${{ needs.pre-deployment-checks.outputs.deployment-id }}"
+          echo "CloudWatch 대시보드에서 지속적인 모니터링을 확인하세요."

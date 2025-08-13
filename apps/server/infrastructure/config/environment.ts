@@ -48,6 +48,8 @@ export interface EnvironmentConfig {
   monitoring: {
     /** 알림 이메일 */
     alertEmail?: string;
+    /** Slack Webhook URL */
+    slackWebhookUrl?: string;
     /** 대시보드 활성화 여부 */
     dashboardEnabled: boolean;
     /** 상세 모니터링 활성화 여부 */

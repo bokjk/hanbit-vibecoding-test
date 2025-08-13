@@ -37,7 +37,15 @@ export class DatabaseConstruct extends Construct {
         name: 'SK',
         type: dynamodb.AttributeType.STRING,
       },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      billingMode: this.getBillingMode(),
+      readCapacity:
+        this.getBillingMode() === dynamodb.BillingMode.PROVISIONED
+          ? this.getReadCapacity()
+          : undefined,
+      writeCapacity:
+        this.getBillingMode() === dynamodb.BillingMode.PROVISIONED
+          ? this.getWriteCapacity()
+          : undefined,
       encryption: dynamodb.TableEncryption.AWS_MANAGED, // AWS 관리형 키 사용 (기본)
       // 프로덕션 환경에서는 고객 관리형 KMS 키 사용 고려
       pointInTimeRecovery: true,
@@ -61,6 +69,14 @@ export class DatabaseConstruct extends Construct {
             type: dynamodb.AttributeType.STRING,
           },
           projectionType: dynamodb.ProjectionType.ALL, // 모든 속성 프로젝션
+          readCapacity:
+            this.getBillingMode() === dynamodb.BillingMode.PROVISIONED
+              ? Math.ceil(this.getReadCapacity() * 0.5)
+              : undefined,
+          writeCapacity:
+            this.getBillingMode() === dynamodb.BillingMode.PROVISIONED
+              ? Math.ceil(this.getWriteCapacity() * 0.5)
+              : undefined,
         },
       ],
     });
@@ -78,6 +94,14 @@ export class DatabaseConstruct extends Construct {
         type: dynamodb.AttributeType.STRING,
       },
       projectionType: dynamodb.ProjectionType.ALL, // 모든 속성 프로젝션
+      readCapacity:
+        this.getBillingMode() === dynamodb.BillingMode.PROVISIONED
+          ? Math.ceil(this.getReadCapacity() * 0.3)
+          : undefined,
+      writeCapacity:
+        this.getBillingMode() === dynamodb.BillingMode.PROVISIONED
+          ? Math.ceil(this.getWriteCapacity() * 0.3)
+          : undefined,
     });
 
     // CloudWatch 메트릭 및 알람 설정
@@ -119,5 +143,176 @@ export class DatabaseConstruct extends Construct {
     if (environment === 'production') {
       cdk.Tags.of(this.todoTable).add('DeletionProtection', 'true');
     }
+
+    // 환경별 오토스케일링 설정 (Provisioned 모드에서만)
+    this.setupAutoScaling();
+
+    // 성능 최적화 설정
+    this.setupPerformanceOptimizations();
+  }
+
+  /**
+   * 환경별 청구 모드 결정
+   */
+  private getBillingMode(): dynamodb.BillingMode {
+    const environment = process.env.NODE_ENV || 'development';
+
+    // 프로덕션 환경에서는 예측 가능한 트래픽을 위해 Provisioned 사용 고려
+    // 개발/테스트 환경에서는 비용 효율적인 Pay-per-Request 사용
+    switch (environment) {
+      case 'production':
+        // 프로덕션에서 트래픽이 예측 가능하면 Provisioned 사용
+        return process.env.USE_PROVISIONED_CAPACITY === 'true'
+          ? dynamodb.BillingMode.PROVISIONED
+          : dynamodb.BillingMode.PAY_PER_REQUEST;
+      default:
+        return dynamodb.BillingMode.PAY_PER_REQUEST;
+    }
+  }
+
+  /**
+   * 환경별 읽기 용량 설정
+   */
+  private getReadCapacity(): number {
+    const environment = process.env.NODE_ENV || 'development';
+
+    switch (environment) {
+      case 'production':
+        return parseInt(process.env.DYNAMODB_READ_CAPACITY || '20');
+      case 'test':
+        return parseInt(process.env.DYNAMODB_READ_CAPACITY || '10');
+      default:
+        return parseInt(process.env.DYNAMODB_READ_CAPACITY || '5');
+    }
+  }
+
+  /**
+   * 환경별 쓰기 용량 설정
+   */
+  private getWriteCapacity(): number {
+    const environment = process.env.NODE_ENV || 'development';
+
+    switch (environment) {
+      case 'production':
+        return parseInt(process.env.DYNAMODB_WRITE_CAPACITY || '10');
+      case 'test':
+        return parseInt(process.env.DYNAMODB_WRITE_CAPACITY || '5');
+      default:
+        return parseInt(process.env.DYNAMODB_WRITE_CAPACITY || '3');
+    }
+  }
+
+  /**
+   * 오토스케일링 설정
+   */
+  private setupAutoScaling(): void {
+    if (this.getBillingMode() !== dynamodb.BillingMode.PROVISIONED) {
+      return; // Pay-per-Request 모드에서는 오토스케일링 불필요
+    }
+
+    const environment = process.env.NODE_ENV || 'development';
+
+    if (environment === 'production' || environment === 'test') {
+      // 테이블 오토스케일링
+      const tableScaling = this.todoTable.autoScaleReadCapacity({
+        minCapacity: Math.max(1, Math.ceil(this.getReadCapacity() * 0.2)),
+        maxCapacity: this.getReadCapacity() * 5,
+      });
+
+      tableScaling.scaleOnUtilization({
+        targetUtilizationPercent: 70,
+        scaleInCooldown: cdk.Duration.minutes(5),
+        scaleOutCooldown: cdk.Duration.minutes(2),
+      });
+
+      const tableWriteScaling = this.todoTable.autoScaleWriteCapacity({
+        minCapacity: Math.max(1, Math.ceil(this.getWriteCapacity() * 0.2)),
+        maxCapacity: this.getWriteCapacity() * 5,
+      });
+
+      tableWriteScaling.scaleOnUtilization({
+        targetUtilizationPercent: 70,
+        scaleInCooldown: cdk.Duration.minutes(5),
+        scaleOutCooldown: cdk.Duration.minutes(2),
+      });
+
+      // GSI 오토스케일링 (프로덕션만)
+      if (environment === 'production') {
+        // GSI1 스케일링
+        const gsi1 = this.todoTable.node.children.find(
+          child => child.node.id === 'GSI1-StatusPriority'
+        ) as dynamodb.GlobalSecondaryIndex | undefined;
+
+        if (gsi1) {
+          const gsi1ReadScaling = gsi1.autoScaleReadCapacity({
+            minCapacity: 1,
+            maxCapacity: Math.ceil(this.getReadCapacity() * 2.5),
+          });
+
+          gsi1ReadScaling.scaleOnUtilization({
+            targetUtilizationPercent: 70,
+            scaleInCooldown: cdk.Duration.minutes(5),
+            scaleOutCooldown: cdk.Duration.minutes(2),
+          });
+        }
+      }
+    }
+  }
+
+  /**
+   * 성능 최적화 설정
+   */
+  private setupPerformanceOptimizations(): void {
+    // 고급 성능 메트릭 설정
+    const environment = process.env.NODE_ENV || 'development';
+
+    if (environment === 'production' || environment === 'test') {
+      // 사용자 오류율 알람 (4xx 에러)
+      const userErrorAlarm = new dynamodb.Table(this, 'UserErrorMetric', {
+        tableName: `${this.todoTable.tableName}-user-errors`,
+        partitionKey: {
+          name: 'ErrorType',
+          type: dynamodb.AttributeType.STRING,
+        },
+        sortKey: {
+          name: 'Timestamp',
+          type: dynamodb.AttributeType.STRING,
+        },
+        billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        timeToLiveAttribute: 'ttl',
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      });
+
+      cdk.Tags.of(userErrorAlarm).add('Purpose', 'ErrorTracking');
+
+      // 스로틀 알람
+      const throttleMetric = this.todoTable.metricThrottledRequests({
+        period: cdk.Duration.minutes(5),
+        statistic: 'Sum',
+      });
+
+      throttleMetric.createAlarm(this, 'HighThrottleAlarm', {
+        threshold: 10,
+        evaluationPeriods: 2,
+        alarmDescription: 'DynamoDB 요청이 스로틀되고 있습니다',
+      });
+
+      // 지연 시간 알람 (P99)
+      const latencyMetric = this.todoTable.metricSuccessfulRequestLatency({
+        period: cdk.Duration.minutes(5),
+        statistic: 'p99',
+      });
+
+      latencyMetric.createAlarm(this, 'HighLatencyAlarm', {
+        threshold: environment === 'production' ? 10 : 20, // ms
+        evaluationPeriods: 3,
+        alarmDescription: 'DynamoDB 응답 시간이 높습니다 (P99)',
+      });
+    }
+
+    // 성능 최적화 태그
+    cdk.Tags.of(this.todoTable).add('PerformanceOptimized', 'true');
+    cdk.Tags.of(this.todoTable).add('SingleTableDesign', 'true');
+    cdk.Tags.of(this.todoTable).add('GSIOptimized', 'true');
   }
 }

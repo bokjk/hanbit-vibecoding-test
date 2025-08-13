@@ -1,0 +1,30 @@
+# 프로덕션 배포 승인 환경
+name: production-approval
+description: "프로덕션 배포 전 최종 승인 단계"
+
+# 강화된 보안 설정
+protection_rules:
+  required_reviewers:
+    # 프로덕션 승인권자 (최소 2명)
+    users:
+      - "admin-user" # 실제 관리자 GitHub 사용자명으로 변경
+      - "lead-developer" # 실제 리드 개발자 GitHub 사용자명으로 변경
+    teams:
+      - "senior-developers" # 실제 시니어 개발팀명으로 변경
+      - "devops-team" # 실제 DevOps 팀명으로 변경
+
+  prevent_self_review: true
+
+  # 긴 대기 시간으로 신중한 검토 유도
+  wait_timer: 10 # 10분 대기
+
+# 승인 관련 환경 변수
+variables:
+  APPROVAL_STAGE: "production-gate"
+  REQUIRE_MANUAL_APPROVAL: "true"
+  APPROVAL_TIMEOUT: "3600" # 1시간
+
+# 엄격한 브랜치 제한 (main 브랜치만)
+deployment_branch_policy:
+  protected_branches: true
+  custom_branch_policies: false

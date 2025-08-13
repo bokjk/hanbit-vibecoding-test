@@ -1,0 +1,154 @@
+name: Repository Cleanup
+
+on:
+  schedule:
+    # 매주 일요일 자정 (UTC)에 실행
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+jobs:
+  cleanup-artifacts:
+    name: 아티팩트 정리
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: 오래된 아티팩트 삭제
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // 30일 이상 된 아티팩트 조회
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner: owner,
+              repo: repo,
+              per_page: 100
+            });
+
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            let deletedCount = 0;
+
+            for (const artifact of artifacts.data.artifacts) {
+              const createdAt = new Date(artifact.created_at);
+              
+              if (createdAt < thirtyDaysAgo) {
+                try {
+                  await github.rest.actions.deleteArtifact({
+                    owner: owner,
+                    repo: repo,
+                    artifact_id: artifact.id
+                  });
+                  console.log(`삭제된 아티팩트: ${artifact.name} (생성일: ${artifact.created_at})`);
+                  deletedCount++;
+                } catch (error) {
+                  console.error(`아티팩트 삭제 실패: ${artifact.name}`, error);
+                }
+              }
+            }
+
+            console.log(`총 ${deletedCount}개의 오래된 아티팩트를 삭제했습니다.`);
+
+  cleanup-caches:
+    name: 캐시 정리
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: 오래된 캐시 삭제
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            try {
+              const caches = await github.rest.actions.getActionsCacheList({
+                owner: owner,
+                repo: repo,
+                per_page: 100
+              });
+              
+              const sevenDaysAgo = new Date();
+              sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+              
+              let deletedCount = 0;
+              
+              for (const cache of caches.data.actions_caches) {
+                const lastAccessedAt = new Date(cache.last_accessed_at);
+                
+                if (lastAccessedAt < sevenDaysAgo) {
+                  try {
+                    await github.rest.actions.deleteActionsCacheById({
+                      owner: owner,
+                      repo: repo,
+                      cache_id: cache.id
+                    });
+                    console.log(`삭제된 캐시: ${cache.key} (마지막 접근: ${cache.last_accessed_at})`);
+                    deletedCount++;
+                  } catch (error) {
+                    console.error(`캐시 삭제 실패: ${cache.key}`, error);
+                  }
+                }
+              }
+              
+              console.log(`총 ${deletedCount}개의 오래된 캐시를 삭제했습니다.`);
+            } catch (error) {
+              console.error('캐시 정리 중 오류 발생:', error);
+            }
+
+  cleanup-workflow-runs:
+    name: 워크플로우 실행 기록 정리
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: 오래된 워크플로우 실행 기록 삭제
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            try {
+              // 실패한 워크플로우 실행 중 30일 이상 된 것들 조회
+              const workflowRuns = await github.rest.actions.listWorkflowRunsForRepo({
+                owner: owner,
+                repo: repo,
+                status: 'failure',
+                per_page: 100
+              });
+              
+              const thirtyDaysAgo = new Date();
+              thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+              
+              let deletedCount = 0;
+              
+              for (const run of workflowRuns.data.workflow_runs) {
+                const createdAt = new Date(run.created_at);
+                
+                if (createdAt < thirtyDaysAgo) {
+                  try {
+                    await github.rest.actions.deleteWorkflowRun({
+                      owner: owner,
+                      repo: repo,
+                      run_id: run.id
+                    });
+                    console.log(`삭제된 워크플로우 실행: ${run.name} #${run.run_number} (생성일: ${run.created_at})`);
+                    deletedCount++;
+                  } catch (error) {
+                    console.error(`워크플로우 실행 삭제 실패: ${run.name} #${run.run_number}`, error);
+                  }
+                }
+              }
+              
+              console.log(`총 ${deletedCount}개의 오래된 워크플로우 실행을 삭제했습니다.`);
+            } catch (error) {
+              console.error('워크플로우 실행 정리 중 오류 발생:', error);
+            }

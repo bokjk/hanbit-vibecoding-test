@@ -29,6 +29,49 @@ export default defineConfig(({ mode }) => {
       assetsDir: "assets",
       sourcemap: false,
       minify: "esbuild",
+      // 번들 최적화 설정
+      rollupOptions: {
+        output: {
+          // 청크 분할 최적화
+          manualChunks: {
+            // React 라이브러리 청크
+            react: ["react", "react-dom"],
+            // 유틸리티 라이브러리 청크
+            utils: ["uuid", "date-fns"],
+            // UI 컴포넌트 청크
+            ui: ["@hanbit/ui"],
+            // 타입 라이브러리 청크 (타입만이므로 런타임에 포함되지 않음)
+            // types: ['@hanbit/types'], // 타입만이므로 제거
+          },
+          // 에셋 파일명 최적화
+          assetFileNames: (assetInfo) => {
+            const info = assetInfo.name?.split(".") || [];
+            const ext = info[info.length - 1] || "";
+
+            if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+              return `assets/images/[name]-[hash][extname]`;
+            }
+            if (/css/i.test(ext)) {
+              return `assets/styles/[name]-[hash][extname]`;
+            }
+            if (/woff2?|eot|ttf|otf/i.test(ext)) {
+              return `assets/fonts/[name]-[hash][extname]`;
+            }
+            return `assets/[name]-[hash][extname]`;
+          },
+          // 청크 파일명 최적화
+          chunkFileNames: "assets/js/[name]-[hash].js",
+          entryFileNames: "assets/js/[name]-[hash].js",
+        },
+      },
+      // 청크 크기 경고 임계값 조정
+      chunkSizeWarningLimit: 500, // KB
+      // CSS 코드 스플리팅 활성화
+      cssCodeSplit: true,
+      // 빌드 타겟 최적화
+      target: ["es2020", "chrome80", "safari13"],
+      // 압축 최적화
+      reportCompressedSize: true,
     },
     server: {
       port: 3000,

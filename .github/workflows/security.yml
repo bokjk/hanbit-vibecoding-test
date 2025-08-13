@@ -1,0 +1,123 @@
+name: Security Scan
+
+on:
+  schedule:
+    # 매주 월요일 오전 9시 (KST)에 실행
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: "스캔 유형을 선택하세요"
+        required: true
+        default: "full"
+        type: choice
+        options:
+          - "full"
+          - "dependencies"
+          - "code"
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "10.13.1"
+
+jobs:
+  security-audit:
+    name: 보안 감사
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 의존성 보안 감사
+        if: github.event.inputs.scan_type == 'dependencies' || github.event.inputs.scan_type == 'full' || github.event_name == 'schedule'
+        run: |
+          echo "🔍 의존성 보안 검사 실행 중..."
+
+          # npm audit 실행
+          pnpm audit --audit-level low --json > npm-audit-report.json || true
+
+          # 결과 분석
+          CRITICAL=$(cat npm-audit-report.json | jq '.vulnerabilities | to_entries | map(select(.value.severity == "critical")) | length' 2>/dev/null || echo "0")
+          HIGH=$(cat npm-audit-report.json | jq '.vulnerabilities | to_entries | map(select(.value.severity == "high")) | length' 2>/dev/null || echo "0")
+          MODERATE=$(cat npm-audit-report.json | jq '.vulnerabilities | to_entries | map(select(.value.severity == "moderate")) | length' 2>/dev/null || echo "0")
+
+          echo "Critical: $CRITICAL"
+          echo "High: $HIGH" 
+          echo "Moderate: $MODERATE"
+
+          # GitHub Step Summary에 결과 추가
+          echo "## 🔒 의존성 보안 감사 결과" >> $GITHUB_STEP_SUMMARY
+          echo "- Critical: $CRITICAL" >> $GITHUB_STEP_SUMMARY
+          echo "- High: $HIGH" >> $GITHUB_STEP_SUMMARY
+          echo "- Moderate: $MODERATE" >> $GITHUB_STEP_SUMMARY
+
+      - name: OWASP Dependency Check
+        if: github.event.inputs.scan_type == 'dependencies' || github.event.inputs.scan_type == 'full' || github.event_name == 'schedule'
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: "hanbit-vibecoding"
+          path: "."
+          format: "ALL"
+          args: >
+            --enableRetired
+            --enableExperimental
+            --failOnCVSS 7
+        continue-on-error: true
+
+      - name: CodeQL 분석
+        if: github.event.inputs.scan_type == 'code' || github.event.inputs.scan_type == 'full' || github.event_name == 'schedule'
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript,typescript
+          queries: security-extended,security-and-quality
+
+      - name: CodeQL 자동 빌드
+        if: github.event.inputs.scan_type == 'code' || github.event.inputs.scan_type == 'full' || github.event_name == 'schedule'
+        uses: github/codeql-action/autobuild@v3
+
+      - name: CodeQL 분석 수행
+        if: github.event.inputs.scan_type == 'code' || github.event.inputs.scan_type == 'full' || github.event_name == 'schedule'
+        uses: github/codeql-action/analyze@v3
+
+      - name: 보안 검사 결과 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-scan-results-${{ github.run_id }}
+          path: |
+            npm-audit-report.json
+            reports/
+          retention-days: 90
+
+      - name: Slack 보안 알림
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: "#security"
+          text: |
+            🚨 **보안 취약점 발견!**
+            - 리포지토리: ${{ github.repository }}
+            - 브랜치: ${{ github.ref_name }}
+            - 실행 시간: $(date)
+            상세 결과는 GitHub Actions에서 확인해주세요.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true

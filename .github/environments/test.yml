@@ -1,0 +1,29 @@
+# 테스트 환경 설정
+name: test
+description: "테스트 환경 - 통합 테스트 및 QA 환경"
+
+# 보안 설정 (프로덕션보다 완화)
+protection_rules:
+  required_reviewers:
+    users: []
+    teams: []
+
+  prevent_self_review: false
+
+  # 배포 지연 없음
+  wait_timer: 0
+
+# 환경 변수
+variables:
+  NODE_ENV: "test"
+  API_STAGE: "test"
+  DEPLOYMENT_TIMEOUT: "20"
+  MONITORING_ENABLED: "true"
+
+# 브랜치 제한
+deployment_branch_policy:
+  protected_branches: false
+  custom_branch_policies: true
+  custom_branches:
+    - "develop"
+    - "main"

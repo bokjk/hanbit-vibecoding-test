@@ -1,0 +1,29 @@
+# 프로덕션 환경 설정
+name: prod
+description: "프로덕션 환경 - 실제 서비스 운영 환경"
+
+# 보안 설정
+protection_rules:
+  required_reviewers:
+    # 프로덕션 배포 승인권자
+    users:
+      - "admin-user" # 실제 GitHub 사용자명으로 변경
+    teams:
+      - "devops-team" # 실제 GitHub 팀명으로 변경
+
+  prevent_self_review: true
+
+  # 배포 지연 설정 (프로덕션 안정성을 위해)
+  wait_timer: 5 # 5분 지연
+
+# 환경 변수 (민감하지 않은 정보만)
+variables:
+  NODE_ENV: "production"
+  API_STAGE: "prod"
+  DEPLOYMENT_TIMEOUT: "30"
+  MONITORING_ENABLED: "true"
+
+# 브랜치 제한
+deployment_branch_policy:
+  protected_branches: true
+  custom_branch_policies: false

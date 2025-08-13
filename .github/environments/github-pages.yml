@@ -1,0 +1,25 @@
+# GitHub Pages 환경 설정
+name: github-pages
+description: "GitHub Pages 정적 사이트 호스팅 환경"
+
+# 최소한의 보안 설정
+protection_rules:
+  required_reviewers:
+    users: []
+    teams: []
+
+  prevent_self_review: false
+  wait_timer: 0
+
+# GitHub Pages 관련 환경 변수
+variables:
+  DEPLOYMENT_TYPE: "static"
+  BUILD_OUTPUT_DIR: "dist"
+  NODE_ENV: "production"
+
+# main 브랜치만 배포
+deployment_branch_policy:
+  protected_branches: false
+  custom_branch_policies: true
+  custom_branches:
+    - "main"

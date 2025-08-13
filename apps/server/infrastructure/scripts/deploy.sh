@@ -40,9 +40,11 @@ usage() {
     echo ""
     echo "옵션:"
     echo "  --dry-run          실제 배포 없이 변경사항만 확인"
-    echo "  --force-approval   프로덕션 배포시 승인 없이 진행"
+    echo "  --require-approval 승인 필요 여부 (never|any-change)"  
+    echo "  --force-approval   프로덕션 배포시 승인 없이 진행 (deprecated)"
     echo "  --skip-build       빌드 단계 건너뛰기"
     echo "  --skip-tests       테스트 단계 건너뛰기"
+    echo "  --ci               CI 모드 (색상 출력 비활성화)"
     echo "  --help             이 도움말 출력"
     echo ""
     echo "예시:"
@@ -178,8 +180,13 @@ execute_deployment() {
     # 환경별 배포 옵션 설정
     local deploy_cmd="npm run deploy:$env"
     
-    # 배포 실행
-    eval $deploy_cmd
+    # 배포 실행 (GitHub Actions 호환)
+    if [[ "$CI_MODE" == "true" ]]; then
+        # GitHub Actions에서는 npx cdk deploy를 직접 실행
+        npx cdk deploy --context environment=$env --require-approval $REQUIRE_APPROVAL --progress events
+    else
+        eval $deploy_cmd
+    fi
     
     log_success "$env 환경 배포 완료!"
 }
@@ -224,9 +231,11 @@ main() {
     # 파라미터 파싱
     ENVIRONMENT=""
     DRY_RUN="false"
+    REQUIRE_APPROVAL="any-change"
     FORCE_APPROVAL="false"
     SKIP_BUILD="false"
     SKIP_TESTS="false"
+    CI_MODE="false"
     
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -234,8 +243,13 @@ main() {
                 DRY_RUN="true"
                 shift
                 ;;
+            --require-approval)
+                REQUIRE_APPROVAL="$2"
+                shift 2
+                ;;
             --force-approval)
                 FORCE_APPROVAL="--force-approval"
+                REQUIRE_APPROVAL="never"
                 shift
                 ;;
             --skip-build)
@@ -244,6 +258,16 @@ main() {
                 ;;
             --skip-tests)
                 SKIP_TESTS="true"
+                shift
+                ;;
+            --ci)
+                CI_MODE="true"
+                # CI 모드에서는 색상 비활성화
+                RED=''
+                GREEN=''
+                YELLOW=''
+                BLUE=''
+                NC=''
                 shift
                 ;;
             --help)

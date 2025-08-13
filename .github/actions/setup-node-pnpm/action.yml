@@ -1,0 +1,70 @@
+name: "Setup Node.js and pnpm"
+description: "Node.js와 pnpm을 설정하고 의존성을 설치합니다"
+
+inputs:
+  node-version:
+    description: "Node.js 버전"
+    required: false
+    default: "20"
+  pnpm-version:
+    description: "pnpm 버전"
+    required: false
+    default: "10.13.1"
+  install-dependencies:
+    description: "의존성 설치 여부"
+    required: false
+    default: "true"
+  cache-key-suffix:
+    description: "캐시 키 접미사"
+    required: false
+    default: ""
+
+outputs:
+  cache-hit:
+    description: "캐시 히트 여부"
+    value: ${{ steps.pnpm-cache.outputs.cache-hit }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: "https://registry.npmjs.org"
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm-version }}
+
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - name: Setup pnpm cache
+      id: pnpm-cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.cache-key-suffix }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      if: inputs.install-dependencies == 'true'
+      shell: bash
+      run: |
+        echo "🔄 의존성 설치 중..."
+        pnpm install --frozen-lockfile
+        echo "✅ 의존성 설치 완료"
+
+    - name: Cache 정보 출력
+      shell: bash
+      run: |
+        if [[ "${{ steps.pnpm-cache.outputs.cache-hit }}" == "true" ]]; then
+          echo "💾 캐시 히트 - 의존성 캐시 재사용"
+        else
+          echo "🔄 캐시 미스 - 새로운 캐시 생성"
+        fi

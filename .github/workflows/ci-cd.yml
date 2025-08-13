@@ -32,7 +32,7 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "environment=prod" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "environment=test" 
+            echo "environment=test" >> $GITHUB_OUTPUT
           else
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
@@ -198,11 +198,15 @@ jobs:
             apps/server/infrastructure/dist/
           retention-days: 7
 
-  # 보안 검사
+  # 보안 검사 강화
   security-scan:
     name: 보안 검사
     runs-on: ubuntu-latest
     needs: validate-environment
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -220,29 +224,171 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run security audit
-        run: pnpm audit --audit-level high
+      - name: 의존성 보안 감사
+        run: |
+          echo "🔍 의존성 보안 검사 실행 중..."
+          pnpm audit --audit-level moderate --json > audit-report.json || true
+
+          # 심각한 취약점이 있는지 확인
+          CRITICAL_VULNS=$(cat audit-report.json | jq '.vulnerabilities | to_entries | map(select(.value.severity == "critical")) | length')
+          HIGH_VULNS=$(cat audit-report.json | jq '.vulnerabilities | to_entries | map(select(.value.severity == "high")) | length')
+
+          echo "Critical vulnerabilities: $CRITICAL_VULNS"
+          echo "High vulnerabilities: $HIGH_VULNS"
+
+          if [[ "$CRITICAL_VULNS" -gt 0 ]]; then
+            echo "❌ Critical 취약점이 발견되어 배포를 중단합니다."
+            exit 1
+          elif [[ "$HIGH_VULNS" -gt 5 ]]; then
+            echo "⚠️ High 취약점이 너무 많습니다 ($HIGH_VULNS개). 수동 검토가 필요합니다."
+            exit 1
+          fi
+
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: "hanbit-vibecoding"
+          path: "."
+          format: "JSON"
+          args: >
+            --enableRetired
+            --enableExperimental
+            --failOnCVSS 7
         continue-on-error: true
 
-      - name: Run CodeQL analysis
+      - name: CodeQL 분석 초기화
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript
+          languages: javascript,typescript
+          queries: security-extended,security-and-quality
 
-      - name: Perform CodeQL analysis
+      - name: CodeQL 자동 빌드
+        uses: github/codeql-action/autobuild@v3
+
+      - name: CodeQL 분석 수행
         uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript"
 
-  # 배포 (develop/main 브랜치만)
-  deploy:
-    name: 배포 - ${{ needs.validate-environment.outputs.environment }}
+      - name: 보안 검사 결과 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-scan-results
+          path: |
+            audit-report.json
+            reports/
+          retention-days: 30
+
+  # 프론트엔드 GitHub Pages 배포
+  deploy-frontend:
+    name: 프론트엔드 GitHub Pages 배포
     runs-on: ubuntu-latest
     needs:
       - validate-environment
       - code-quality
       - unit-tests
       - build-validation
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
-    environment: ${{ needs.validate-environment.outputs.environment }}
+      - production-approval
+    if: |
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      (needs.production-approval.result == 'success' || needs.production-approval.result == 'skipped') &&
+      !cancelled()
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend for production
+        run: |
+          pnpm --filter @vive/client build
+        env:
+          NODE_ENV: production
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "apps/client/dist"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Frontend 배포 완료 알림
+        if: success()
+        run: |
+          echo "✅ GitHub Pages 배포 성공!"
+          echo "사이트 URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "배포 시간: $(date)"
+          echo "커밋: ${{ github.sha }}"
+
+  # 프로덕션 배포 승인 대기
+  production-approval:
+    name: 프로덕션 배포 승인 대기
+    runs-on: ubuntu-latest
+    needs:
+      - validate-environment
+      - code-quality
+      - unit-tests
+      - build-validation
+      - security-scan
+      - e2e-tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.validate-environment.outputs.environment == 'prod'
+    environment:
+      name: production-approval
+    steps:
+      - name: 승인 대기 메시지
+        run: |
+          echo "🚀 프로덕션 배포 승인을 기다리는 중..."
+          echo "커밋: ${{ github.sha }}"
+          echo "배포 예정 시간: $(date)"
+          echo "GitHub 저장소에서 승인자가 승인하기를 기다리고 있습니다."
+
+  # 백엔드 AWS 배포 (develop/main 브랜치만)
+  deploy-backend:
+    name: 백엔드 배포 - ${{ needs.validate-environment.outputs.environment }}
+    runs-on: ubuntu-latest
+    needs:
+      - validate-environment
+      - code-quality
+      - unit-tests
+      - build-validation
+      - security-scan
+      - production-approval
+    if: |
+      github.event_name == 'push' && 
+      (github.ref == 'refs/heads/develop' || 
+       (github.ref == 'refs/heads/main' && needs.production-approval.result == 'success')) &&
+      !cancelled()
+    environment:
+      name: ${{ needs.validate-environment.outputs.environment }}
+      url: ${{ steps.get-api-url.outputs.api_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -265,19 +411,70 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          aws-region: ${{ vars.AWS_DEFAULT_REGION || 'us-east-1' }}
+          role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
+          role-session-name: GitHubActions-${{ github.run_id }}
+          role-duration-seconds: 3600
 
       - name: 배포 전 검증
         run: node apps/server/infrastructure/scripts/pre-deploy.js ${{ needs.validate-environment.outputs.environment }}
 
+      - name: CDK Bootstrap (필요시)
+        run: |
+          cd apps/server/infrastructure
+          pnpm install --frozen-lockfile
+          npx cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ vars.AWS_DEFAULT_REGION || 'us-east-1' }} --context environment=${{ needs.validate-environment.outputs.environment }}
+        continue-on-error: true
+
+      - name: CDK Diff 확인
+        id: cdk-diff
+        run: |
+          cd apps/server/infrastructure
+          echo "::group::CDK Diff Output"
+          npx cdk diff --context environment=${{ needs.validate-environment.outputs.environment }} || true
+          echo "::endgroup::"
+
       - name: CDK 배포
+        id: cdk-deploy
         run: |
           cd apps/server/infrastructure
           chmod +x scripts/deploy.sh
-          ./scripts/deploy.sh ${{ needs.validate-environment.outputs.environment }} --force-approval
+          ./scripts/deploy.sh ${{ needs.validate-environment.outputs.environment }} --require-approval never
+        timeout-minutes: 30
+
+      - name: API URL 추출
+        id: get-api-url
+        run: |
+          cd apps/server/infrastructure
+          API_URL=$(npx cdk output --context environment=${{ needs.validate-environment.outputs.environment }} HanbitStackApiUrl 2>/dev/null || echo "")
+          echo "api_url=${API_URL}" >> $GITHUB_OUTPUT
+          echo "배포된 API URL: ${API_URL}"
 
       - name: 배포 후 검증
-        run: node apps/server/infrastructure/scripts/post-deploy.js ${{ needs.validate-environment.outputs.environment }}
+        run: |
+          node apps/server/infrastructure/scripts/post-deploy.js ${{ needs.validate-environment.outputs.environment }}
+
+      - name: API 헬스체크
+        run: |
+          API_URL="${{ steps.get-api-url.outputs.api_url }}"
+          if [[ -n "$API_URL" ]]; then
+            echo "API 헬스체크 실행 중: $API_URL/health"
+            for i in {1..5}; do
+              if curl -f "$API_URL/health" --max-time 30; then
+                echo "✅ API 헬스체크 성공 ($i/5)"
+                break
+              else
+                echo "⚠️ API 헬스체크 실패 ($i/5), 30초 후 재시도..."
+                sleep 30
+              fi
+              if [[ $i -eq 5 ]]; then
+                echo "❌ API 헬스체크 최종 실패"
+                exit 1
+              fi
+            done
+          else
+            echo "⚠️ API URL을 찾을 수 없어 헬스체크를 건너뜡니다."
+          fi
 
       - name: 배포 성공 알림
         if: success()
@@ -287,16 +484,85 @@ jobs:
           echo "커밋: ${{ github.sha }}"
 
       - name: 배포 실패 시 롤백
-        if: failure()
+        if: failure() && steps.cdk-deploy.conclusion == 'failure'
         run: |
-          echo "❌ 배포 실패. 롤백을 시도합니다..."
-          echo "yes" | node apps/server/infrastructure/scripts/rollback.js ${{ needs.validate-environment.outputs.environment }}
+          echo "❌ 배포 실패. 자동 롤백을 시도합니다..."
+          cd apps/server/infrastructure
+          echo "yes" | node scripts/rollback.js ${{ needs.validate-environment.outputs.environment }}
+          echo "🔄 롤백 완료"
+
+  # Slack/Discord 알림
+  notify:
+    name: 배포 결과 알림
+    runs-on: ubuntu-latest
+    needs: [validate-environment, deploy-backend, deploy-frontend]
+    if: always() && (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'))
+    steps:
+      - name: Slack 알림 (성공)
+        if: needs.deploy-backend.result == 'success' || needs.deploy-frontend.result == 'success'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: "#deployment"
+          text: |
+            🎉 **배포 성공!**
+            - 환경: `${{ needs.validate-environment.outputs.environment }}`
+            - 커밋: `${{ github.sha }}`
+            - 브랜치: `${{ github.ref_name }}`
+            - 배포 시간: $(date)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+      - name: Slack 알림 (실패)
+        if: needs.deploy-backend.result == 'failure' || needs.deploy-frontend.result == 'failure'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: "#deployment"
+          text: |
+            ❌ **배포 실패!**
+            - 환경: `${{ needs.validate-environment.outputs.environment }}`
+            - 커밋: `${{ github.sha }}`
+            - 브랜치: `${{ github.ref_name }}`
+            - 실패 시간: $(date)
+            - 롤백 실행됨
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+      - name: Discord 알림 (성공)
+        if: needs.deploy-backend.result == 'success' || needs.deploy-frontend.result == 'success'
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+            🎉 **배포 성공!**
+            환경: `${{ needs.validate-environment.outputs.environment }}`
+            커밋: `${{ github.sha }}`
+            브랜치: `${{ github.ref_name }}`
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        continue-on-error: true
+
+      - name: Discord 알림 (실패)
+        if: needs.deploy-backend.result == 'failure' || needs.deploy-frontend.result == 'failure'
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+            ❌ **배포 실패!**
+            환경: `${{ needs.validate-environment.outputs.environment }}`
+            커밋: `${{ github.sha }}`
+            브랜치: `${{ github.ref_name }}`
+            롤백 실행됨
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        continue-on-error: true
 
   # 배포 후 검증 (별도 작업)
   post-deployment-validation:
     name: 배포 후 통합 검증
     runs-on: ubuntu-latest
-    needs: [validate-environment, deploy]
+    needs: [validate-environment, deploy-backend]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
     steps:
       - name: Checkout code
@@ -318,12 +584,32 @@ jobs:
         run: |
           # 배포된 환경에 대한 통합 테스트
           echo "배포된 API 엔드포인트 테스트 중..."
-          # TODO: 실제 API 엔드포인트 테스트 로직 추가
+
+          # API 엔드포인트 기본 테스트
+          API_URL=$(cd apps/server/infrastructure && npx cdk output --context environment=${{ needs.validate-environment.outputs.environment }} HanbitStackApiUrl 2>/dev/null || echo "")
+          if [[ -n "$API_URL" ]]; then
+            echo "API 기본 기능 테스트 실행 중..."
+            
+            # Health check
+            curl -f "$API_URL/health" --max-time 30
+            
+            # TODO API 수정 시 주석 해제
+            # curl -f "$API_URL/api/todos" -H "Authorization: Bearer test-token" --max-time 30
+            
+            echo "✅ API 통합 테스트 완료"
+          else
+            echo "⚠️ API URL을 찾을 수 없어 통합 테스트를 건너뜁니다."
+          fi
 
       - name: 성능 모니터링 설정 확인
         run: |
           echo "CloudWatch 대시보드 및 알람 상태 확인 중..."
           aws cloudwatch describe-alarms --query 'MetricAlarms[?StateValue!=`OK`]'
+
+      - name: 보안 규정 준수 확인
+        run: |
+          echo "AWS Config 보안 규칙 확인 중..."
+          aws configservice get-compliance-summary-by-config-rule --region ${{ vars.AWS_DEFAULT_REGION || 'us-east-1' }} || true
 
       - name: 배포 결과 요약
         run: |

@@ -8,6 +8,7 @@ import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import { Construct } from 'constructs';
 import { BaseStack } from './base-stack';
 import { EnvironmentConfig } from '../../config/environment';
+import { LambdaWarmer } from '../lambda-warmer';
 import { resolve } from 'path';
 
 export interface OptimizedLambdaStackProps extends cdk.StackProps {
@@ -27,6 +28,7 @@ export class OptimizedLambdaStack extends BaseStack {
   public readonly todoHandlers: Record<string, lambda.Function>;
   public readonly authHandlers: Record<string, lambda.Function>;
   private readonly lambdaRole: iam.Role;
+  public readonly warmer?: LambdaWarmer;
 
   constructor(scope: Construct, id: string, props: OptimizedLambdaStackProps) {
     super(scope, id, props);
@@ -78,6 +80,9 @@ export class OptimizedLambdaStack extends BaseStack {
 
     // 비용 최적화 설정
     this.applyCostOptimizations();
+
+    // Lambda Warmer 설정 (환경별)
+    this.setupLambdaWarmer();
 
     // 출력값 생성
     this.createOutputs();
@@ -378,6 +383,59 @@ export class OptimizedLambdaStack extends BaseStack {
       allHandlers.forEach(handler => {
         cdk.Tags.of(handler).add('CostOptimization', 'performance-first');
         cdk.Tags.of(handler).add('SavingsPlan', 'eligible');
+      });
+    }
+  }
+
+  /**
+   * Lambda Warmer 설정
+   */
+  private setupLambdaWarmer(): void {
+    const allHandlers = [...Object.values(this.todoHandlers), ...Object.values(this.authHandlers)];
+
+    // 환경별 warmer 설정
+    if (this.isProd || this.isTest) {
+      // Critical 함수들 (높은 빈도 사용)
+      const criticalFunctions = [
+        this.todoHandlers.list,
+        this.todoHandlers.create,
+        this.authHandlers.login,
+      ];
+
+      // Regular 함수들 (일반 빈도 사용)
+      const regularFunctions = allHandlers.filter(handler => !criticalFunctions.includes(handler));
+
+      // Critical 함수용 고빈도 warmer
+      if (criticalFunctions.length > 0) {
+        new LambdaWarmer(this, 'CriticalWarmer', {
+          targetFunctions: criticalFunctions,
+          warmerSchedule: this.selectByEnvironment(
+            cdk.aws_events.Schedule.rate(cdk.Duration.minutes(2)), // 프로덕션: 2분마다
+            cdk.aws_events.Schedule.rate(cdk.Duration.minutes(5)), // 테스트: 5분마다
+            undefined
+          ),
+          concurrency: this.selectByEnvironment(3, 2, 1),
+          enableWarming: true,
+        });
+      }
+
+      // Regular 함수용 일반 warmer
+      if (regularFunctions.length > 0) {
+        this.warmer = new LambdaWarmer(this, 'RegularWarmer', {
+          targetFunctions: regularFunctions,
+          warmerSchedule: this.selectByEnvironment(
+            cdk.aws_events.Schedule.rate(cdk.Duration.minutes(5)), // 프로덕션: 5분마다
+            cdk.aws_events.Schedule.rate(cdk.Duration.minutes(10)), // 테스트: 10분마다
+            undefined
+          ),
+          concurrency: this.selectByEnvironment(2, 1, 1),
+          enableWarming: true,
+        });
+      }
+
+      console.log(`Lambda warmer configured for ${this.config.name} environment`, {
+        criticalFunctions: criticalFunctions.length,
+        regularFunctions: regularFunctions.length,
       });
     }
   }
