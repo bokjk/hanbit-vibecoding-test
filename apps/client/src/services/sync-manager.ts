@@ -15,6 +15,7 @@ import type {
 } from "../contexts/todo.reducer";
 import { offlineStorage } from "./offline-storage";
 import { todoApiService } from "./api/todo-api-client";
+import { appConfig, createApiUrl } from "../config/environment";
 
 /**
  * 동기화 결과
@@ -209,7 +210,7 @@ class SyncManagerService {
         this.config.offlineTimeout,
       );
 
-      await fetch("/api/health", {
+      await fetch(createApiUrl("/health"), {
         method: "HEAD",
         signal: controller.signal,
         cache: "no-cache",
