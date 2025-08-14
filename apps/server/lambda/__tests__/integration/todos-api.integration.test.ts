@@ -37,11 +37,19 @@ describe('Todo API 통합 테스트', () => {
     it('새 사용자의 빈 Todo 목록을 반환한다', async () => {
       // Given
       const userId = 'new-user-123';
-      const event = createMockAPIGatewayEvent('GET', '/todos', null, null, null, {}, {
-        userId,
-        userType: 'authenticated',
-        permissions: JSON.stringify({ maxItems: 1000 }),
-      });
+      const event = createMockAPIGatewayEvent(
+        'GET',
+        '/todos',
+        null,
+        null,
+        null,
+        {},
+        {
+          userId,
+          userType: 'authenticated',
+          permissions: JSON.stringify({ maxItems: 1000 }),
+        }
+      );
 
       // When
       const response = await getTodosHandler(event, lambdaContext);
@@ -58,7 +66,7 @@ describe('Todo API 통합 테스트', () => {
       // Given
       const userId = 'user-with-todos';
       const todos = TestDataFactory.createTodos(25, { userId });
-      
+
       // 테스트 데이터 직접 삽입 (실제 DynamoDB에)
       const documentClient = testContainer.getDocumentClient();
       for (const todo of todos) {
@@ -96,7 +104,7 @@ describe('Todo API 통합 테스트', () => {
       const userId = 'filter-test-user';
       const completedTodos = TestDataFactory.createTodos(5, { userId, completed: true });
       const activeTodos = TestDataFactory.createTodos(10, { userId, completed: false });
-      
+
       const documentClient = testContainer.getDocumentClient();
       for (const todo of [...completedTodos, ...activeTodos]) {
         await documentClient.put({
@@ -203,11 +211,11 @@ describe('Todo API 통합 테스트', () => {
     it('게스트 사용자 할당량을 검증한다', async () => {
       // Given
       const guestUserId = 'guest-session-123';
-      
+
       // 게스트 최대 할당량(10개)만큼 Todo 생성
       const maxTodos = TestDataFactory.createTodos(10, { userId: guestUserId, isGuest: true });
       const documentClient = testContainer.getDocumentClient();
-      
+
       for (const todo of maxTodos) {
         await documentClient.put({
           TableName: 'test-todos',
@@ -246,7 +254,7 @@ describe('Todo API 통합 테스트', () => {
       // Given
       const userId = 'update-test-user';
       const originalTodo = TestDataFactory.createTodo({ userId });
-      
+
       const documentClient = testContainer.getDocumentClient();
       await documentClient.put({
         TableName: 'test-todos',
@@ -317,7 +325,7 @@ describe('Todo API 통합 테스트', () => {
       const originalUserId = 'original-user';
       const otherUserId = 'other-user';
       const todo = TestDataFactory.createTodo({ userId: originalUserId });
-      
+
       const documentClient = testContainer.getDocumentClient();
       await documentClient.put({
         TableName: 'test-todos',
@@ -351,7 +359,7 @@ describe('Todo API 통합 테스트', () => {
       // Given
       const userId = 'delete-test-user';
       const todo = TestDataFactory.createTodo({ userId });
-      
+
       const documentClient = testContainer.getDocumentClient();
       await documentClient.put({
         TableName: 'test-todos',
@@ -499,7 +507,7 @@ describe('Todo API 통합 테스트', () => {
       // Given
       const userId = 'concurrency-test-user';
       const todo = TestDataFactory.createTodo({ userId });
-      
+
       const documentClient = testContainer.getDocumentClient();
       await documentClient.put({
         TableName: 'test-todos',

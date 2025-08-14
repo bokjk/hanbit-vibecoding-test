@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { 
-  RateLimiter, 
-  RateLimitError, 
-  defaultRateLimits, 
-  extractClientIdentifier, 
-  createUserIdentifier, 
-  createRateLimitMiddleware 
+import {
+  RateLimiter,
+  RateLimitError,
+  defaultRateLimits,
+  extractClientIdentifier,
+  createUserIdentifier,
+  createRateLimitMiddleware,
 } from '../../middleware/rate-limiter';
 import type { RateLimitConfig } from '../../middleware/rate-limiter';
 
@@ -13,9 +13,9 @@ import type { RateLimitConfig } from '../../middleware/rate-limiter';
 const mockSend = vi.fn();
 vi.mock('@aws-sdk/client-dynamodb', () => ({
   DynamoDBClient: vi.fn(() => ({
-    send: mockSend
+    send: mockSend,
   })),
-  UpdateItemCommand: vi.fn((params) => ({ params }))
+  UpdateItemCommand: vi.fn(params => ({ params })),
 }));
 
 // 로거 모킹
@@ -23,8 +23,8 @@ vi.mock('@/utils/logger', () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
-    error: vi.fn()
-  }
+    error: vi.fn(),
+  },
 }));
 
 describe('RateLimiter', () => {
@@ -37,7 +37,7 @@ describe('RateLimiter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     rateLimiter = new RateLimiter('us-east-1', 'test-rate-limits');
-    
+
     // 현재 시간 모킹 (테스트 일관성을 위해)
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
@@ -55,8 +55,8 @@ describe('RateLimiter', () => {
     it('should allow request within rate limit', async () => {
       const mockResponse = {
         Attributes: {
-          requests: { N: '1' }
-        }
+          requests: { N: '1' },
+        },
       };
       mockSend.mockResolvedValueOnce(mockResponse);
 
@@ -71,8 +71,8 @@ describe('RateLimiter', () => {
     it('should deny request when rate limit exceeded', async () => {
       const mockResponse = {
         Attributes: {
-          requests: { N: '6' } // exceeds limit of 5
-        }
+          requests: { N: '6' }, // exceeds limit of 5
+        },
       };
       mockSend.mockResolvedValueOnce(mockResponse);
 
@@ -103,36 +103,36 @@ describe('RateLimiter', () => {
       expect(updateCommand.params).toEqual({
         TableName: 'test-rate-limits',
         Key: {
-          id: { S: expect.stringContaining('test-client:') }
+          id: { S: expect.stringContaining('test-client:') },
         },
         UpdateExpression: 'ADD requests :inc SET #ttl = :ttl, updated_at = :now',
         ExpressionAttributeNames: {
-          '#ttl': 'ttl'
+          '#ttl': 'ttl',
         },
         ExpressionAttributeValues: {
           ':inc': { N: '1' },
           ':ttl': { N: expect.any(String) },
-          ':now': { N: '0' } // mocked time
+          ':now': { N: '0' }, // mocked time
         },
-        ReturnValues: 'ALL_NEW'
+        ReturnValues: 'ALL_NEW',
       });
     });
 
     it('should handle block duration configuration', async () => {
       const configWithBlock = {
         ...testConfig,
-        blockDurationMs: 300000 // 5 minutes
+        blockDurationMs: 300000, // 5 minutes
       };
 
       const mockResponse = {
         Attributes: {
-          requests: { N: '6' } // exceeds limit
-        }
+          requests: { N: '6' }, // exceeds limit
+        },
       };
       mockSend.mockResolvedValueOnce(mockResponse);
 
       // setBlock 메서드 모킹 (두 번째 호출)
-      mockSend.mockResolvedValueOnce({}); 
+      mockSend.mockResolvedValueOnce({});
 
       const result = await rateLimiter.checkRateLimit('test-client', configWithBlock);
 
@@ -170,16 +170,16 @@ describe('RateLimiter', () => {
       expect(updateCommand.params).toEqual({
         TableName: 'test-rate-limits',
         Key: {
-          id: { S: 'block:test-client' }
+          id: { S: 'block:test-client' },
         },
         UpdateExpression: 'SET block_until = :block_until, #ttl = :ttl',
         ExpressionAttributeNames: {
-          '#ttl': 'ttl'
+          '#ttl': 'ttl',
         },
         ExpressionAttributeValues: {
           ':block_until': { N: '300000' }, // current time (0) + duration
-          ':ttl': { N: expect.any(String) }
-        }
+          ':ttl': { N: expect.any(String) },
+        },
       });
     });
 
@@ -209,8 +209,8 @@ describe('RateLimiter', () => {
       const futureTime = Date.now() + 300000; // 5 minutes in future
       mockSend.mockResolvedValueOnce({
         Attributes: {
-          block_until: { N: String(futureTime) }
-        }
+          block_until: { N: String(futureTime) },
+        },
       });
 
       const result = await rateLimiter.isBlocked('test-client');
@@ -223,8 +223,8 @@ describe('RateLimiter', () => {
       const pastTime = Date.now() - 300000; // 5 minutes in past
       mockSend.mockResolvedValueOnce({
         Attributes: {
-          block_until: { N: String(pastTime) }
-        }
+          block_until: { N: String(pastTime) },
+        },
       });
 
       const result = await rateLimiter.isBlocked('test-client');
@@ -248,7 +248,7 @@ describe('RateLimiter', () => {
   describe('checkMultipleRateLimits', () => {
     const multipleConfigs = [
       { name: 'global', config: defaultRateLimits.global },
-      { name: 'auth', config: defaultRateLimits.auth }
+      { name: 'auth', config: defaultRateLimits.auth },
     ];
 
     it('should pass when all limits are satisfied', async () => {
@@ -284,8 +284,8 @@ describe('RateLimiter', () => {
       const futureTime = Date.now() + 300000;
       mockSend.mockResolvedValueOnce({
         Attributes: {
-          block_until: { N: String(futureTime) }
-        }
+          block_until: { N: String(futureTime) },
+        },
       });
 
       const result = await rateLimiter.checkMultipleRateLimits('test-client', multipleConfigs);
@@ -314,30 +314,29 @@ describe('Default Rate Limits', () => {
   it('should have proper default configurations', () => {
     expect(defaultRateLimits.global).toEqual({
       limit: 100,
-      windowMs: 60 * 1000
+      windowMs: 60 * 1000,
     });
 
     expect(defaultRateLimits.auth).toEqual({
       limit: 5,
       windowMs: 15 * 60 * 1000,
-      blockDurationMs: 60 * 60 * 1000
+      blockDurationMs: 60 * 60 * 1000,
     });
 
     expect(defaultRateLimits.todos).toEqual({
       limit: 60,
-      windowMs: 60 * 1000
+      windowMs: 60 * 1000,
     });
 
     expect(defaultRateLimits.strict).toEqual({
       limit: 10,
       windowMs: 60 * 1000,
-      blockDurationMs: 5 * 60 * 1000
+      blockDurationMs: 5 * 60 * 1000,
     });
   });
 });
 
 describe('Utility Functions', () => {
-  
   // ================================
   // extractClientIdentifier 함수 테스트
   // ================================
@@ -347,10 +346,10 @@ describe('Utility Functions', () => {
       const event = {
         requestContext: {
           identity: {
-            sourceIp: '192.168.1.1'
-          }
+            sourceIp: '192.168.1.1',
+          },
         },
-        headers: {}
+        headers: {},
       };
 
       const result = extractClientIdentifier(event);
@@ -361,13 +360,13 @@ describe('Utility Functions', () => {
       const event = {
         requestContext: {
           identity: {
-            sourceIp: '192.168.1.1'
-          }
+            sourceIp: '192.168.1.1',
+          },
         },
         headers: {
           'X-Real-IP': '10.0.0.1',
-          'X-Forwarded-For': '203.0.113.1, 198.51.100.1'
-        }
+          'X-Forwarded-For': '203.0.113.1, 198.51.100.1',
+        },
       };
 
       const result = extractClientIdentifier(event);
@@ -378,12 +377,12 @@ describe('Utility Functions', () => {
       const event = {
         requestContext: {
           identity: {
-            sourceIp: '192.168.1.1'
-          }
+            sourceIp: '192.168.1.1',
+          },
         },
         headers: {
-          'X-Forwarded-For': '203.0.113.1, 198.51.100.1, 192.168.1.1'
-        }
+          'X-Forwarded-For': '203.0.113.1, 198.51.100.1, 192.168.1.1',
+        },
       };
 
       const result = extractClientIdentifier(event);
@@ -394,12 +393,12 @@ describe('Utility Functions', () => {
       const event = {
         requestContext: {
           identity: {
-            sourceIp: '192.168.1.1'
-          }
+            sourceIp: '192.168.1.1',
+          },
         },
         headers: {
-          'x-real-ip': '10.0.0.1' // lowercase
-        }
+          'x-real-ip': '10.0.0.1', // lowercase
+        },
       };
 
       const result = extractClientIdentifier(event);
@@ -410,10 +409,10 @@ describe('Utility Functions', () => {
       const event = {
         requestContext: {
           identity: {
-            sourceIp: '192.168.1.1'
-          }
+            sourceIp: '192.168.1.1',
+          },
         },
-        headers: {}
+        headers: {},
       };
 
       const result = extractClientIdentifier(event);
@@ -424,10 +423,10 @@ describe('Utility Functions', () => {
       const event = {
         requestContext: {
           identity: {
-            sourceIp: undefined as any
-          }
+            sourceIp: undefined as any,
+          },
         },
-        headers: {}
+        headers: {},
       };
 
       const result = extractClientIdentifier(event);
@@ -466,12 +465,10 @@ describe('Utility Functions', () => {
 
     beforeEach(() => {
       mockRateLimiter = {
-        checkMultipleRateLimits: vi.fn()
+        checkMultipleRateLimits: vi.fn(),
       } as any;
 
-      const configs = [
-        { name: 'global', config: defaultRateLimits.global }
-      ];
+      const configs = [{ name: 'global', config: defaultRateLimits.global }];
 
       middleware = createRateLimitMiddleware(mockRateLimiter, configs);
     });
@@ -484,14 +481,14 @@ describe('Utility Functions', () => {
       const mockEvent = {
         requestContext: {
           identity: { sourceIp: '192.168.1.1' },
-          requestId: 'test-request-id'
+          requestId: 'test-request-id',
         },
-        headers: {}
+        headers: {},
       };
 
       (mockRateLimiter.checkMultipleRateLimits as any).mockResolvedValueOnce({
         allowed: true,
-        result: { allowed: true, remaining: 5, resetTime: 60000 }
+        result: { allowed: true, remaining: 5, resetTime: 60000 },
       });
 
       const result = await middleware(mockEvent, {});
@@ -499,7 +496,7 @@ describe('Utility Functions', () => {
       expect(result).toEqual({
         allowed: true,
         remaining: 5,
-        resetTime: 60000
+        resetTime: 60000,
       });
     });
 
@@ -507,15 +504,15 @@ describe('Utility Functions', () => {
       const mockEvent = {
         requestContext: {
           identity: { sourceIp: '192.168.1.1' },
-          requestId: 'test-request-id'
+          requestId: 'test-request-id',
         },
-        headers: {}
+        headers: {},
       };
 
       (mockRateLimiter.checkMultipleRateLimits as any).mockResolvedValueOnce({
         allowed: false,
         failedCheck: 'global',
-        result: { allowed: false, remaining: 0, resetTime: 60000, retryAfter: 30 }
+        result: { allowed: false, remaining: 0, resetTime: 60000, retryAfter: 30 },
       });
 
       await expect(middleware(mockEvent, {})).rejects.toThrow(RateLimitError);
@@ -524,9 +521,9 @@ describe('Utility Functions', () => {
     it('should handle rate limiter errors gracefully', async () => {
       const mockEvent = {
         requestContext: {
-          identity: { sourceIp: '192.168.1.1' }
+          identity: { sourceIp: '192.168.1.1' },
         },
-        headers: {}
+        headers: {},
       };
 
       (mockRateLimiter.checkMultipleRateLimits as any).mockRejectedValueOnce(
@@ -542,9 +539,9 @@ describe('Utility Functions', () => {
     it('should re-throw RateLimitError specifically', async () => {
       const mockEvent = {
         requestContext: {
-          identity: { sourceIp: '192.168.1.1' }
+          identity: { sourceIp: '192.168.1.1' },
         },
-        headers: {}
+        headers: {},
       };
 
       const rateLimitError = new RateLimitError('Rate limited', 60, 100, 0);
@@ -561,7 +558,7 @@ describe('Utility Functions', () => {
   describe('Integration Tests', () => {
     it('should handle complete rate limiting flow', async () => {
       vi.useRealTimers(); // 실제 타이머 사용
-      
+
       const rateLimiter = new RateLimiter('us-east-1', 'test-table');
       const testConfig: RateLimitConfig = {
         limit: 2,
@@ -607,13 +604,13 @@ describe('Utility Functions', () => {
         requestContext: {
           requestId: 'c6af9ac6-7b61-11e6-9a41-93e8deadbeef',
           identity: {
-            sourceIp: '127.0.0.1'
-          }
+            sourceIp: '127.0.0.1',
+          },
         },
         headers: {
           'CloudFront-Viewer-Country': 'US',
-          'X-Forwarded-For': '203.0.113.1, 198.51.100.1'
-        }
+          'X-Forwarded-For': '203.0.113.1, 198.51.100.1',
+        },
       };
 
       const clientId = extractClientIdentifier(apiGatewayEvent);

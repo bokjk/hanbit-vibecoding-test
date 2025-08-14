@@ -1,4 +1,4 @@
-import type { Todo, Priority, FilterType } from "types/index";
+import type { Todo, Priority, FilterType } from "@vive/types";
 
 // ================================
 // 기본 API 응답 타입들
@@ -249,29 +249,31 @@ export interface MigrateDataResponse {
 // 에러 코드 열거형
 // ================================
 
-export enum APIErrorCode {
+export const APIErrorCode = {
   // 인증 관련
-  UNAUTHORIZED = "UNAUTHORIZED",
-  FORBIDDEN = "FORBIDDEN",
-  TOKEN_EXPIRED = "TOKEN_EXPIRED",
+  UNAUTHORIZED: "UNAUTHORIZED",
+  FORBIDDEN: "FORBIDDEN",
+  TOKEN_EXPIRED: "TOKEN_EXPIRED",
 
   // 검증 관련
-  VALIDATION_ERROR = "VALIDATION_ERROR",
-  INVALID_REQUEST = "INVALID_REQUEST",
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+  INVALID_REQUEST: "INVALID_REQUEST",
 
   // 리소스 관련
-  NOT_FOUND = "NOT_FOUND",
-  CONFLICT = "CONFLICT",
-  QUOTA_EXCEEDED = "QUOTA_EXCEEDED",
+  NOT_FOUND: "NOT_FOUND",
+  CONFLICT: "CONFLICT",
+  QUOTA_EXCEEDED: "QUOTA_EXCEEDED",
 
   // 서버 관련
-  INTERNAL_ERROR = "INTERNAL_ERROR",
-  SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE",
+  INTERNAL_ERROR: "INTERNAL_ERROR",
+  SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
 
   // 네트워크 관련
-  NETWORK_ERROR = "NETWORK_ERROR",
-  TIMEOUT_ERROR = "TIMEOUT_ERROR",
-}
+  NETWORK_ERROR: "NETWORK_ERROR",
+  TIMEOUT_ERROR: "TIMEOUT_ERROR",
+} as const;
+
+export type APIErrorCode = (typeof APIErrorCode)[keyof typeof APIErrorCode];
 
 // ================================
 // 동기화 관련 타입들

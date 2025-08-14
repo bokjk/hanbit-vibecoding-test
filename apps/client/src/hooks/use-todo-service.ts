@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Todo, Priority, FilterType, TodoStats } from "types/index";
+import type { Todo, Priority, FilterType, TodoStats } from "@vive/types";
 import {
   unifiedTodoService,
   StorageMode,

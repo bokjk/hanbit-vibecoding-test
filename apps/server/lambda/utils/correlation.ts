@@ -29,15 +29,17 @@ class CorrelationIdManager {
   /**
    * 새로운 상관 ID 컨텍스트 생성
    */
-  create(options: {
-    requestId?: string;
-    userId?: string;
-    sessionId?: string;
-    operation?: string;
-    source?: string;
-    parentCorrelationId?: string;
-  } = {}): CorrelationContext {
-    const correlationId = options.parentCorrelationId 
+  create(
+    options: {
+      requestId?: string;
+      userId?: string;
+      sessionId?: string;
+      operation?: string;
+      source?: string;
+      parentCorrelationId?: string;
+    } = {}
+  ): CorrelationContext {
+    const correlationId = options.parentCorrelationId
       ? `${options.parentCorrelationId}.${randomUUID().substring(0, 8)}`
       : randomUUID();
 
@@ -57,14 +59,14 @@ class CorrelationIdManager {
       if (segment) {
         context.traceId = segment.trace_id;
         context.parentSpanId = segment.id;
-        
+
         // X-Ray에 메타데이터 추가
         segment.addMetadata('correlation', {
           correlationId: context.correlationId,
           operation: context.operation,
           userId: context.userId,
         });
-        
+
         // 커스텀 어노테이션 추가
         segment.addAnnotation('correlationId', context.correlationId);
         if (context.userId) {
@@ -93,7 +95,9 @@ class CorrelationIdManager {
   /**
    * 상관 ID 헤더에서 컨텍스트 추출
    */
-  extractFromHeaders(headers: Record<string, string | string[] | undefined>): Partial<CorrelationContext> {
+  extractFromHeaders(
+    headers: Record<string, string | string[] | undefined>
+  ): Partial<CorrelationContext> {
     const getHeader = (key: string): string | undefined => {
       const value = headers[key] || headers[key.toLowerCase()];
       return Array.isArray(value) ? value[0] : value;
@@ -219,10 +223,10 @@ export const CorrelationUtils = {
    */
   initializeFromAPIGateway(event: Record<string, unknown>, operation?: string): CorrelationContext {
     const extractedContext = correlationId.extractFromHeaders(event.headers || {});
-    
+
     const requestContext = event.requestContext as Record<string, unknown> | undefined;
     const authorizer = requestContext?.authorizer as Record<string, unknown> | undefined;
-    
+
     return correlationId.create({
       requestId: requestContext?.requestId as string | undefined,
       userId: authorizer?.userId as string | undefined,
@@ -235,9 +239,12 @@ export const CorrelationUtils = {
   /**
    * EventBridge 이벤트에서 상관 ID 컨텍스트 초기화
    */
-  initializeFromEventBridge(event: Record<string, unknown>, operation?: string): CorrelationContext {
+  initializeFromEventBridge(
+    event: Record<string, unknown>,
+    operation?: string
+  ): CorrelationContext {
     const detail = event.detail as Record<string, unknown> | undefined;
-    
+
     return correlationId.create({
       requestId: (event.id as string) || randomUUID(),
       operation,
@@ -254,8 +261,10 @@ export const CorrelationUtils = {
     let parentCorrelationId: string | undefined;
     let userId: string | undefined;
 
-    const messageAttributes = record.messageAttributes as Record<string, Record<string, unknown>> | undefined;
-    
+    const messageAttributes = record.messageAttributes as
+      | Record<string, Record<string, unknown>>
+      | undefined;
+
     // 메시지 속성에서 상관 ID 추출
     const correlationIdAttr = messageAttributes?.correlationId;
     if (correlationIdAttr?.stringValue) {

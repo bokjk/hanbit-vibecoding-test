@@ -8,31 +8,33 @@ export class InputSanitizer {
    * 사용자 입력 텍스트에 사용
    */
   static sanitizeText(input: string): string {
-    return input
-      // 스크립트 태그 제거
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      // 모든 HTML 태그 제거
-      .replace(/<[^>]*>/g, '')
-      // JavaScript URL 프로토콜 제거
-      .replace(/javascript:/gi, '')
-      // 이벤트 핸들러 제거
-      .replace(/on\w+\s*=/gi, '')
-      // SQL 인젝션 패턴 제거
-      .replace(/(\b(union|select|insert|update|delete|drop|create|alter|exec|execute)\b)/gi, '')
-      // 특수 문자 이스케이프
-      .replace(/[<>"'&]/g, (match) => {
-        const escapeMap: Record<string, string> = {
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#x27;',
-          '&': '&amp;'
-        };
-        return escapeMap[match] || match;
-      })
-      // 연속 공백 제거
-      .replace(/\s+/g, ' ')
-      .trim();
+    return (
+      input
+        // 스크립트 태그 제거
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        // 모든 HTML 태그 제거
+        .replace(/<[^>]*>/g, '')
+        // JavaScript URL 프로토콜 제거
+        .replace(/javascript:/gi, '')
+        // 이벤트 핸들러 제거
+        .replace(/on\w+\s*=/gi, '')
+        // SQL 인젝션 패턴 제거
+        .replace(/(\b(union|select|insert|update|delete|drop|create|alter|exec|execute)\b)/gi, '')
+        // 특수 문자 이스케이프
+        .replace(/[<>"'&]/g, match => {
+          const escapeMap: Record<string, string> = {
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;',
+            '&': '&amp;',
+          };
+          return escapeMap[match] || match;
+        })
+        // 연속 공백 제거
+        .replace(/\s+/g, ' ')
+        .trim()
+    );
   }
 
   /**
@@ -42,31 +44,35 @@ export class InputSanitizer {
   static sanitizeHtml(input: string): string {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const allowedTags = ['b', 'i', 'em', 'strong', 'p', 'br'];
-    
-    return input
-      // 허용되지 않은 태그 제거
-      .replace(new RegExp(`<(?!\\/?(?:${allowedTags.join('|')})\\b)[^>]*>`, 'gi'), '')
-      // 스크립트 및 위험한 패턴 제거
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/javascript:/gi, '')
-      .replace(/on\w+\s*=/gi, '')
-      .trim();
+
+    return (
+      input
+        // 허용되지 않은 태그 제거
+        .replace(new RegExp(`<(?!\\/?(?:${allowedTags.join('|')})\\b)[^>]*>`, 'gi'), '')
+        // 스크립트 및 위험한 패턴 제거
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+\s*=/gi, '')
+        .trim()
+    );
   }
 
   /**
    * 파일 경로 정화 (경로 탐색 공격 방지)
    */
   static sanitizePath(path: string): string {
-    return path
-      // 상위 디렉토리 접근 패턴 제거
-      .replace(/\.\.\/|\.\.\\|\.\./g, '')
-      // 절대 경로 변환 방지
-      .replace(/^\/+|^\\+/g, '')
-      // 특수 문자 제거
-      .replace(/[<>"'|?*]/g, '')
-      // 연속 슬래시 제거
-      .replace(/\/+/g, '/')
-      .trim();
+    return (
+      path
+        // 상위 디렉토리 접근 패턴 제거
+        .replace(/\.\.\/|\.\.\\|\.\./g, '')
+        // 절대 경로 변환 방지
+        .replace(/^\/+|^\\+/g, '')
+        // 특수 문자 제거
+        .replace(/[<>"'|?*]/g, '')
+        // 연속 슬래시 제거
+        .replace(/\/+/g, '/')
+        .trim()
+    );
   }
 
   /**
@@ -104,18 +110,18 @@ export class InputSanitizer {
     if (typeof obj === 'string') {
       return this.sanitizeText(obj);
     }
-    
+
     if (Array.isArray(obj)) {
       return obj.map(item => this.sanitizeObject(item));
     }
-    
+
     if (obj && typeof obj === 'object') {
       const sanitized: Record<string, unknown> = {};
-      
+
       for (const [key, value] of Object.entries(obj)) {
         // 키 이름도 정화
         const sanitizedKey = this.sanitizeText(key);
-        
+
         if (typeof value === 'string') {
           // 필드별 적절한 정화 방법 선택
           if (['title', 'description', 'content'].includes(sanitizedKey)) {
@@ -131,10 +137,10 @@ export class InputSanitizer {
           sanitized[sanitizedKey] = this.sanitizeObject(value);
         }
       }
-      
+
       return sanitized;
     }
-    
+
     return obj;
   }
 
@@ -158,11 +164,11 @@ export class InputSanitizer {
       { pattern: /on\w+\s*=/i, name: 'event-handler' },
       { pattern: /\b(union|select|insert|update|delete)\b/i, name: 'sql-injection' },
       { pattern: /\.\.\//g, name: 'path-traversal' },
-      { pattern: /<%[\s\S]*%>/g, name: 'server-side-template' }
+      { pattern: /<%[\s\S]*%>/g, name: 'server-side-template' },
     ];
 
     const detectedPatterns: string[] = [];
-    
+
     for (const { pattern, name } of dangerousPatterns) {
       if (pattern.test(input)) {
         detectedPatterns.push(name);
@@ -171,7 +177,7 @@ export class InputSanitizer {
 
     return {
       isSafe: detectedPatterns.length === 0,
-      detectedPatterns
+      detectedPatterns,
     };
   }
 }
@@ -199,7 +205,7 @@ export class SecurityMiddleware {
    */
   static sanitizeRequestBody(body: unknown): unknown {
     const sanitized = InputSanitizer.sanitizeObject(body);
-    
+
     // 위험한 패턴 검증
     if (typeof sanitized === 'object' && sanitized !== null) {
       for (const [, value] of Object.entries(sanitized)) {
@@ -215,37 +221,41 @@ export class SecurityMiddleware {
         }
       }
     }
-    
+
     return sanitized;
   }
 
   /**
    * 쿼리 파라미터 정화
    */
-  static sanitizeQueryParams(params: Record<string, string | undefined>): Record<string, string | undefined> {
+  static sanitizeQueryParams(
+    params: Record<string, string | undefined>
+  ): Record<string, string | undefined> {
     const sanitized: Record<string, string | undefined> = {};
-    
+
     for (const [key, value] of Object.entries(params)) {
       if (typeof value === 'string') {
         sanitized[InputSanitizer.sanitizeText(key)] = InputSanitizer.sanitizeText(value);
       }
     }
-    
+
     return sanitized;
   }
 
   /**
    * 경로 파라미터 정화
    */
-  static sanitizePathParams(params: Record<string, string | undefined>): Record<string, string | undefined> {
+  static sanitizePathParams(
+    params: Record<string, string | undefined>
+  ): Record<string, string | undefined> {
     const sanitized: Record<string, string | undefined> = {};
-    
+
     for (const [key, value] of Object.entries(params)) {
       if (typeof value === 'string') {
         sanitized[key] = InputSanitizer.sanitizePath(value);
       }
     }
-    
+
     return sanitized;
   }
 }

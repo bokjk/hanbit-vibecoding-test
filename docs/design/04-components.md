@@ -26,6 +26,7 @@ App
 ## 4.3 주요 컴포넌트 명세
 
 ### 4.3.1 TodoInput 컴포넌트
+
 ```typescript
 interface TodoInputProps {
   onAddTodo: (title: string, priority: Priority) => void;
@@ -40,6 +41,7 @@ interface TodoInputProps {
 ```
 
 ### 4.3.2 TodoItem 컴포넌트
+
 ```typescript
 interface TodoItemProps {
   todo: Todo;
@@ -56,6 +58,7 @@ interface TodoItemProps {
 ```
 
 ### 4.3.3 TodoFilters 컴포넌트
+
 ```typescript
 interface TodoFiltersProps {
   currentFilter: TodoFilter;
@@ -74,6 +77,7 @@ interface TodoFiltersProps {
 ```
 
 ### 4.3.4 TodoList 컴포넌트
+
 ```typescript
 interface TodoListProps {
   todos: Todo[];
@@ -91,6 +95,7 @@ interface TodoListProps {
 ```
 
 ### 4.3.5 TodoStats 컴포넌트
+
 ```typescript
 interface TodoStatsProps {
   todos: Todo[];
@@ -104,6 +109,7 @@ interface TodoStatsProps {
 ```
 
 ### 4.3.6 Header 컴포넌트
+
 ```typescript
 interface HeaderProps {
   user?: User; // 2단계에서 추가
@@ -118,10 +124,11 @@ interface HeaderProps {
 ## 4.4 공통 컴포넌트
 
 ### 4.4.1 PriorityBadge 컴포넌트
+
 ```typescript
 interface PriorityBadgeProps {
   priority: Priority;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
 // 책임:
@@ -131,6 +138,7 @@ interface PriorityBadgeProps {
 ```
 
 ### 4.4.2 ConfirmDialog 컴포넌트
+
 ```typescript
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -151,15 +159,18 @@ interface ConfirmDialogProps {
 ## 4.5 컴포넌트 최적화 전략
 
 ### 4.5.1 React.memo 적용
+
 - TodoItem: props가 변경되지 않으면 리렌더링 방지
 - PriorityBadge: 우선순위가 동일하면 리렌더링 방지
 - TodoStats: 통계 데이터가 동일하면 리렌더링 방지
 
 ### 4.5.2 useCallback 활용
+
 - 이벤트 핸들러 함수들을 메모이제이션
 - 부모에서 자식으로 전달되는 콜백 함수 최적화
 
 ### 4.5.3 가상 스크롤링
+
 - 많은 할 일 항목이 있을 때 성능 최적화
 - react-window 또는 react-virtualized 활용
 

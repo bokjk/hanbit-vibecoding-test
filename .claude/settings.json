@@ -1,0 +1,9 @@
+{
+  "shell": {
+    "windows": "powershell.exe",
+    "path": "powershell.exe"
+  },
+  "terminal": {
+    "shell": "powershell.exe"
+  }
+}

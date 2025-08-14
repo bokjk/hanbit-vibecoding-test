@@ -208,7 +208,7 @@ export function createMockXRay() {
  */
 export function mockEnvironmentVariables(envVars: Record<string, string>) {
   const originalEnv = process.env;
-  
+
   beforeEach(() => {
     vi.restoreAllMocks();
     process.env = {
@@ -216,7 +216,7 @@ export function mockEnvironmentVariables(envVars: Record<string, string>) {
       ...envVars,
     };
   });
-  
+
   afterEach(() => {
     process.env = originalEnv;
   });
@@ -247,10 +247,7 @@ export async function expectAsyncError(
 /**
  * 타임아웃 테스트 헬퍼
  */
-export function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number = 5000
-): Promise<T> {
+export function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 5000): Promise<T> {
   return Promise.race([
     promise,
     new Promise<never>((_, reject) =>
@@ -268,7 +265,7 @@ export async function withRetry<T>(
   delayMs: number = 100
 ): Promise<T> {
   let lastError: Error;
-  
+
   for (let i = 0; i <= maxRetries; i++) {
     try {
       return await fn();
@@ -279,7 +276,7 @@ export async function withRetry<T>(
       }
     }
   }
-  
+
   throw lastError || new Error('Timeout occurred');
 }
 
@@ -293,7 +290,7 @@ export async function measurePerformance<T>(
   const result = await fn();
   const end = process.hrtime.bigint();
   const duration = Number(end - start) / 1_000_000; // Convert to milliseconds
-  
+
   return { result, duration };
 }
 

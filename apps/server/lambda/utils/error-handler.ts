@@ -324,10 +324,7 @@ export function createSuccessResponse(
 /**
  * 에러 응답 생성
  */
-export function createErrorResponse(
-  error: Error,
-  correlationId?: string
-): APIGatewayProxyResult {
+export function createErrorResponse(error: Error, correlationId?: string): APIGatewayProxyResult {
   // AppError인 경우
   if (error instanceof AppError) {
     logger.error('Application error occurred', error, {
@@ -401,7 +398,7 @@ export function recordErrorToXRay(error: Error, correlationId?: string): void {
     const segment = AWSXRay.getSegment();
     if (segment) {
       segment.addError(error);
-      
+
       if (correlationId) {
         segment.addAnnotation('correlationId', correlationId);
       }
@@ -409,16 +406,16 @@ export function recordErrorToXRay(error: Error, correlationId?: string): void {
       if (error instanceof AppError) {
         segment.addAnnotation('errorCode', error.code);
         segment.addAnnotation('statusCode', error.statusCode);
-        
+
         if (error.details) {
           segment.addMetadata('error', 'details', error.details);
         }
       }
     }
   } catch (xrayError) {
-    logger.warn('Failed to record error to X-Ray', { 
+    logger.warn('Failed to record error to X-Ray', {
       originalError: error.message,
-      xrayError: xrayError instanceof Error ? xrayError.message : 'Unknown X-Ray error'
+      xrayError: xrayError instanceof Error ? xrayError.message : 'Unknown X-Ray error',
     });
   }
 }

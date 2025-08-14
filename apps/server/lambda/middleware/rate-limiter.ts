@@ -1,12 +1,16 @@
-import { DynamoDBClient, UpdateItemCommand, UpdateItemCommandInput } from '@aws-sdk/client-dynamodb';
+import {
+  DynamoDBClient,
+  UpdateItemCommand,
+  UpdateItemCommandInput,
+} from '@aws-sdk/client-dynamodb';
 import { logger } from '@/utils/logger';
 
 /**
  * DynamoDB 기반 레이트 리미터
  */
 export interface RateLimitConfig {
-  limit: number;           // 허용 요청 수
-  windowMs: number;        // 시간 창 (밀리초)
+  limit: number; // 허용 요청 수
+  windowMs: number; // 시간 창 (밀리초)
   blockDurationMs?: number; // 차단 시간 (밀리초) - 선택적
 }
 
@@ -47,10 +51,7 @@ export class RateLimiter {
   /**
    * 레이트 리미팅 검사 및 적용
    */
-  async checkRateLimit(
-    identifier: string,
-    config: RateLimitConfig
-  ): Promise<RateLimitResult> {
+  async checkRateLimit(identifier: string, config: RateLimitConfig): Promise<RateLimitResult> {
     const now = Date.now();
     const windowStart = Math.floor(now / config.windowMs) * config.windowMs;
     const key = `${identifier}:${windowStart}`;
@@ -61,18 +62,18 @@ export class RateLimiter {
       const updateParams: UpdateItemCommandInput = {
         TableName: this.tableName,
         Key: {
-          id: { S: key }
+          id: { S: key },
         },
         UpdateExpression: 'ADD requests :inc SET #ttl = :ttl, updated_at = :now',
         ExpressionAttributeNames: {
-          '#ttl': 'ttl'
+          '#ttl': 'ttl',
         },
         ExpressionAttributeValues: {
           ':inc': { N: '1' },
           ':ttl': { N: String(ttl) },
-          ':now': { N: String(now) }
+          ':now': { N: String(now) },
         },
-        ReturnValues: 'ALL_NEW'
+        ReturnValues: 'ALL_NEW',
       };
 
       const response = await this.dynamoClient.send(new UpdateItemCommand(updateParams));
@@ -83,7 +84,7 @@ export class RateLimiter {
       // 제한 초과 시 차단 설정
       if (currentCount > config.limit) {
         const retryAfter = Math.ceil((resetTime - now) / 1000);
-        
+
         // 차단 기간이 설정된 경우 추가 차단
         if (config.blockDurationMs) {
           await this.setBlock(identifier, config.blockDurationMs);
@@ -93,23 +94,23 @@ export class RateLimiter {
           allowed: false,
           remaining: 0,
           resetTime,
-          retryAfter
+          retryAfter,
         };
       }
 
       return {
         allowed: true,
         remaining,
-        resetTime
+        resetTime,
       };
     } catch (error) {
       logger.error('Rate limiting check failed:', error as Error);
-      
+
       // 실패 시 허용 (가용성 우선)
       return {
         allowed: true,
         remaining: config.limit - 1,
-        resetTime: windowStart + config.windowMs
+        resetTime: windowStart + config.windowMs,
       };
     }
   }
@@ -123,20 +124,22 @@ export class RateLimiter {
     const ttl = Math.floor(blockUntil / 1000) + 60; // 1분 여유시간
 
     try {
-      await this.dynamoClient.send(new UpdateItemCommand({
-        TableName: this.tableName,
-        Key: {
-          id: { S: blockKey }
-        },
-        UpdateExpression: 'SET block_until = :block_until, #ttl = :ttl',
-        ExpressionAttributeNames: {
-          '#ttl': 'ttl'
-        },
-        ExpressionAttributeValues: {
-          ':block_until': { N: String(blockUntil) },
-          ':ttl': { N: String(ttl) }
-        }
-      }));
+      await this.dynamoClient.send(
+        new UpdateItemCommand({
+          TableName: this.tableName,
+          Key: {
+            id: { S: blockKey },
+          },
+          UpdateExpression: 'SET block_until = :block_until, #ttl = :ttl',
+          ExpressionAttributeNames: {
+            '#ttl': 'ttl',
+          },
+          ExpressionAttributeValues: {
+            ':block_until': { N: String(blockUntil) },
+            ':ttl': { N: String(ttl) },
+          },
+        })
+      );
     } catch (error) {
       logger.error('Failed to set block:', error as Error);
     }
@@ -150,17 +153,19 @@ export class RateLimiter {
     const now = Date.now();
 
     try {
-      const response = await this.dynamoClient.send(new UpdateItemCommand({
-        TableName: this.tableName,
-        Key: {
-          id: { S: blockKey }
-        },
-        UpdateExpression: 'SET dummy = :dummy', // DynamoDB GetItem 대신 사용
-        ExpressionAttributeValues: {
-          ':dummy': { N: String(now) }
-        },
-        ReturnValues: 'ALL_OLD'
-      }));
+      const response = await this.dynamoClient.send(
+        new UpdateItemCommand({
+          TableName: this.tableName,
+          Key: {
+            id: { S: blockKey },
+          },
+          UpdateExpression: 'SET dummy = :dummy', // DynamoDB GetItem 대신 사용
+          ExpressionAttributeValues: {
+            ':dummy': { N: String(now) },
+          },
+          ReturnValues: 'ALL_OLD',
+        })
+      );
 
       const blockUntil = response.Attributes?.block_until?.N;
       if (blockUntil && parseInt(blockUntil) > now) {
@@ -192,8 +197,8 @@ export class RateLimiter {
           allowed: false,
           remaining: 0,
           resetTime: Date.now() + (blockStatus.retryAfter || 0) * 1000,
-          retryAfter: blockStatus.retryAfter
-        }
+          retryAfter: blockStatus.retryAfter,
+        },
       };
     }
 
@@ -204,7 +209,7 @@ export class RateLimiter {
         return {
           allowed: false,
           failedCheck: name,
-          result
+          result,
         };
       }
     }
@@ -219,35 +224,35 @@ export class RateLimiter {
 export const defaultRateLimits = {
   // IP별 글로벌 제한
   global: {
-    limit: 100,        // 100 requests
-    windowMs: 60 * 1000 // per minute
+    limit: 100, // 100 requests
+    windowMs: 60 * 1000, // per minute
   },
-  
+
   // 인증 API 제한
   auth: {
-    limit: 5,          // 5 attempts
+    limit: 5, // 5 attempts
     windowMs: 15 * 60 * 1000, // per 15 minutes
-    blockDurationMs: 60 * 60 * 1000 // block for 1 hour
+    blockDurationMs: 60 * 60 * 1000, // block for 1 hour
   },
-  
+
   // TODO API 제한
   todos: {
-    limit: 60,         // 60 requests
-    windowMs: 60 * 1000 // per minute
+    limit: 60, // 60 requests
+    windowMs: 60 * 1000, // per minute
   },
-  
+
   // 엄격한 제한 (관리자 API 등)
   strict: {
-    limit: 10,         // 10 requests
+    limit: 10, // 10 requests
     windowMs: 60 * 1000, // per minute
-    blockDurationMs: 5 * 60 * 1000 // block for 5 minutes
-  }
+    blockDurationMs: 5 * 60 * 1000, // block for 5 minutes
+  },
 };
 
 /**
  * API Gateway 이벤트에서 클라이언트 식별자 추출
  */
-export function extractClientIdentifier(event: { 
+export function extractClientIdentifier(event: {
   requestContext: { identity: { sourceIp: string } };
   headers: Record<string, string | undefined>;
 }): string {
@@ -255,10 +260,10 @@ export function extractClientIdentifier(event: {
   const userId = event.requestContext?.identity?.sourceIp;
   const forwardedFor = event.headers['X-Forwarded-For'] || event.headers['x-forwarded-for'];
   const realIP = event.headers['X-Real-IP'] || event.headers['x-real-ip'];
-  
+
   // 실제 클라이언트 IP 추출 (프록시 고려)
-  const clientIP = realIP || (forwardedFor?.split(',')[0]?.trim()) || userId || 'unknown';
-  
+  const clientIP = realIP || forwardedFor?.split(',')[0]?.trim() || userId || 'unknown';
+
   return clientIP;
 }
 
@@ -276,21 +281,24 @@ export function createRateLimitMiddleware(
   rateLimiter: RateLimiter,
   configs: Array<{ name: string; config: RateLimitConfig }>
 ) {
-  return async (event: APIGatewayProxyEvent, _context: unknown): Promise<RateLimitResult | null> => {
+  return async (
+    event: APIGatewayProxyEvent,
+    _context: unknown
+  ): Promise<RateLimitResult | null> => {
     const clientIdentifier = extractClientIdentifier(event);
-    
+
     try {
       const result = await rateLimiter.checkMultipleRateLimits(clientIdentifier, configs);
-      
+
       if (!result.allowed && result.result) {
         logger.warn('Rate limit exceeded', {
           identifier: clientIdentifier,
           failedCheck: result.failedCheck,
           remaining: result.result.remaining,
           retryAfter: result.result.retryAfter,
-          requestId: event.requestContext?.requestId
+          requestId: event.requestContext?.requestId,
         });
-        
+
         throw new RateLimitError(
           `Rate limit exceeded: ${result.failedCheck}`,
           result.result.retryAfter || 60,
@@ -298,13 +306,13 @@ export function createRateLimitMiddleware(
           result.result.remaining
         );
       }
-      
+
       return result.result || null;
     } catch (error) {
       if (error instanceof RateLimitError) {
         throw error;
       }
-      
+
       logger.error('Rate limiting middleware error:', error as Error);
       return null; // 에러 시 통과
     }

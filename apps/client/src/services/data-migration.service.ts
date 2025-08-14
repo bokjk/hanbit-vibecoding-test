@@ -7,7 +7,7 @@
  * - 데이터 무결성 보장
  */
 
-import type { Todo } from "types/index";
+import type { Todo } from "@vive/types";
 import type { AuthState } from "../types/auth.types";
 import { localStorageService } from "./localStorage.service";
 import { authService } from "./auth.service";
@@ -218,7 +218,8 @@ class DataMigrationService {
     try {
       // 1. 로컬 데이터 존재 확인
       const localTodos = localStorageService.getTodos();
-      const hasLocalData = localTodos.length > 0;
+      const localTodosData = await localTodos;
+      const hasLocalData = localTodosData.length > 0;
 
       // 2. 인증 상태 확인
       const isAuthenticated = authState?.isAuthenticated || false;
@@ -239,7 +240,7 @@ class DataMigrationService {
 
       this.updateState({
         isRequired,
-        totalItems: isRequired ? localTodos.length : 0,
+        totalItems: isRequired ? localTodosData.length : 0,
       });
 
       console.log("🔄 Migration check:", {
@@ -249,7 +250,7 @@ class DataMigrationService {
         isInitialized,
         migrationCompleted,
         isRequired,
-        totalItems: localTodos.length,
+        totalItems: localTodosData.length,
       });
 
       return isRequired;
@@ -391,7 +392,7 @@ class DataMigrationService {
   }> {
     this.updateState({ stage: "migrating" });
 
-    const localTodos = localStorageService.getTodos();
+    const localTodos = await localStorageService.getTodos();
     let migrated = 0;
     let skipped = 0;
     let errors = 0;
@@ -638,8 +639,9 @@ export const migrationUtils = {
   /**
    * 마이그레이션 필요성 빠른 확인
    */
-  quickCheck(): boolean {
-    const hasLocalData = localStorageService.getTodos().length > 0;
+  async quickCheck(): Promise<boolean> {
+    const localTodos = await localStorageService.getTodos();
+    const hasLocalData = localTodos.length > 0;
     const migrationCompleted =
       localStorage.getItem("migration:completed") === "true";
     return hasLocalData && !migrationCompleted;

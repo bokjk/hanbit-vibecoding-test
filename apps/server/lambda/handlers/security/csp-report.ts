@@ -16,11 +16,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     // 요청 본문 검증
     if (!event.body) {
       logger.warn('Empty CSP report body', { requestId });
-      return ResponseSecurity.createSecureErrorResponse(
-        new Error('Empty report body'),
-        400,
-        { origin, requestId }
-      );
+      return ResponseSecurity.createSecureErrorResponse(new Error('Empty report body'), 400, {
+        origin,
+        requestId,
+      });
     }
 
     // CSP 보고서 파싱
@@ -34,17 +33,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     try {
       const reportData = JSON.parse(event.body);
       cspReport = reportData['csp-report'];
-      
+
       if (!cspReport) {
         throw new Error('Invalid report format');
       }
     } catch (parseError) {
       logger.warn('Invalid CSP report format', { requestId, error: parseError });
-      return ResponseSecurity.createSecureErrorResponse(
-        new Error('Invalid report format'),
-        400,
-        { origin, requestId }
-      );
+      return ResponseSecurity.createSecureErrorResponse(new Error('Invalid report format'), 400, {
+        origin,
+        requestId,
+      });
     }
 
     // 클라이언트 정보 수집
@@ -69,33 +67,33 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       columnNumber: cspReport['column-number'],
       userAgent,
       clientIP,
-      timestamp
+      timestamp,
     });
 
     // 심각한 위반 감지 및 알림
     const seriousViolations = [
-      'script-src', 
-      'object-src', 
-      'base-uri', 
+      'script-src',
+      'object-src',
+      'base-uri',
       'unsafe-inline',
-      'unsafe-eval'
+      'unsafe-eval',
     ];
-    
+
     const violatedDirective = cspReport['violated-directive'] || '';
     const blockedUri = cspReport['blocked-uri'] || '';
-    
-    const isSeriousViolation = seriousViolations.some(violation => 
-      violatedDirective.includes(violation) || blockedUri.includes('javascript:')
+
+    const isSeriousViolation = seriousViolations.some(
+      violation => violatedDirective.includes(violation) || blockedUri.includes('javascript:')
     );
 
     if (isSeriousViolation) {
       logger.error('Serious CSP violation detected', {
         requestId,
         directive: violatedDirective,
-        blockedUri: blockedUri,
+        blockedUri,
         userAgent,
         clientIP,
-        documentUri: cspReport['document-uri']
+        documentUri: cspReport['document-uri'],
       });
 
       // 프로덕션에서는 추가 알림 시스템 연동 가능
@@ -107,7 +105,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       userAgent,
       clientIP,
       timestamp,
-      isSeriousViolation
+      isSeriousViolation,
     });
 
     // 204 No Content 응답 (표준)
@@ -115,19 +113,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       statusCode: 204,
       headers: {
         ...ResponseSecurity.getCorsHeaders(origin),
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
       },
-      body: ''
+      body: '',
     };
-
   } catch (error) {
     logger.error('Error processing CSP report', error as Error, { requestId });
-    
-    return ResponseSecurity.createSecureErrorResponse(
-      error as Error,
-      500,
-      { origin, requestId }
-    );
+
+    return ResponseSecurity.createSecureErrorResponse(error as Error, 500, { origin, requestId });
   }
 };
 
@@ -155,7 +148,7 @@ async function collectCSPStatistics(
       documentUri: cspReport['document-uri'],
       userAgent: metadata.userAgent,
       timestamp: metadata.timestamp,
-      serious: metadata.isSeriousViolation
+      serious: metadata.isSeriousViolation,
     };
 
     // 실제 구현 시 DynamoDB에 저장
@@ -168,11 +161,13 @@ async function collectCSPStatistics(
 /**
  * CSP 위반 빈도 분석용 헬퍼
  */
-export function analyzeCSPViolationTrends(reports: Array<{
-  'violated-directive'?: string;
-  'blocked-uri'?: string;
-  timestamp?: string;
-}>): {
+export function analyzeCSPViolationTrends(
+  reports: Array<{
+    'violated-directive'?: string;
+    'blocked-uri'?: string;
+    timestamp?: string;
+  }>
+): {
   topViolations: Array<{ directive: string; count: number }>;
   commonBlockedUris: Array<{ uri: string; count: number }>;
   timeDistribution: Record<string, number>;
@@ -204,6 +199,6 @@ export function analyzeCSPViolationTrends(reports: Array<{
   return {
     topViolations,
     commonBlockedUris,
-    timeDistribution
+    timeDistribution,
   };
 }

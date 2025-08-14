@@ -9,32 +9,35 @@ export class ResponseSecurity {
   /**
    * 보안 헤더 생성 (동적 CSP 포함)
    */
-  static getSecurityHeaders(options: {
-    origin?: string;
-    requestId?: string;
-    environment?: 'development' | 'staging' | 'production';
-    enableNonce?: boolean;
-  } = {}): Record<string, string> {
+  static getSecurityHeaders(
+    options: {
+      origin?: string;
+      requestId?: string;
+      environment?: 'development' | 'staging' | 'production';
+      enableNonce?: boolean;
+    } = {}
+  ): Record<string, string> {
     const { requestId, environment = 'production', enableNonce = true } = options;
-    
+
     const headers: Record<string, string> = {
       // XSS 보호
       'X-XSS-Protection': '1; mode=block',
-      
+
       // 콘텐츠 타입 스니핑 방지
       'X-Content-Type-Options': 'nosniff',
-      
+
       // 클릭재킹 방지
       'X-Frame-Options': 'DENY',
-      
+
       // 참조자 정책
       'Referrer-Policy': 'strict-origin-when-cross-origin',
-      
+
       // HTTPS 강제
-      'Strict-Transport-Security': environment === 'production' 
-        ? 'max-age=31536000; includeSubDomains; preload'
-        : 'max-age=86400',
-      
+      'Strict-Transport-Security':
+        environment === 'production'
+          ? 'max-age=31536000; includeSubDomains; preload'
+          : 'max-age=86400',
+
       // 권한 정책
       'Permissions-Policy': [
         'camera=()',
@@ -43,8 +46,8 @@ export class ResponseSecurity {
         'payment=()',
         'usb=()',
         'fullscreen=(self)',
-        'picture-in-picture=()'
-      ].join(', ')
+        'picture-in-picture=()',
+      ].join(', '),
     };
 
     // 동적 CSP 생성
@@ -58,10 +61,11 @@ export class ResponseSecurity {
 
     // CSP 위반 보고 설정 (프로덕션/스테이징에서만)
     if (environment !== 'development') {
-      const reportEndpoint = environment === 'production' 
-        ? 'https://todoapp.hanbit.com/csp-report'
-        : 'https://staging.todoapp.hanbit.com/csp-report';
-      
+      const reportEndpoint =
+        environment === 'production'
+          ? 'https://todoapp.hanbit.com/csp-report'
+          : 'https://staging.todoapp.hanbit.com/csp-report';
+
       headers['Report-To'] = CSPNonce.generateReportToHeader(reportEndpoint);
     }
 
@@ -75,11 +79,11 @@ export class ResponseSecurity {
     const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
       'http://localhost:3000',
       'http://localhost:5173',
-      'https://todoapp.hanbit.com'
+      'https://todoapp.hanbit.com',
     ];
 
     const isAllowedOrigin = origin && allowedOrigins.includes(origin);
-    
+
     return {
       'Access-Control-Allow-Origin': isAllowedOrigin ? origin : allowedOrigins[0],
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -87,11 +91,11 @@ export class ResponseSecurity {
         'Content-Type',
         'Authorization',
         'X-Requested-With',
-        'X-Request-ID'
+        'X-Request-ID',
       ].join(', '),
       'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Max-Age': '86400', // 24시간 preflight 캐싱
-      'Vary': 'Origin'
+      Vary: 'Origin',
     };
   }
 
@@ -103,7 +107,7 @@ export class ResponseSecurity {
 
     const headers: Record<string, string> = {
       'X-RateLimit-Remaining': String(rateLimitResult.remaining),
-      'X-RateLimit-Reset': String(Math.ceil(rateLimitResult.resetTime / 1000))
+      'X-RateLimit-Reset': String(Math.ceil(rateLimitResult.resetTime / 1000)),
     };
 
     if (rateLimitResult.retryAfter) {
@@ -128,13 +132,14 @@ export class ResponseSecurity {
       enableNonce?: boolean;
     } = {}
   ): APIGatewayProxyResult {
-    const { 
-      origin, 
-      requestId, 
-      environment = (process.env.NODE_ENV as 'development' | 'staging' | 'production') || 'production',
-      rateLimitResult, 
+    const {
+      origin,
+      requestId,
+      environment = (process.env.NODE_ENV as 'development' | 'staging' | 'production') ||
+        'production',
+      rateLimitResult,
       additionalHeaders = {},
-      enableNonce = true 
+      enableNonce = true,
     } = options;
 
     // 민감한 정보 제거
@@ -147,9 +152,9 @@ export class ResponseSecurity {
         ...this.getSecurityHeaders({ origin, requestId, environment, enableNonce }),
         ...this.getCorsHeaders(origin),
         ...this.getRateLimitHeaders(rateLimitResult),
-        ...additionalHeaders
+        ...additionalHeaders,
       },
-      body: JSON.stringify(sanitizedData)
+      body: JSON.stringify(sanitizedData),
     };
   }
 
@@ -167,24 +172,25 @@ export class ResponseSecurity {
       enableNonce?: boolean;
     } = {}
   ): APIGatewayProxyResult {
-    const { 
-      origin, 
-      requestId, 
-      environment = (process.env.NODE_ENV as 'development' | 'staging' | 'production') || 'production',
+    const {
+      origin,
+      requestId,
+      environment = (process.env.NODE_ENV as 'development' | 'staging' | 'production') ||
+        'production',
       rateLimitResult,
-      enableNonce = true 
+      enableNonce = true,
     } = options;
 
     // 프로덕션에서는 상세 에러 정보 숨김
     const isDevelopment = environment === 'development';
     const errorMessage = isDevelopment ? error.message : this.getGenericErrorMessage(statusCode);
-    
+
     const errorResponse = {
       error: true,
       message: errorMessage,
       statusCode,
       ...(requestId && { requestId }),
-      ...(isDevelopment && { stack: error.stack })
+      ...(isDevelopment && { stack: error.stack }),
     };
 
     return {
@@ -193,9 +199,9 @@ export class ResponseSecurity {
         'Content-Type': 'application/json; charset=utf-8',
         ...this.getSecurityHeaders({ origin, requestId, environment, enableNonce }),
         ...this.getCorsHeaders(origin),
-        ...this.getRateLimitHeaders(rateLimitResult)
+        ...this.getRateLimitHeaders(rateLimitResult),
       },
-      body: JSON.stringify(errorResponse)
+      body: JSON.stringify(errorResponse),
     };
   }
 
@@ -207,9 +213,9 @@ export class ResponseSecurity {
       statusCode: 204,
       headers: {
         ...this.getCorsHeaders(origin),
-        'Content-Length': '0'
+        'Content-Length': '0',
       },
-      body: ''
+      body: '',
     };
   }
 
@@ -224,15 +230,21 @@ export class ResponseSecurity {
 
       const sanitized: Record<string, unknown> = {};
       const sensitiveKeys = [
-        'password', 'secret', 'token', 'key', 'credential', 
-        'private', 'auth', 'jwt', 'session', 'cookie'
+        'password',
+        'secret',
+        'token',
+        'key',
+        'credential',
+        'private',
+        'auth',
+        'jwt',
+        'session',
+        'cookie',
       ];
 
       for (const [key, value] of Object.entries(data)) {
         const lowerKey = key.toLowerCase();
-        const isSensitive = sensitiveKeys.some(sensitiveKey => 
-          lowerKey.includes(sensitiveKey)
-        );
+        const isSensitive = sensitiveKeys.some(sensitiveKey => lowerKey.includes(sensitiveKey));
 
         if (isSensitive) {
           sanitized[key] = '[REDACTED]';
@@ -261,7 +273,7 @@ export class ResponseSecurity {
       500: 'Internal Server Error',
       502: 'Bad Gateway',
       503: 'Service Unavailable',
-      504: 'Gateway Timeout'
+      504: 'Gateway Timeout',
     };
 
     return errorMessages[statusCode] || 'Unknown Error';
@@ -270,29 +282,31 @@ export class ResponseSecurity {
   /**
    * 콘텐츠 보안 정책 (CSP) 동적 생성
    */
-  static generateCSP(options: {
-    allowInlineStyles?: boolean;
-    allowInlineScripts?: boolean;
-    additionalScriptSrc?: string[];
-    additionalStyleSrc?: string[];
-  } = {}): string {
+  static generateCSP(
+    options: {
+      allowInlineStyles?: boolean;
+      allowInlineScripts?: boolean;
+      additionalScriptSrc?: string[];
+      additionalStyleSrc?: string[];
+    } = {}
+  ): string {
     const {
       allowInlineStyles = true,
       allowInlineScripts = false,
       additionalScriptSrc = [],
-      additionalStyleSrc = []
+      additionalStyleSrc = [],
     } = options;
 
     const scriptSrc = [
       "'self'",
       ...(allowInlineScripts ? ["'unsafe-inline'"] : []),
-      ...additionalScriptSrc
+      ...additionalScriptSrc,
     ].join(' ');
 
     const styleSrc = [
       "'self'",
       ...(allowInlineStyles ? ["'unsafe-inline'"] : []),
-      ...additionalStyleSrc
+      ...additionalStyleSrc,
     ].join(' ');
 
     return [
@@ -304,7 +318,7 @@ export class ResponseSecurity {
       `connect-src 'self' https:`,
       `frame-ancestors 'none'`,
       `base-uri 'self'`,
-      `form-action 'self'`
+      `form-action 'self'`,
     ].join('; ');
   }
 }
@@ -327,8 +341,8 @@ export function createRateLimitErrorResponse(
         allowed: false,
         remaining,
         resetTime: Date.now() + retryAfter * 1000,
-        retryAfter
-      }
+        retryAfter,
+      },
     }
   );
 }

@@ -240,7 +240,7 @@ export class NotificationSystem extends constructs.Construct {
       // 토픽에 태그 추가
       topic.node.addMetadata('severity', severity);
       topic.node.addMetadata('service', 'todo-app');
-      
+
       this.topics.set(severity, topic);
     });
 
@@ -249,7 +249,7 @@ export class NotificationSystem extends constructs.Construct {
       topicName: 'TodoApp-Composite-Alerts',
       displayName: 'Todo App Composite Alerts',
     });
-    
+
     this.topics.set('COMPOSITE', compositeTopic);
   }
 
@@ -262,9 +262,12 @@ export class NotificationSystem extends constructs.Construct {
         const topic = this.topics.get(severity);
         if (topic) {
           const subscriptions = this.createChannelSubscriptions(topic, channel);
-          
+
           const existingSubs = this.subscriptions.get(`${severity}-${channel.name}`) || [];
-          this.subscriptions.set(`${severity}-${channel.name}`, [...existingSubs, ...subscriptions]);
+          this.subscriptions.set(`${severity}-${channel.name}`, [
+            ...existingSubs,
+            ...subscriptions,
+          ]);
         }
       });
     });
@@ -273,7 +276,10 @@ export class NotificationSystem extends constructs.Construct {
   /**
    * 채널별 구독 생성
    */
-  private createChannelSubscriptions(topic: sns.Topic, channel: NotificationChannel): sns.Subscription[] {
+  private createChannelSubscriptions(
+    topic: sns.Topic,
+    channel: NotificationChannel
+  ): sns.Subscription[] {
     const subscriptions: sns.Subscription[] = [];
 
     switch (channel.type) {
@@ -324,7 +330,8 @@ export class NotificationSystem extends constructs.Construct {
     const policy: Record<string, sns.SubscriptionFilter> = {};
 
     // 심각도 필터
-    if (channel.severity.length < 3) { // 모든 심각도가 아닌 경우에만 필터 적용
+    if (channel.severity.length < 3) {
+      // 모든 심각도가 아닌 경우에만 필터 적용
       policy.severity = sns.SubscriptionFilter.stringFilter({
         allowlist: channel.severity,
       });
@@ -368,7 +375,7 @@ export class NotificationSystem extends constructs.Construct {
    */
   public connectCompositeAlarmsToNotifications(compositeAlarms: cloudwatch.CompositeAlarm[]): void {
     const compositeTopic = this.topics.get('COMPOSITE');
-    
+
     if (compositeTopic) {
       compositeAlarms.forEach(alarm => {
         const action = new cloudwatchActions.SnsAction(compositeTopic);
@@ -394,13 +401,13 @@ export class NotificationSystem extends constructs.Construct {
     channel: NotificationChannel
   ): string {
     const template = NotificationConfiguration.NOTIFICATION_TEMPLATES[alarmDetails.severity];
-    
+
     if (!template) {
       return this.getDefaultMessage(alarmDetails);
     }
 
     let message = '';
-    
+
     switch (channel.type) {
       case 'SMS':
         message = template.smsFormat || template.subject;
@@ -455,7 +462,7 @@ export class NotificationSystem extends constructs.Construct {
    */
   private generateDashboardURL(alarmName?: string): string {
     const baseUrl = 'https://console.aws.amazon.com/cloudwatch/home';
-    return alarmName 
+    return alarmName
       ? `${baseUrl}#dashboards:name=TodoApp&alarm=${encodeURIComponent(alarmName)}`
       : `${baseUrl}#dashboards:name=TodoApp`;
   }
@@ -465,7 +472,7 @@ export class NotificationSystem extends constructs.Construct {
    */
   private generateLogsURL(alarmName?: string): string {
     const baseUrl = 'https://console.aws.amazon.com/cloudwatch/home#logsV2:logs-insights';
-    return alarmName 
+    return alarmName
       ? `${baseUrl}$3FqueryDetail$3D$257E$2528end$257E0$257Estart$257E-3600$257EtimeType$257E$2527RELATIVE$2527$257Eunit$257E$2527seconds$2527$257EeditorString$257E$2527fields*20*40timestamp*2c*20*40message*0a*7c*20filter*20*40message*20like*20*2f${encodeURIComponent(alarmName || '')}*2f$2529`
       : baseUrl;
   }

@@ -3,7 +3,7 @@ import {
   PutMetricDataCommand,
   PutMetricDataCommandInput,
   MetricDatum,
-  Dimension
+  Dimension,
 } from '@aws-sdk/client-cloudwatch';
 import { Logger } from './logger';
 
@@ -20,18 +20,20 @@ export class CloudWatchMetrics {
   private flushInterval: number;
   private flushTimer?: NodeJS.Timeout;
 
-  constructor(options: {
-    namespace?: string;
-    bufferSize?: number;
-    flushIntervalMs?: number;
-    region?: string;
-  } = {}) {
+  constructor(
+    options: {
+      namespace?: string;
+      bufferSize?: number;
+      flushIntervalMs?: number;
+      region?: string;
+    } = {}
+  ) {
     this.namespace = options.namespace || 'Hanbit/TodoApp';
     this.bufferSize = options.bufferSize || 20; // AWS 최대 20개 메트릭 per request
     this.flushInterval = options.flushIntervalMs || 60000; // 1분
 
     this.cloudWatchClient = new CloudWatchClient({
-      region: options.region || process.env.AWS_REGION || 'ap-northeast-2'
+      region: options.region || process.env.AWS_REGION || 'ap-northeast-2',
     });
 
     this.logger = new Logger('CloudWatchMetrics');
@@ -52,7 +54,7 @@ export class CloudWatchMetrics {
       Value: value,
       Unit: unit,
       Timestamp: new Date(),
-      Dimensions: this.formatDimensions(dimensions)
+      Dimensions: this.formatDimensions(dimensions),
     };
 
     this.addToBuffer(metric);
@@ -69,30 +71,15 @@ export class CloudWatchMetrics {
     const dimensions = { Operation: operation };
 
     // 응답 시간 메트릭
-    await this.recordBusinessMetric(
-      'ResponseTime',
-      responseTime,
-      'Seconds',
-      dimensions
-    );
+    await this.recordBusinessMetric('ResponseTime', responseTime, 'Seconds', dimensions);
 
     // 메모리 사용량 메트릭 (있는 경우)
     if (memoryUsed !== undefined) {
-      await this.recordBusinessMetric(
-        'MemoryUsage',
-        memoryUsed,
-        'Bytes',
-        dimensions
-      );
+      await this.recordBusinessMetric('MemoryUsage', memoryUsed, 'Bytes', dimensions);
     }
 
     // 요청 카운트
-    await this.recordBusinessMetric(
-      'RequestCount',
-      1,
-      'Count',
-      dimensions
-    );
+    await this.recordBusinessMetric('RequestCount', 1, 'Count', dimensions);
   }
 
   /**
@@ -103,31 +90,21 @@ export class CloudWatchMetrics {
     errorType: string,
     errorMessage?: string
   ): Promise<void> {
-    const dimensions = { 
+    const dimensions = {
       Operation: operation,
-      ErrorType: errorType 
+      ErrorType: errorType,
     };
 
     // 에러 카운트
-    await this.recordBusinessMetric(
-      'ErrorCount',
-      1,
-      'Count',
-      dimensions
-    );
+    await this.recordBusinessMetric('ErrorCount', 1, 'Count', dimensions);
 
     // 특정 에러 타입별 카운트
-    await this.recordBusinessMetric(
-      `Error_${errorType}`,
-      1,
-      'Count',
-      { Operation: operation }
-    );
+    await this.recordBusinessMetric(`Error_${errorType}`, 1, 'Count', { Operation: operation });
 
     this.logger.warn('Error metric recorded', {
       operation,
       errorType,
-      errorMessage
+      errorMessage,
     });
   }
 
@@ -139,37 +116,22 @@ export class CloudWatchMetrics {
     userId?: string,
     success: boolean = true
   ): Promise<void> {
-    const dimensions: Record<string, string> = { 
+    const dimensions: Record<string, string> = {
       Action: action,
-      Status: success ? 'Success' : 'Failed'
+      Status: success ? 'Success' : 'Failed',
     };
 
     if (userId) {
       dimensions.UserId = userId;
     }
 
-    await this.recordBusinessMetric(
-      'TodoOperation',
-      1,
-      'Count',
-      dimensions
-    );
+    await this.recordBusinessMetric('TodoOperation', 1, 'Count', dimensions);
 
     // 성공/실패별 메트릭
     if (success) {
-      await this.recordBusinessMetric(
-        'TodoOperationSuccess',
-        1,
-        'Count',
-        { Action: action }
-      );
+      await this.recordBusinessMetric('TodoOperationSuccess', 1, 'Count', { Action: action });
     } else {
-      await this.recordBusinessMetric(
-        'TodoOperationFailure',
-        1,
-        'Count',
-        { Action: action }
-      );
+      await this.recordBusinessMetric('TodoOperationFailure', 1, 'Count', { Action: action });
     }
   }
 
@@ -181,15 +143,10 @@ export class CloudWatchMetrics {
     activityType: string,
     value: number = 1
   ): Promise<void> {
-    await this.recordBusinessMetric(
-      'UserActivity',
-      value,
-      'Count',
-      {
-        UserId: userId,
-        ActivityType: activityType
-      }
-    );
+    await this.recordBusinessMetric('UserActivity', value, 'Count', {
+      UserId: userId,
+      ActivityType: activityType,
+    });
   }
 
   /**
@@ -209,7 +166,7 @@ export class CloudWatchMetrics {
     try {
       const params: PutMetricDataCommandInput = {
         Namespace: this.namespace,
-        MetricData: metricsToSend
+        MetricData: metricsToSend,
       };
 
       const command = new PutMetricDataCommand(params);
@@ -217,11 +174,11 @@ export class CloudWatchMetrics {
 
       this.logger.info('Metrics flushed to CloudWatch', {
         count: metricsToSend.length,
-        namespace: this.namespace
+        namespace: this.namespace,
       });
     } catch (error) {
       this.logger.error('Failed to flush metrics to CloudWatch', error as Error);
-      
+
       // 실패한 메트릭을 다시 버퍼에 추가 (재시도를 위해)
       this.metricBuffer.unshift(...metricsToSend);
     }
@@ -237,7 +194,7 @@ export class CloudWatchMetrics {
 
     // 남은 메트릭을 모두 전송
     await this.flushMetrics(true);
-    
+
     this.logger.info('CloudWatch metrics service shutdown completed');
   }
 
@@ -261,7 +218,7 @@ export class CloudWatchMetrics {
   private formatDimensions(dimensions: Record<string, string>): Dimension[] {
     return Object.entries(dimensions).map(([name, value]) => ({
       Name: name,
-      Value: value
+      Value: value,
     }));
   }
 
@@ -290,7 +247,7 @@ export function getCloudWatchMetrics(): CloudWatchMetrics {
     cloudWatchMetricsInstance = new CloudWatchMetrics({
       namespace: process.env.CLOUDWATCH_NAMESPACE || 'Hanbit/TodoApp',
       bufferSize: parseInt(process.env.METRICS_BUFFER_SIZE || '20'),
-      flushIntervalMs: parseInt(process.env.METRICS_FLUSH_INTERVAL || '60000')
+      flushIntervalMs: parseInt(process.env.METRICS_FLUSH_INTERVAL || '60000'),
     });
   }
   return cloudWatchMetricsInstance;
@@ -300,24 +257,20 @@ export function getCloudWatchMetrics(): CloudWatchMetrics {
  * 메트릭 수집 데코레이터 - 함수 실행 시간 자동 측정
  */
 export function withMetrics(operation: string) {
-  return function (
-    target: unknown,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: unknown[]) {
       const startTime = Date.now();
       const metrics = getCloudWatchMetrics();
-      
+
       try {
         const result = await originalMethod.apply(this, args);
-        
+
         // 성공 메트릭 기록
         const responseTime = (Date.now() - startTime) / 1000;
         await metrics.recordPerformanceMetric(operation, responseTime);
-        
+
         return result;
       } catch (error) {
         // 에러 메트릭 기록
@@ -328,7 +281,7 @@ export function withMetrics(operation: string) {
           error instanceof Error ? error.constructor.name : 'UnknownError',
           error instanceof Error ? error.message : 'Unknown error'
         );
-        
+
         throw error;
       }
     };

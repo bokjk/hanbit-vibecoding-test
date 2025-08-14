@@ -1,4 +1,4 @@
-import type { Todo } from "types/index";
+import type { Todo } from "@vive/types";
 import { TodoItem } from "./todo-item";
 
 interface TodoListProps {

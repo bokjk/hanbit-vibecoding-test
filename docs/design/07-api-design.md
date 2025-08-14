@@ -233,33 +233,33 @@ Response: {
 interface ErrorResponse {
   success: false;
   error: {
-    code: string;           // 에러 코드 (VALIDATION_ERROR, UNAUTHORIZED 등)
-    message: string;        // 사용자 친화적 메시지
-    details?: any;          // 상세 정보 (개발 환경에서만)
-    timestamp: string;      // ISO 8601 형식
-    requestId: string;      // 추적용 요청 ID
+    code: string; // 에러 코드 (VALIDATION_ERROR, UNAUTHORIZED 등)
+    message: string; // 사용자 친화적 메시지
+    details?: any; // 상세 정보 (개발 환경에서만)
+    timestamp: string; // ISO 8601 형식
+    requestId: string; // 추적용 요청 ID
   };
 }
 
 // 공통 에러 코드
 enum ErrorCode {
   // 인증 관련
-  UNAUTHORIZED = 'UNAUTHORIZED',
-  FORBIDDEN = 'FORBIDDEN',
-  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
-  
+  UNAUTHORIZED = "UNAUTHORIZED",
+  FORBIDDEN = "FORBIDDEN",
+  TOKEN_EXPIRED = "TOKEN_EXPIRED",
+
   // 검증 관련
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  INVALID_REQUEST = 'INVALID_REQUEST',
-  
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  INVALID_REQUEST = "INVALID_REQUEST",
+
   // 리소스 관련
-  NOT_FOUND = 'NOT_FOUND',
-  CONFLICT = 'CONFLICT',
-  QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
-  
+  NOT_FOUND = "NOT_FOUND",
+  CONFLICT = "CONFLICT",
+  QUOTA_EXCEEDED = "QUOTA_EXCEEDED",
+
   // 서버 관련
-  INTERNAL_ERROR = 'INTERNAL_ERROR',
-  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE'
+  INTERNAL_ERROR = "INTERNAL_ERROR",
+  SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE",
 }
 ```
 
@@ -278,15 +278,15 @@ class TodoAPIClient {
   // HTTP 요청 래퍼
   private async request<T>(
     endpoint: string,
-    options: RequestInit
+    options: RequestInit,
   ): Promise<APIResponse<T>> {
     const token = await this.authService.getValidToken();
-    
+
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       ...options,
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
         ...options.headers,
       },
     });
@@ -301,54 +301,57 @@ class TodoAPIClient {
 
   // TODO CRUD 메서드들
   async getTodos(params?: GetTodosParams): Promise<GetTodosResponse> {
-    const queryString = params ? new URLSearchParams(params).toString() : '';
-    return this.request(`/todos${queryString ? `?${queryString}` : ''}`, {
-      method: 'GET',
+    const queryString = params ? new URLSearchParams(params).toString() : "";
+    return this.request(`/todos${queryString ? `?${queryString}` : ""}`, {
+      method: "GET",
     });
   }
 
   async createTodo(data: CreateTodoRequest): Promise<CreateTodoResponse> {
-    return this.request('/todos', {
-      method: 'POST',
+    return this.request("/todos", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
 
   async getTodo(id: string): Promise<GetTodoResponse> {
     return this.request(`/todos/${id}`, {
-      method: 'GET',
+      method: "GET",
     });
   }
 
-  async updateTodo(id: string, data: UpdateTodoRequest): Promise<UpdateTodoResponse> {
+  async updateTodo(
+    id: string,
+    data: UpdateTodoRequest,
+  ): Promise<UpdateTodoResponse> {
     return this.request(`/todos/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
   }
 
   async deleteTodo(id: string): Promise<DeleteTodoResponse> {
     return this.request(`/todos/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 
   // 인증 관련 메서드들
   async getGuestToken(): Promise<GuestTokenResponse> {
-    return this.request('/auth/guest', {
-      method: 'POST',
+    return this.request("/auth/guest", {
+      method: "POST",
     });
   }
 
   async refreshToken(): Promise<RefreshTokenResponse> {
-    return this.request('/auth/refresh', {
-      method: 'POST',
+    return this.request("/auth/refresh", {
+      method: "POST",
     });
   }
 
   async getUserInfo(): Promise<UserInfoResponse> {
-    return this.request('/auth/me', {
-      method: 'GET',
+    return this.request("/auth/me", {
+      method: "GET",
     });
   }
 }
@@ -381,7 +384,7 @@ export class TodoService {
 
   async createTodo(title: string, priority: Priority): Promise<Todo> {
     const todoData = { title, priority };
-    
+
     try {
       const response = await this.apiClient.createTodo(todoData);
       return response.data.todo;
@@ -390,7 +393,7 @@ export class TodoService {
         // 낙관적 업데이트
         const optimisticTodo = this.createOptimisticTodo(title, priority);
         this.syncManager.addPendingAction({
-          type: 'create',
+          type: "create",
           payload: todoData,
           optimisticId: optimisticTodo.id,
         });
@@ -408,7 +411,7 @@ export class TodoService {
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      userId: '',
+      userId: "",
       isGuest: true,
     };
   }
@@ -429,17 +432,19 @@ export class SyncManager {
   }
 
   private setupNetworkListeners(): void {
-    window.addEventListener('online', () => {
+    window.addEventListener("online", () => {
       this.isOnline = true;
       this.processPendingActions();
     });
 
-    window.addEventListener('offline', () => {
+    window.addEventListener("offline", () => {
       this.isOnline = false;
     });
   }
 
-  addPendingAction(action: Omit<PendingAction, 'id' | 'timestamp' | 'retryCount'>): void {
+  addPendingAction(
+    action: Omit<PendingAction, "id" | "timestamp" | "retryCount">,
+  ): void {
     const pendingAction: PendingAction = {
       ...action,
       id: generateId(),
@@ -448,7 +453,7 @@ export class SyncManager {
     };
 
     this.pendingActions.push(pendingAction);
-    
+
     if (this.isOnline) {
       this.processPendingActions();
     }
@@ -456,7 +461,7 @@ export class SyncManager {
 
   private async processPendingActions(): Promise<void> {
     const actionsToProcess = [...this.pendingActions];
-    
+
     for (const action of actionsToProcess) {
       try {
         await this.processAction(action);
@@ -469,39 +474,44 @@ export class SyncManager {
 
   private async processAction(action: PendingAction): Promise<void> {
     switch (action.type) {
-      case 'create':
+      case "create":
         await this.apiClient.createTodo(action.payload);
         break;
-      case 'update':
+      case "update":
         await this.apiClient.updateTodo(action.payload.id, action.payload);
         break;
-      case 'delete':
+      case "delete":
         await this.apiClient.deleteTodo(action.payload.id);
         break;
     }
   }
 
-  private async handleActionError(action: PendingAction, error: unknown): Promise<void> {
+  private async handleActionError(
+    action: PendingAction,
+    error: unknown,
+  ): Promise<void> {
     action.retryCount++;
-    
+
     if (action.retryCount >= 3) {
       // 최대 재시도 횟수 초과
       this.removePendingAction(action.id);
       throw new Error(`Failed to sync action after 3 retries: ${action.type}`);
     }
-    
+
     // 지수 백오프로 재시도 스케줄링
     const delay = Math.pow(2, action.retryCount) * 1000;
     const timeoutId = setTimeout(() => {
       this.processAction(action);
     }, delay);
-    
+
     this.retryTimeouts.set(action.id, timeoutId);
   }
 
   private removePendingAction(actionId: string): void {
-    this.pendingActions = this.pendingActions.filter(action => action.id !== actionId);
-    
+    this.pendingActions = this.pendingActions.filter(
+      (action) => action.id !== actionId,
+    );
+
     const timeoutId = this.retryTimeouts.get(actionId);
     if (timeoutId) {
       clearTimeout(timeoutId);
@@ -520,7 +530,7 @@ interface GetTodosParams {
   cursor?: string;
   filter?: FilterType;
   sortBy?: SortBy;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 interface CreateTodoRequest {

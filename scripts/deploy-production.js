@@ -52,16 +52,16 @@ function logInfo(message) {
 const DEPLOYMENT_CONFIG = {
   environments: {
     staging: {
-      s3Bucket: 'todo-app-staging',
+      s3Bucket: 'jkbok-todo-dev',
       cloudFrontId: null,
       apiUrl: 'https://staging-api.todo-app.com',
-      domain: 'staging.todo-app.com'
+      domain: 'jkbok-todo-dev.s3-website-ap-southeast-2.amazonaws.com'
     },
     production: {
-      s3Bucket: 'todo-app-production',
+      s3Bucket: 'jkbok-todo-prod',
       cloudFrontId: null,
       apiUrl: 'https://api.todo-app.com',
-      domain: 'todo-app.com'
+      domain: 'jkbok-todo-prod.s3-website-ap-southeast-2.amazonaws.com'
     }
   },
   healthCheck: {

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import type { Todo, Priority } from "types/index";
+import type { Todo, Priority } from "@vive/types";
 
 interface TodoItemProps {
   todo: Todo;

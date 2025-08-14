@@ -19,35 +19,35 @@ export default defineConfig({
         '**/types.ts',
         '**/index.ts', // 핸들러 인덱스 파일들
         '**/constants.ts',
-        '**/*.d.ts'
+        '**/*.d.ts',
       ],
       thresholds: {
         global: {
           branches: 80,
           functions: 85,
           lines: 85,
-          statements: 85
+          statements: 85,
         },
         './lambda/services/': {
           branches: 90,
           functions: 95,
           lines: 95,
-          statements: 95
+          statements: 95,
         },
         './lambda/repositories/': {
           branches: 85,
           functions: 90,
           lines: 90,
-          statements: 90
+          statements: 90,
         },
         './lambda/utils/': {
           branches: 80,
           functions: 85,
           lines: 85,
-          statements: 85
-        }
-      }
-    }
+          statements: 85,
+        },
+      },
+    },
   },
   resolve: {
     alias: {
@@ -57,7 +57,7 @@ export default defineConfig({
       '@/repositories': resolve(__dirname, './lambda/repositories'),
       '@/utils': resolve(__dirname, './lambda/utils'),
       '@/handlers': resolve(__dirname, './lambda/handlers'),
-      '@/middleware': resolve(__dirname, './lambda/middleware')
-    }
-  }
+      '@/middleware': resolve(__dirname, './lambda/middleware'),
+    },
+  },
 });

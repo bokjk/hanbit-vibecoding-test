@@ -188,7 +188,7 @@ describe('Authentication API Contract Tests', () => {
         path: '/auth/login',
         body: JSON.stringify(loginData),
         headers: {
-          'Origin': 'https://todo-app.example.com',
+          Origin: 'https://todo-app.example.com',
           'User-Agent': 'contract-test-agent',
         },
       });
@@ -292,15 +292,15 @@ describe('Authentication API Contract Tests', () => {
     it('✅ 유효한 토큰으로 사용자 정보 조회 성공해야 함', async () => {
       // 참고: /auth/me 엔드포인트가 현재 구현되지 않았을 수 있음
       // 이 테스트는 Contract 검증 목적으로 작성됨
-      
+
       // Given - OpenAPI 스키마에서 엔드포인트 정보 확인
       const endpointSchema = contractEnv.getEndpointSchema('GET', '/auth/me');
-      
+
       if (endpointSchema) {
         // 엔드포인트가 스키마에 정의되어 있는 경우에만 테스트
         expect(endpointSchema.summary).toContain('사용자 정보');
         expect(endpointSchema.security).toBeDefined();
-        
+
         // 응답 스키마 검증
         const responses = endpointSchema.responses;
         expect(responses['200']).toBeDefined();
@@ -316,7 +316,7 @@ describe('Authentication API Contract Tests', () => {
     it('❌ 인증 토큰 없이 요청 시 401 에러를 반환해야 함', async () => {
       // 스키마 기반 검증만 수행
       const endpointSchema = contractEnv.getEndpointSchema('GET', '/auth/me');
-      
+
       if (endpointSchema) {
         expect(endpointSchema.security).toBeDefined();
         expect(endpointSchema.responses['401']).toBeDefined();
@@ -426,14 +426,16 @@ describe('Authentication API Contract Tests', () => {
       if (response.headers?.['X-Rate-Limit-Limit']) {
         expect(response.headers?.['X-Rate-Limit-Remaining']).toBeDefined();
         expect(Number(response.headers?.['X-Rate-Limit-Limit'] || '0')).toBeGreaterThan(0);
-        expect(Number(response.headers?.['X-Rate-Limit-Remaining'] || '0')).toBeGreaterThanOrEqual(0);
+        expect(Number(response.headers?.['X-Rate-Limit-Remaining'] || '0')).toBeGreaterThanOrEqual(
+          0
+        );
       }
     });
 
     it('✅ CORS preflight 요청 처리', async () => {
       // Given - OPTIONS 요청은 별도 핸들러가 있을 수 있지만, 현재는 POST 핸들러로 테스트
       // 실제로는 API Gateway에서 CORS를 처리할 가능성이 높음
-      
+
       // Then - 최소한 CORS 헤더가 응답에 포함되어야 함
       const loginResponse = await loginHandler(
         createMockApiGatewayEvent({

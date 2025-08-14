@@ -40,7 +40,7 @@ const linearInputVariants = cva(
 );
 
 export interface LinearInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement>,
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof linearInputVariants> {
   /**
    * 입력 필드 라벨
@@ -69,7 +69,7 @@ const LinearInput = React.forwardRef<HTMLInputElement, LinearInputProps>(
     className, 
     variant, 
     state, 
-    size,
+    size: inputSize,
     label,
     helperText,
     errorMessage,
@@ -97,7 +97,7 @@ const LinearInput = React.forwardRef<HTMLInputElement, LinearInputProps>(
           
           <input
             className={cn(
-              linearInputVariants({ variant, state: inputState, size }),
+              linearInputVariants({ variant, state: inputState, size: inputSize }),
               startIcon && "pl-10",
               endIcon && "pr-10",
               className

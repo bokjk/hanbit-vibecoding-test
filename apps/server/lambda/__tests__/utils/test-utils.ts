@@ -170,11 +170,11 @@ export const expectErrorResponse = (
   const body = JSON.parse(response.body);
   expect(body.success).toBe(false);
   expect(body.error).toBeDefined();
-  
+
   if (expectedErrorCode) {
     expect(body.error.code).toBe(expectedErrorCode);
   }
-  
+
   return body.error;
 };
 
@@ -196,15 +196,12 @@ export const measureExecutionTime = async <T>(
   const result = await fn();
   const end = process.hrtime.bigint();
   const duration = Number(end - start) / 1_000_000; // 밀리초로 변환
-  
+
   return { result, duration };
 };
 
 // 동시성 테스트 헬퍼
-export const runConcurrentTests = async <T>(
-  fn: () => Promise<T>,
-  count: number
-): Promise<T[]> => {
+export const runConcurrentTests = async <T>(fn: () => Promise<T>, count: number): Promise<T[]> => {
   const promises = Array.from({ length: count }, () => fn());
   return Promise.all(promises);
 };

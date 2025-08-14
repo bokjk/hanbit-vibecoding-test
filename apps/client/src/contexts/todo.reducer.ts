@@ -1,4 +1,4 @@
-import type { Todo, TodoFilter } from "types/index";
+import type { Todo, TodoFilter } from "@vive/types";
 
 /**
  * 대기 중인 작업 (낙관적 업데이트용)

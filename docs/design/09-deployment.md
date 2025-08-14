@@ -11,40 +11,40 @@ name: Deploy Frontend (Stage 1)
 on:
   push:
     branches: [main]
-    paths: ['apps/client/**']
-  
+    paths: ["apps/client/**"]
+
 env:
-  NODE_VERSION: '18'
-  PNPM_VERSION: '8'
+  NODE_VERSION: "18"
+  PNPM_VERSION: "8"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Build application
         run: |
           cd apps/client
           pnpm build
-          
+
       - name: Run tests
         run: |
           cd apps/client
           pnpm test:ci
-          
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -67,32 +67,32 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  NODE_VERSION: '18'
-  PNPM_VERSION: '8'
+  NODE_VERSION: "18"
+  PNPM_VERSION: "8"
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Run backend tests
         run: |
           cd apps/server
           pnpm test:ci
-          
+
       - name: Run frontend tests
         run: |
           cd apps/client
@@ -102,32 +102,32 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.0
-          
+
       - name: Terraform Init
         run: |
           cd infrastructure
           terraform init
-          
+
       - name: Terraform Plan
         run: |
           cd infrastructure
           terraform plan -out=tfplan
-          
+
       - name: Terraform Apply
         run: |
           cd infrastructure
@@ -136,29 +136,29 @@ jobs:
   deploy-backend:
     needs: deploy-infrastructure
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Build backend
         run: |
           cd apps/server
           pnpm build
-          
+
       - name: Deploy Lambda functions
         run: |
           cd apps/server
@@ -167,17 +167,17 @@ jobs:
   deploy-frontend:
     needs: deploy-backend
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-          
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Build frontend
         env:
           VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
@@ -186,7 +186,7 @@ jobs:
         run: |
           cd apps/client
           pnpm build
-          
+
       - name: Deploy to S3 and CloudFront
         run: |
           aws s3 sync apps/client/dist s3://${{ secrets.S3_BUCKET_NAME }} --delete
@@ -201,14 +201,14 @@ jobs:
 # infrastructure/main.tf
 terraform {
   required_version = ">= 1.6"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
   }
-  
+
   backend "s3" {
     bucket = "todo-app-terraform-state"
     key    = "terraform.tfstate"
@@ -218,7 +218,7 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  
+
   default_tags {
     tags = {
       Project     = "todo-app"
@@ -257,42 +257,42 @@ resource "aws_dynamodb_table" "todos_table" {
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "PK"
   range_key      = "SK"
-  
+
   attribute {
     name = "PK"
     type = "S"
   }
-  
+
   attribute {
     name = "SK"
     type = "S"
   }
-  
+
   attribute {
     name = "GSI1PK"
     type = "S"
   }
-  
+
   attribute {
     name = "GSI1SK"
     type = "S"
   }
-  
+
   global_secondary_index {
     name     = "GSI1"
     hash_key = "GSI1PK"
     range_key = "GSI1SK"
   }
-  
+
   ttl {
     attribute_name = "ttl"
     enabled        = true
   }
-  
+
   point_in_time_recovery {
     enabled = true
   }
-  
+
   tags = {
     Name = "todos-app-data"
   }
@@ -305,10 +305,10 @@ resource "aws_dynamodb_table" "todos_table" {
 # infrastructure/cognito.tf
 resource "aws_cognito_user_pool" "todo_user_pool" {
   name = "todo-app-users-${var.environment}"
-  
+
   # 사용자 속성
   alias_attributes = ["email"]
-  
+
   # 비밀번호 정책
   password_policy {
     minimum_length    = 8
@@ -317,7 +317,7 @@ resource "aws_cognito_user_pool" "todo_user_pool" {
     require_symbols   = true
     require_uppercase = true
   }
-  
+
   # 계정 복구 설정
   account_recovery_setting {
     recovery_mechanism {
@@ -325,15 +325,15 @@ resource "aws_cognito_user_pool" "todo_user_pool" {
       priority = 1
     }
   }
-  
+
   # 이메일 설정
   email_configuration {
     email_sending_account = "COGNITO_DEFAULT"
   }
-  
+
   # 사용자 풀 도메인
   domain = "todo-app-${var.environment}"
-  
+
   tags = {
     Name = "todo-app-user-pool"
   }
@@ -342,25 +342,25 @@ resource "aws_cognito_user_pool" "todo_user_pool" {
 resource "aws_cognito_user_pool_client" "todo_app_client" {
   name         = "todo-app-client-${var.environment}"
   user_pool_id = aws_cognito_user_pool.todo_user_pool.id
-  
+
   # 인증 플로우
   explicit_auth_flows = [
     "ALLOW_USER_SRP_AUTH",
     "ALLOW_REFRESH_TOKEN_AUTH"
   ]
-  
+
   # 토큰 만료 시간
   access_token_validity  = 60    # 1시간
   id_token_validity     = 60    # 1시간
   refresh_token_validity = 30   # 30일
-  
+
   # OAuth 설정
   supported_identity_providers = ["COGNITO"]
-  
+
   callback_urls = [
     "https://${var.domain_name}/auth/callback"
   ]
-  
+
   logout_urls = [
     "https://${var.domain_name}/auth/logout"
   ]
@@ -369,12 +369,12 @@ resource "aws_cognito_user_pool_client" "todo_app_client" {
 resource "aws_cognito_identity_pool" "todo_identity_pool" {
   identity_pool_name               = "todo_app_identity_pool_${var.environment}"
   allow_unauthenticated_identities = true
-  
+
   cognito_identity_providers {
     client_id     = aws_cognito_user_pool_client.todo_app_client.id
     provider_name = aws_cognito_user_pool.todo_user_pool.endpoint
   }
-  
+
   tags = {
     Name = "todo-app-identity-pool"
   }
@@ -387,7 +387,7 @@ resource "aws_cognito_identity_pool" "todo_identity_pool" {
 # infrastructure/lambda.tf
 resource "aws_iam_role" "lambda_execution_role" {
   name = "todo-app-lambda-role-${var.environment}"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -410,7 +410,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 resource "aws_iam_role_policy" "lambda_dynamodb_policy" {
   name = "lambda-dynamodb-policy"
   role = aws_iam_role.lambda_execution_role.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -442,14 +442,14 @@ resource "aws_lambda_function" "get_todos" {
   runtime         = "nodejs18.x"
   timeout         = 30
   memory_size     = 256
-  
+
   environment {
     variables = {
       DYNAMODB_TABLE_NAME = aws_dynamodb_table.todos_table.name
       NODE_ENV           = var.environment
     }
   }
-  
+
   depends_on = [
     aws_iam_role_policy_attachment.lambda_basic_execution,
     aws_iam_role_policy.lambda_dynamodb_policy,
@@ -464,7 +464,7 @@ resource "aws_lambda_function" "get_todos" {
 resource "aws_api_gateway_rest_api" "todo_api" {
   name        = "todo-app-api-${var.environment}"
   description = "Todo App REST API"
-  
+
   endpoint_configuration {
     types = ["REGIONAL"]
   }
@@ -499,7 +499,7 @@ resource "aws_api_gateway_integration" "get_todos_integration" {
   rest_api_id = aws_api_gateway_rest_api.todo_api.id
   resource_id = aws_api_gateway_resource.todos_resource.id
   http_method = aws_api_gateway_method.get_todos.http_method
-  
+
   integration_http_method = "POST"
   type                   = "AWS_PROXY"
   uri                    = aws_lambda_function.get_todos.invoke_arn
@@ -520,7 +520,7 @@ resource "aws_api_gateway_deployment" "todo_api_deployment" {
     aws_api_gateway_method.get_todos,
     aws_api_gateway_integration.get_todos_integration,
   ]
-  
+
   rest_api_id = aws_api_gateway_rest_api.todo_api.id
   stage_name  = var.environment
 }
@@ -540,11 +540,11 @@ resource "random_id" "bucket_suffix" {
 
 resource "aws_s3_bucket_website_configuration" "frontend_website" {
   bucket = aws_s3_bucket.frontend_bucket.id
-  
+
   index_document {
     suffix = "index.html"
   }
-  
+
   error_document {
     key = "index.html"
   }
@@ -552,7 +552,7 @@ resource "aws_s3_bucket_website_configuration" "frontend_website" {
 
 resource "aws_s3_bucket_public_access_block" "frontend_bucket_pab" {
   bucket = aws_s3_bucket.frontend_bucket.id
-  
+
   block_public_acls       = false
   block_public_policy     = false
   ignore_public_acls      = false
@@ -563,50 +563,50 @@ resource "aws_cloudfront_distribution" "frontend_distribution" {
   origin {
     domain_name = aws_s3_bucket.frontend_bucket.bucket_regional_domain_name
     origin_id   = "S3-${aws_s3_bucket.frontend_bucket.id}"
-    
+
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.frontend_oai.cloudfront_access_identity_path
     }
   }
-  
+
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
-  
+
   aliases = [var.domain_name]
-  
+
   default_cache_behavior {
     allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods         = ["GET", "HEAD"]
     target_origin_id       = "S3-${aws_s3_bucket.frontend_bucket.id}"
     compress               = true
     viewer_protocol_policy = "redirect-to-https"
-    
+
     forwarded_values {
       query_string = false
       cookies {
         forward = "none"
       }
     }
-    
+
     min_ttl     = 0
     default_ttl = 3600
     max_ttl     = 86400
   }
-  
+
   # SPA 지원을 위한 커스텀 에러 페이지
   custom_error_response {
     error_code         = 404
     response_code      = 200
     response_page_path = "/index.html"
   }
-  
+
   restrictions {
     geo_restriction {
       restriction_type = "none"
     }
   }
-  
+
   viewer_certificate {
     acm_certificate_arn = aws_acm_certificate.frontend_cert.arn
     ssl_support_method  = "sni-only"
@@ -631,7 +631,7 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
     "update-todo",
     "delete-todo"
   ])
-  
+
   name              = "/aws/lambda/todo-app-${each.key}-${var.environment}"
   retention_in_days = 14
 }
@@ -645,7 +645,7 @@ resource "aws_cloudwatch_log_group" "api_gateway_logs" {
 # CloudWatch 대시보드
 resource "aws_cloudwatch_dashboard" "todo_app_dashboard" {
   dashboard_name = "todo-app-${var.environment}"
-  
+
   dashboard_body = jsonencode({
     widgets = [
       {
@@ -654,7 +654,7 @@ resource "aws_cloudwatch_dashboard" "todo_app_dashboard" {
         y      = 0
         width  = 12
         height = 6
-        
+
         properties = {
           metrics = [
             ["AWS/Lambda", "Duration", "FunctionName", "todo-app-get-todos-${var.environment}"],

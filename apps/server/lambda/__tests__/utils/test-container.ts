@@ -1,12 +1,16 @@
-import { 
-  DynamoDBClient, 
-  CreateTableCommand, 
-  DeleteTableCommand, 
+import {
+  DynamoDBClient,
+  CreateTableCommand,
+  DeleteTableCommand,
   ListTablesCommand,
   DescribeTableCommand,
-  waitUntilTableExists 
+  waitUntilTableExists,
 } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, ScanCommand as DocScanCommand, DeleteCommand as DocDeleteCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  DynamoDBDocumentClient,
+  ScanCommand as DocScanCommand,
+  DeleteCommand as DocDeleteCommand,
+} from '@aws-sdk/lib-dynamodb';
 import { DynamoTodoItem } from '@/types/database.types';
 
 /**
@@ -16,7 +20,7 @@ import { DynamoTodoItem } from '@/types/database.types';
 export class TestContainer {
   private dynamoClient: DynamoDBClient;
   private documentClient: DynamoDBDocumentClient;
-  
+
   constructor() {
     // DynamoDB Local 연결 (기본 포트 8000)
     this.dynamoClient = new DynamoDBClient({
@@ -27,7 +31,7 @@ export class TestContainer {
         secretAccessKey: 'test',
       },
     });
-    
+
     this.documentClient = DynamoDBDocumentClient.from(this.dynamoClient);
   }
 
@@ -38,17 +42,17 @@ export class TestContainer {
     try {
       // DynamoDB Local 연결 확인
       await this.verifyDynamoDBLocal();
-      
+
       // 기존 테스트 테이블이 있으면 삭제
       await this.cleanupExistingTables();
-      
+
       // 새 테이블 생성
       await this.createTodoTable();
       await this.createRateLimitTable();
-      
+
       // 테이블 활성화 대기
       await this.waitForTablesActive();
-      
+
       console.log('테스트 테이블 생성 완료');
     } catch (error) {
       console.error('테스트 환경 설정 실패:', error);
@@ -62,13 +66,17 @@ export class TestContainer {
   async teardown(): Promise<void> {
     try {
       const tables = await this.listTables();
-      
+
       for (const tableName of tables) {
-        if (tableName.startsWith('test-') || tableName.includes('todo') || tableName.includes('rate-limit')) {
+        if (
+          tableName.startsWith('test-') ||
+          tableName.includes('todo') ||
+          tableName.includes('rate-limit')
+        ) {
           await this.deleteTable(tableName);
         }
       }
-      
+
       console.log('테스트 테이블 정리 완료');
     } catch (error) {
       console.error('테스트 환경 정리 실패:', error);
@@ -82,10 +90,10 @@ export class TestContainer {
     try {
       // Todo 테이블 데이터 삭제
       await this.clearTodoTable();
-      
+
       // Rate Limit 테이블 데이터 삭제
       await this.clearRateLimitTable();
-      
+
       console.log('테스트 데이터 초기화 완료');
     } catch (error) {
       console.error('테스트 데이터 초기화 실패:', error);
@@ -244,8 +252,8 @@ export class TestContainer {
       console.error('DynamoDB Local 연결 실패. DynamoDB Local이 실행 중인지 확인하세요.');
       throw new Error(
         'DynamoDB Local 연결 실패. ' +
-        'Docker를 사용하여 DynamoDB Local을 실행하세요: ' +
-        'docker run -p 8000:8000 amazon/dynamodb-local'
+          'Docker를 사용하여 DynamoDB Local을 실행하세요: ' +
+          'docker run -p 8000:8000 amazon/dynamodb-local'
       );
     }
   }
@@ -255,12 +263,10 @@ export class TestContainer {
    */
   private async cleanupExistingTables(): Promise<void> {
     const tables = await this.listTables();
-    const testTables = tables.filter(name => 
-      name.startsWith('test-') || 
-      name.includes('todo') || 
-      name.includes('rate-limit')
+    const testTables = tables.filter(
+      name => name.startsWith('test-') || name.includes('todo') || name.includes('rate-limit')
     );
-    
+
     for (const tableName of testTables) {
       await this.deleteTable(tableName);
     }
@@ -278,12 +284,12 @@ export class TestContainer {
         { client: this.dynamoClient, maxWaitTime: 60 },
         { TableName: 'test-todos' }
       );
-      
+
       await waitUntilTableExists(
         { client: this.dynamoClient, maxWaitTime: 60 },
         { TableName: 'test-rate-limits' }
       );
-      
+
       console.log('모든 테이블이 활성화됨');
     } catch (error) {
       console.error('테이블 활성화 대기 중 오류:', error);
@@ -299,17 +305,19 @@ export class TestContainer {
       TableName: 'test-todos',
       ProjectionExpression: 'PK, SK',
     });
-    
+
     const result = await this.documentClient.send(scanCommand);
-    
+
     if (result.Items && result.Items.length > 0) {
       const deletePromises = result.Items.map(item => {
-        return this.documentClient.send(new DocDeleteCommand({
-          TableName: 'test-todos',
-          Key: { PK: item.PK, SK: item.SK },
-        }));
+        return this.documentClient.send(
+          new DocDeleteCommand({
+            TableName: 'test-todos',
+            Key: { PK: item.PK, SK: item.SK },
+          })
+        );
       });
-      
+
       await Promise.all(deletePromises);
       console.log(`Todo 테이블에서 ${result.Items.length}개 항목 삭제됨`);
     }
@@ -323,17 +331,19 @@ export class TestContainer {
       TableName: 'test-rate-limits',
       ProjectionExpression: 'identifier, window',
     });
-    
+
     const result = await this.documentClient.send(scanCommand);
-    
+
     if (result.Items && result.Items.length > 0) {
       const deletePromises = result.Items.map(item => {
-        return this.documentClient.send(new DocDeleteCommand({
-          TableName: 'test-rate-limits',
-          Key: { identifier: item.identifier, window: item.window },
-        }));
+        return this.documentClient.send(
+          new DocDeleteCommand({
+            TableName: 'test-rate-limits',
+            Key: { identifier: item.identifier, window: item.window },
+          })
+        );
       });
-      
+
       await Promise.all(deletePromises);
       console.log(`Rate Limit 테이블에서 ${result.Items.length}개 항목 삭제됨`);
     }
@@ -343,13 +353,13 @@ export class TestContainer {
    * 테이블에 테스트 데이터 삽입
    */
   async insertTestData(todos: DynamoTodoItem[]): Promise<void> {
-    const insertPromises = todos.map(todo => 
+    const insertPromises = todos.map(todo =>
       this.documentClient.put({
         TableName: 'test-todos',
         Item: todo,
       })
     );
-    
+
     await Promise.all(insertPromises);
     console.log(`${todos.length}개 테스트 데이터 삽입됨`);
   }

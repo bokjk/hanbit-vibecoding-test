@@ -9,7 +9,7 @@ graph TB
         CTX[React Context]
         RED[useReducer]
         LS[localStorage]
-        
+
         UI --> CTX
         CTX --> RED
         RED --> LS
@@ -17,7 +17,7 @@ graph TB
         RED --> CTX
         CTX --> UI
     end
-    
+
     subgraph "2단계: API 통합"
         UI2[사용자 인터페이스]
         CTX2[React Context]
@@ -25,7 +25,7 @@ graph TB
         API[API Service]
         AWS[AWS Backend]
         SYNC[Sync Manager]
-        
+
         UI2 --> CTX2
         CTX2 --> RED2
         RED2 --> API
@@ -34,7 +34,7 @@ graph TB
         API --> RED2
         RED2 --> CTX2
         CTX2 --> UI2
-        
+
         RED2 --> SYNC
         SYNC --> LS
     end
@@ -146,7 +146,7 @@ sequenceDiagram
 
     APP->>AUTH: 앱 시작
     AUTH->>COG: 저장된 토큰 확인
-    
+
     alt 유효한 토큰 존재
         COG-->>AUTH: 인증 정보 반환
         AUTH->>API: API 클라이언트 초기화
@@ -159,7 +159,7 @@ sequenceDiagram
         AUTH->>TC: 로컬 데이터 로드
         TC->>TC: localStorage에서 복원
     end
-    
+
     AUTH-->>APP: 초기화 완료
 ```
 
@@ -180,11 +180,11 @@ sequenceDiagram
     R->>LS: 임시 저장 (pending 상태)
     R-->>TC: UI 즉시 업데이트
     TC-->>U: 즉시 반영 표시
-    
+
     par 백그라운드 동기화
         R->>SYNC: 동기화 큐에 추가
         SYNC->>API: 서버로 전송
-        
+
         alt 성공
             API-->>SYNC: 성공 응답
             SYNC->>R: dispatch(SYNC_SUCCESS)
@@ -222,7 +222,7 @@ sequenceDiagram
     NET->>SYNC: 온라인 상태 변경
     SYNC->>LS: 대기 중인 작업 조회
     LS-->>SYNC: 큐의 작업들 반환
-    
+
     loop 각 대기 작업
         SYNC->>API: 서버 동기화
         alt 성공
@@ -233,7 +233,7 @@ sequenceDiagram
             SYNC->>SYNC: 재시도 카운터 증가
         end
     end
-    
+
     SYNC->>TC: 동기화 완료 알림
     TC-->>U: 온라인 상태 표시
 ```
@@ -249,16 +249,16 @@ sequenceDiagram
 
     SYNC->>API: 로컬 변경사항 업로드
     API-->>SYNC: 충돌 응답 (409)
-    
+
     SYNC->>SYNC: 충돌 감지
     SYNC->>LOCAL: 현재 로컬 상태 조회
     LOCAL-->>SYNC: 로컬 데이터 반환
-    
+
     SYNC->>API: 서버 최신 상태 조회
     API-->>SYNC: 서버 데이터 반환
-    
+
     SYNC->>SYNC: 충돌 해결 전략 결정
-    
+
     alt 자동 병합 가능
         SYNC->>SYNC: 자동 병합 수행
         SYNC->>LOCAL: 병합된 상태 업데이트
@@ -269,7 +269,7 @@ sequenceDiagram
         SYNC->>LOCAL: 선택된 해결방식 적용
         SYNC->>API: 해결된 상태 업로드
     end
-    
+
     API-->>SYNC: 동기화 완료
     SYNC->>LOCAL: 최종 상태 확정
 ```
@@ -288,13 +288,13 @@ sequenceDiagram
     TC->>API: API 요청
     API-->>TC: 네트워크 오류
     TC->>ERR: 오류 처리 위임
-    
+
     ERR->>ERR: 오류 분류
-    
+
     alt 일시적 오류
         ERR->>ERR: 재시도 로직 실행
         ERR->>API: 요청 재시도
-        
+
         alt 재시도 성공
             API-->>ERR: 성공 응답
             ERR-->>TC: 성공 결과 반환

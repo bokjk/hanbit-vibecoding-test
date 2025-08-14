@@ -31,7 +31,9 @@ export class AlarmDefinitions {
    * CRITICAL 알람 - 즉각적인 대응 필요
    * 시스템 안정성에 직접적 영향을 미치는 상황
    */
-  static readonly CRITICAL_ALARMS: Array<AlarmConfiguration & { metricConfig: MetricConfiguration }> = [
+  static readonly CRITICAL_ALARMS: Array<
+    AlarmConfiguration & { metricConfig: MetricConfiguration }
+  > = [
     {
       name: 'HighErrorRate',
       description: '5분간 에러율이 5% 초과 시 즉각적인 조치 필요',
@@ -46,7 +48,7 @@ export class AlarmDefinitions {
         metricName: '4XXError',
         statistic: cloudwatch.Statistic.AVERAGE,
         period: Duration.minutes(5),
-      }
+      },
     },
     {
       name: 'HighLambdaErrorRate',
@@ -61,7 +63,7 @@ export class AlarmDefinitions {
         metricName: 'Errors',
         statistic: cloudwatch.Statistic.AVERAGE,
         period: Duration.minutes(5),
-      }
+      },
     },
     {
       name: 'DatabaseConnectionFailure',
@@ -76,7 +78,7 @@ export class AlarmDefinitions {
         metricName: 'ThrottledRequests',
         statistic: cloudwatch.Statistic.SUM,
         period: Duration.minutes(5),
-      }
+      },
     },
     {
       name: 'ExtremeLatency',
@@ -91,15 +93,17 @@ export class AlarmDefinitions {
         metricName: 'Latency',
         statistic: cloudwatch.Statistic.AVERAGE,
         period: Duration.minutes(5),
-      }
-    }
+      },
+    },
   ];
 
   /**
    * WARNING 알람 - 모니터링 및 예방적 조치 필요
    * 잠재적 문제나 성능 저하 상황
    */
-  static readonly WARNING_ALARMS: Array<AlarmConfiguration & { metricConfig: MetricConfiguration }> = [
+  static readonly WARNING_ALARMS: Array<
+    AlarmConfiguration & { metricConfig: MetricConfiguration }
+  > = [
     {
       name: 'ElevatedErrorRate',
       description: '에러율 증가 추세 - 2% 초과 시 모니터링 강화',
@@ -113,7 +117,7 @@ export class AlarmDefinitions {
         metricName: '4XXError',
         statistic: cloudwatch.Statistic.AVERAGE,
         period: Duration.minutes(10),
-      }
+      },
     },
     {
       name: 'HighLatency',
@@ -128,7 +132,7 @@ export class AlarmDefinitions {
         metricName: 'Latency',
         statistic: cloudwatch.Statistic.AVERAGE,
         period: Duration.minutes(5),
-      }
+      },
     },
     {
       name: 'LambdaThrottling',
@@ -143,7 +147,7 @@ export class AlarmDefinitions {
         metricName: 'Throttles',
         statistic: cloudwatch.Statistic.SUM,
         period: Duration.minutes(5),
-      }
+      },
     },
     {
       name: 'HighMemoryUsage',
@@ -158,7 +162,7 @@ export class AlarmDefinitions {
         metricName: 'MemoryUtilization',
         statistic: cloudwatch.Statistic.MAXIMUM,
         period: Duration.minutes(5),
-      }
+      },
     },
     {
       name: 'DatabaseReadCapacityHigh',
@@ -173,8 +177,8 @@ export class AlarmDefinitions {
         metricName: 'ConsumedReadCapacityUnits',
         statistic: cloudwatch.Statistic.AVERAGE,
         period: Duration.minutes(5),
-      }
-    }
+      },
+    },
   ];
 
   /**
@@ -195,7 +199,7 @@ export class AlarmDefinitions {
         metricName: 'Count',
         statistic: cloudwatch.Statistic.SUM,
         period: Duration.minutes(1),
-      }
+      },
     },
     {
       name: 'LowTrafficAlert',
@@ -211,8 +215,8 @@ export class AlarmDefinitions {
         metricName: 'Count',
         statistic: cloudwatch.Statistic.SUM,
         period: Duration.minutes(5),
-      }
-    }
+      },
+    },
   ];
 
   /**
@@ -237,7 +241,7 @@ export class AlarmDefinitions {
       description: '성능 저하 패턴 감지',
       severity: 'WARNING' as const,
       rule: 'HighLatency AND (HighMemoryUsage OR DatabaseReadCapacityHigh)',
-    }
+    },
   ];
 
   /**
@@ -312,7 +316,7 @@ export class TodoAppAlarmSystem extends constructs.Construct {
   private createCompositeAlarms(): void {
     AlarmDefinitions.COMPOSITE_ALARMS.forEach(compositeConfig => {
       const alarmMap = new Map<string, cloudwatch.Alarm>();
-      
+
       // 참조된 알람들을 맵에 저장
       this.alarms.forEach(alarm => {
         const alarmName = alarm.alarmName.replace('TodoApp-', '');
@@ -344,7 +348,7 @@ export class TodoAppAlarmSystem extends constructs.Construct {
     try {
       // 간단한 규칙 파서 - 실제 구현에서는 더 정교한 파싱 필요
       const tokens = rule.split(/\s+(AND|OR)\s+/);
-      
+
       if (tokens.length >= 3) {
         const leftAlarm = alarmMap.get(tokens[0]);
         const operator = tokens[1];
@@ -378,10 +382,11 @@ export class TodoAppAlarmSystem extends constructs.Construct {
   private categorizeAlarm(alarmName: string): string {
     if (alarmName.toLowerCase().includes('error')) return 'reliability';
     if (alarmName.toLowerCase().includes('latency')) return 'performance';
-    if (alarmName.toLowerCase().includes('memory') || alarmName.toLowerCase().includes('capacity')) return 'resource';
+    if (alarmName.toLowerCase().includes('memory') || alarmName.toLowerCase().includes('capacity'))
+      return 'resource';
     if (alarmName.toLowerCase().includes('database')) return 'storage';
     if (alarmName.toLowerCase().includes('traffic')) return 'usage';
-    
+
     return 'general';
   }
 
@@ -389,28 +394,24 @@ export class TodoAppAlarmSystem extends constructs.Construct {
    * 알람 상태 요약 메트릭 생성
    */
   public createAlarmSummaryMetrics(): cloudwatch.MathExpression[] {
-    const criticalAlarms = this.alarms.filter(alarm => 
+    const criticalAlarms = this.alarms.filter(alarm =>
       alarm.node.metadata.find(m => m.type === 'severity' && m.data === 'CRITICAL')
     );
 
-    const warningAlarms = this.alarms.filter(alarm => 
+    const warningAlarms = this.alarms.filter(alarm =>
       alarm.node.metadata.find(m => m.type === 'severity' && m.data === 'WARNING')
     );
 
     return [
       new cloudwatch.MathExpression({
         expression: `SUM([${criticalAlarms.map((_, i) => `m${i}`).join(',')}])`,
-        usingMetrics: Object.fromEntries(
-          criticalAlarms.map((alarm, i) => [`m${i}`, alarm.metric])
-        ),
+        usingMetrics: Object.fromEntries(criticalAlarms.map((alarm, i) => [`m${i}`, alarm.metric])),
         label: '심각한 알람 개수',
         period: Duration.minutes(5),
       }),
       new cloudwatch.MathExpression({
         expression: `SUM([${warningAlarms.map((_, i) => `w${i}`).join(',')}])`,
-        usingMetrics: Object.fromEntries(
-          warningAlarms.map((alarm, i) => [`w${i}`, alarm.metric])
-        ),
+        usingMetrics: Object.fromEntries(warningAlarms.map((alarm, i) => [`w${i}`, alarm.metric])),
         label: '경고 알람 개수',
         period: Duration.minutes(5),
       }),
@@ -421,11 +422,14 @@ export class TodoAppAlarmSystem extends constructs.Construct {
    * 알람 임계값 동적 조정
    */
   public adjustThresholdsForTimeOfDay(isBusinessHours: boolean): void {
-    const multipliers = isBusinessHours 
+    const multipliers = isBusinessHours
       ? AlarmDefinitions.THRESHOLD_BASELINES.PEAK_HOURS
       : AlarmDefinitions.THRESHOLD_BASELINES.OFF_HOURS;
 
     // 구현 시 알람 임계값을 시간대별로 조정
-    console.log(`알람 임계값을 ${isBusinessHours ? '업무시간' : '비업무시간'}에 맞게 조정:`, multipliers);
+    console.log(
+      `알람 임계값을 ${isBusinessHours ? '업무시간' : '비업무시간'}에 맞게 조정:`,
+      multipliers
+    );
   }
 }

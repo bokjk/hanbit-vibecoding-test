@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { TodoFilter, FilterType, SortBy, SortOrder } from "types/index";
+import type { TodoFilter, FilterType, SortBy, SortOrder } from "@vive/types";
 import type {
   FilterHelpers,
   SyncHelpers,

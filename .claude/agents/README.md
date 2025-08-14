@@ -11,14 +11,16 @@ This repository contains a comprehensive set of Claude Code sub-agents designed 
 ## 📦 Agent Categories
 
 ### 1. Requirements & Analysis
+
 **Purpose**: Transform business needs into detailed technical specifications
 
 - **requirements-analyst** - Analyzes user needs and creates detailed functional specifications
-- **user-story-generator** - Creates comprehensive user stories and acceptance criteria  
+- **user-story-generator** - Creates comprehensive user stories and acceptance criteria
 - **business-process-analyst** - Analyzes business processes and translates to technical requirements
 - **requirements-validator** - Validates requirements for completeness and consistency
 
 ### 2. Design & Architecture
+
 **Purpose**: Create robust, scalable system designs
 
 - **system-architect** - Designs comprehensive system architectures and technology stacks
@@ -28,6 +30,7 @@ This repository contains a comprehensive set of Claude Code sub-agents designed 
 - **design-reviewer** - Reviews and validates system designs for quality
 
 ### 3. Implementation & Development
+
 **Purpose**: Handle all aspects of code development and quality assurance
 
 - **code-reviewer** - Performs comprehensive code quality assessments
@@ -43,6 +46,7 @@ This repository contains a comprehensive set of Claude Code sub-agents designed 
 - **cicd-builder** - Creates and configures CI/CD pipelines
 
 ### 4. Project Management
+
 **Purpose**: Coordinate and manage the entire development process
 
 - **project-planner** - Creates comprehensive project plans and timelines
@@ -52,6 +56,7 @@ This repository contains a comprehensive set of Claude Code sub-agents designed 
 - **stakeholder-communicator** - Manages stakeholder communication and reporting
 
 ### 5. Deployment & Operations
+
 **Purpose**: Handle production deployment and ongoing operations
 
 - **project-orchestrator** - Master coordinator for end-to-end project execution
@@ -61,6 +66,7 @@ This repository contains a comprehensive set of Claude Code sub-agents designed 
 - **project-template-manager** - Manages project templates and quick setup for common project patterns
 
 ### 6. Meta-Management
+
 **Purpose**: Optimize Claude Code itself for maximum efficiency
 
 - **context-manager** - Monitors session context and manages information for continuity
@@ -73,18 +79,21 @@ This repository contains a comprehensive set of Claude Code sub-agents designed 
 ## 🚀 Key Features
 
 ### Complete Automation
+
 - **End-to-end development**: From requirements to production deployment
 - **Intelligent orchestration**: Agents automatically coordinate and sequence work
 - **Dynamic specialization**: Create new agents for unique project needs
 - **Session continuity**: Maintain context across long development sessions
 
 ### Professional Quality
+
 - **Industry best practices**: Each agent follows established methodologies
 - **Comprehensive testing**: Automated test generation and quality assurance
 - **Security-first**: Built-in security analysis and compliance checking
 - **Production-ready**: Full deployment and operational support
 
 ### Scalable Architecture
+
 - **Modular design**: Use individual agents or complete workflows
 - **Context preservation**: Efficient memory management for long projects
 - **Resource optimization**: Monitor and optimize Claude Code usage
@@ -93,18 +102,21 @@ This repository contains a comprehensive set of Claude Code sub-agents designed 
 ## 💡 Use Cases
 
 ### Complete Project Automation
+
 ```
 User: "Create a library management system for our company"
 Result: Fully functional web application with database, API, frontend, tests, documentation, and deployment
 ```
 
 ### Specialized Development Tasks
+
 ```
 User: "Review this authentication code for security issues"
 Agent: security-analyzer performs comprehensive security audit
 ```
 
 ### Long-term Project Management
+
 ```
 User: "Manage the development of a multi-tenant SaaS platform"
 Agent: project-orchestrator coordinates all phases with appropriate specialists
@@ -113,12 +125,14 @@ Agent: project-orchestrator coordinates all phases with appropriate specialists
 ## 📋 Installation
 
 1. **Clone or copy agent definitions** to your project's `.claude/agents/` directory:
+
    ```bash
    mkdir -p .claude/agents
    # Copy the agent definition files to this directory
    ```
 
 2. **Verify installation**:
+
    ```bash
    ls .claude/agents/
    # Should show all agent files (.md format)
@@ -132,11 +146,13 @@ Agent: project-orchestrator coordinates all phases with appropriate specialists
 ## 🎮 Usage Examples
 
 ### Starting a New Web Application
+
 ```
 "I want to build a task management web application with user authentication, real-time updates, and mobile responsiveness. Handle everything from requirements to deployment."
 ```
 
 The **project-orchestrator** will:
+
 1. Use **requirements-analyst** to gather detailed requirements
 2. Coordinate **system-architect** and **data-architect** for design
 3. Manage implementation with development agents
@@ -144,21 +160,25 @@ The **project-orchestrator** will:
 5. Provide training materials for end users
 
 ### Code Quality Review
+
 ```
 "Review my e-commerce checkout process for security vulnerabilities, performance issues, and code quality."
 ```
 
 Multiple agents coordinate:
+
 - **security-analyzer** checks for vulnerabilities
-- **performance-optimizer** identifies bottlenecks  
+- **performance-optimizer** identifies bottlenecks
 - **code-reviewer** ensures best practices
 
 ### Long-term Project Management
+
 ```
 "Manage the development of our new customer portal over the next 6 months with regular stakeholder updates."
 ```
 
 The system provides:
+
 - Automated project planning and risk management
 - Regular progress tracking and reporting
 - Quality gates and testing coordination
@@ -167,20 +187,25 @@ The system provides:
 ## 🔧 Agent Workflow Patterns
 
 ### Sequential Pattern
+
 Requirements → Design → Implementation → Testing → Deployment
 
 ### Parallel Pattern
+
 Multiple development agents working simultaneously on different components
 
 ### Adaptive Pattern
+
 **agent-creator** generates specialized agents for unique requirements
 
 ### Continuous Pattern
+
 Meta-management agents provide ongoing optimization and monitoring
 
 ## 📝 Agent Definition Format
 
 Each agent follows Claude Code's standard format:
+
 ```markdown
 ---
 name: agent-name
@@ -193,13 +218,15 @@ Comprehensive system prompt defining the agent's expertise, responsibilities, an
 ## 🔄 Agent Interactions
 
 ### Master Coordinator
+
 - **project-orchestrator** manages overall project flow
 - Automatically selects and sequences appropriate agents
 - Handles inter-agent communication and dependency management
 
 ### Specialized Teams
+
 - **Requirements Team**: Gather and validate project needs
-- **Design Team**: Create technical architecture and specifications  
+- **Design Team**: Create technical architecture and specifications
 - **Development Team**: Implement, test, and optimize code
 - **Operations Team**: Deploy and maintain production systems
 - **Meta Team**: Optimize Claude Code usage and continuity
@@ -207,6 +234,7 @@ Comprehensive system prompt defining the agent's expertise, responsibilities, an
 ## 📚 Documentation
 
 Each agent includes:
+
 - **Detailed description** with usage examples
 - **Specific use cases** and trigger conditions
 - **Expected outputs** and deliverables
@@ -215,11 +243,13 @@ Each agent includes:
 ## 🎯 Complete Automation Example
 
 ### Input
+
 ```
 "Create a library management system for our company"
 ```
 
 ### Automated Process
+
 1. **Requirements Analysis**: Stakeholder needs → Technical specifications
 2. **System Design**: Architecture → Database design → API design → UI design
 3. **Implementation**: Backend → Frontend → Testing → Documentation
@@ -228,6 +258,7 @@ Each agent includes:
 6. **Handover**: User training → Documentation → Support procedures
 
 ### Output
+
 - Fully functional web application
 - Complete test suite with high coverage
 - Production deployment with monitoring
@@ -255,13 +286,14 @@ Designed to work seamlessly with [Claude Code](https://claude.ai/code) and follo
 ## 📞 Support
 
 For issues, questions, or suggestions:
+
 - Open an issue in this repository
 - Check the Claude Code documentation at https://docs.anthropic.com/en/docs/claude-code
 - Review agent examples and usage patterns
 
 ---
 
-*Transform your development process with intelligent automation. From a single requirement to a production system - let the agents handle the complexity while you focus on the vision.*
+_Transform your development process with intelligent automation. From a single requirement to a production system - let the agents handle the complexity while you focus on the vision._
 
 ## 🚀 Quick Start
 

@@ -8,7 +8,14 @@
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, QueryCommand, GetCommand, PutCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  DynamoDBDocumentClient,
+  QueryCommand,
+  GetCommand,
+  PutCommand,
+  UpdateCommand,
+  DeleteCommand,
+} from '@aws-sdk/lib-dynamodb';
 import AWSXRay from 'aws-xray-sdk-core';
 import { traceAsyncWithMetrics, SubsystemType } from './xray-tracer';
 
@@ -30,7 +37,7 @@ export enum DynamoOperation {
   QUERY = 'query',
   SCAN = 'scan',
   BATCH_GET = 'batch_get',
-  BATCH_WRITE = 'batch_write'
+  BATCH_WRITE = 'batch_write',
 }
 
 // 스로틀링 통계
@@ -72,7 +79,7 @@ class DynamoPerformanceMonitor {
   recordThrottling(tableName: string, operation: string): void {
     const key = `${tableName}:${operation}`;
     const existing = this.throttleStats.get(key);
-    
+
     if (existing) {
       existing.count++;
       existing.lastOccurrence = new Date();
@@ -81,18 +88,21 @@ class DynamoPerformanceMonitor {
       this.throttleStats.set(key, {
         count: 1,
         lastOccurrence: new Date(),
-        affectedOperations: [operation]
+        affectedOperations: [operation],
       });
     }
 
     // 스로틀링 경고 발생
     const currentStats = this.throttleStats.get(key);
     if (currentStats && currentStats.count >= DB_PERFORMANCE_THRESHOLDS.THROTTLING_WARNING) {
-      console.warn(`[DynamoDB THROTTLING ALERT] ${key} has been throttled ${currentStats.count} times`, {
-        recentOperations: existing?.affectedOperations || [operation],
-        lastOccurrence: new Date(),
-        recommendations: this.getThrottlingRecommendations(tableName)
-      });
+      console.warn(
+        `[DynamoDB THROTTLING ALERT] ${key} has been throttled ${currentStats.count} times`,
+        {
+          recentOperations: existing?.affectedOperations || [operation],
+          lastOccurrence: new Date(),
+          recommendations: this.getThrottlingRecommendations(tableName),
+        }
+      );
     }
   }
 
@@ -103,20 +113,20 @@ class DynamoPerformanceMonitor {
     if (metrics.isHotPartition) {
       const partitionKey = `${metrics.tableName}:${metrics.indexName || 'primary'}`;
       this.hotPartitions.add(partitionKey);
-      
+
       console.warn(`[HOT PARTITION DETECTED] ${partitionKey}`, {
         scannedVsReturned: `${metrics.scannedCount}/${metrics.itemCount}`,
-        efficiency: ((metrics.itemCount / metrics.scannedCount) * 100).toFixed(2) + '%',
-        recommendations: this.getHotPartitionRecommendations(metrics)
+        efficiency: `${((metrics.itemCount / metrics.scannedCount) * 100).toFixed(2)}%`,
+        recommendations: this.getHotPartitionRecommendations(metrics),
       });
     }
 
     // 비효율적인 쿼리 감지
     if (metrics.isInefficient) {
       console.warn(`[INEFFICIENT QUERY] ${metrics.operation} on ${metrics.tableName}`, {
-        efficiency: ((metrics.itemCount / metrics.scannedCount) * 100).toFixed(2) + '%',
+        efficiency: `${((metrics.itemCount / metrics.scannedCount) * 100).toFixed(2)}%`,
         consumedCapacity: metrics.consumedCapacity,
-        recommendations: this.getQueryOptimizationRecommendations(metrics)
+        recommendations: this.getQueryOptimizationRecommendations(metrics),
       });
     }
   }
@@ -127,7 +137,7 @@ class DynamoPerformanceMonitor {
       'Implement exponential backoff with jitter',
       'Review access patterns for hot partitions',
       'Consider using on-demand billing mode',
-      'Implement request coalescing or batching'
+      'Implement request coalescing or batching',
     ];
   }
 
@@ -137,21 +147,21 @@ class DynamoPerformanceMonitor {
       'Review data distribution across partition keys',
       'Consider using composite sort key for better distribution',
       `Review access patterns for ${metrics.tableName}`,
-      'Consider implementing write sharding'
+      'Consider implementing write sharding',
     ];
   }
 
   private getQueryOptimizationRecommendations(metrics: QueryMetrics): string[] {
     const recommendations = [];
-    
+
     if (metrics.scannedCount > metrics.itemCount * 10) {
       recommendations.push('Query is scanning too many items - consider better filtering');
     }
-    
+
     if (!metrics.indexName && metrics.operation === DynamoOperation.QUERY) {
       recommendations.push('Consider creating a GSI for this access pattern');
     }
-    
+
     if (metrics.consumedCapacity?.readCapacity && metrics.consumedCapacity.readCapacity > 5) {
       recommendations.push('High read capacity consumption - consider projection optimization');
     }
@@ -164,9 +174,10 @@ class DynamoPerformanceMonitor {
       throttleStats: Object.fromEntries(this.throttleStats),
       hotPartitions: Array.from(this.hotPartitions),
       queryCount: this.queryMetrics.length,
-      avgEfficiency: this.queryMetrics.length > 0 
-        ? (this.queryMetrics.reduce((sum, m) => sum + (m.itemCount / m.scannedCount), 0) / this.queryMetrics.length * 100).toFixed(2) + '%'
-        : 'N/A'
+      avgEfficiency:
+        this.queryMetrics.length > 0
+          ? `${((this.queryMetrics.reduce((sum, m) => sum + m.itemCount / m.scannedCount, 0) / this.queryMetrics.length) * 100).toFixed(2)}%`
+          : 'N/A',
     };
   }
 }
@@ -213,13 +224,13 @@ export async function tracedGet<T = Record<string, unknown>>(
   return traceAsyncWithMetrics(
     `get-item`,
     SubsystemType.DATABASE,
-    async (subsegment) => {
+    async subsegment => {
       const command = new GetCommand({
         TableName: tableName,
         Key: key,
         ConsistentRead: options?.consistentRead,
         ProjectionExpression: options?.projectionExpression,
-        ReturnConsumedCapacity: 'TOTAL'
+        ReturnConsumedCapacity: 'TOTAL',
       });
 
       // 상세 메타데이터 추가
@@ -228,23 +239,25 @@ export async function tracedGet<T = Record<string, unknown>>(
         tableName,
         key,
         consistentRead: options?.consistentRead || false,
-        projectionExpression: options?.projectionExpression
+        projectionExpression: options?.projectionExpression,
       });
 
       try {
         const result = await client.send(command);
-        
+
         // 성능 메트릭 수집
         const metrics: QueryMetrics = {
           operation: DynamoOperation.GET,
           tableName,
           itemCount: result.Item ? 1 : 0,
           scannedCount: 1,
-          consumedCapacity: result.ConsumedCapacity ? {
-            readCapacity: result.ConsumedCapacity.CapacityUnits
-          } : undefined,
+          consumedCapacity: result.ConsumedCapacity
+            ? {
+                readCapacity: result.ConsumedCapacity.CapacityUnits,
+              }
+            : undefined,
           isHotPartition: false,
-          isInefficient: false
+          isInefficient: false,
         };
 
         dbMonitor.recordQueryMetrics(metrics);
@@ -289,20 +302,20 @@ export async function tracedPut(
   return traceAsyncWithMetrics(
     `put-item`,
     SubsystemType.DATABASE,
-    async (subsegment) => {
+    async subsegment => {
       const command = new PutCommand({
         TableName: tableName,
         Item: item,
         ConditionExpression: options?.conditionExpression,
         ReturnValues: options?.returnValues,
-        ReturnConsumedCapacity: 'TOTAL'
+        ReturnConsumedCapacity: 'TOTAL',
       });
 
       subsegment?.addMetadata('dynamodb_operation', {
         operation: DynamoOperation.PUT,
         tableName,
         itemSize: JSON.stringify(item).length,
-        hasCondition: !!options?.conditionExpression
+        hasCondition: !!options?.conditionExpression,
       });
 
       try {
@@ -313,11 +326,13 @@ export async function tracedPut(
           tableName,
           itemCount: 1,
           scannedCount: 1,
-          consumedCapacity: result.ConsumedCapacity ? {
-            writeCapacity: result.ConsumedCapacity.CapacityUnits
-          } : undefined,
+          consumedCapacity: result.ConsumedCapacity
+            ? {
+                writeCapacity: result.ConsumedCapacity.CapacityUnits,
+              }
+            : undefined,
           isHotPartition: false,
-          isInefficient: false
+          isInefficient: false,
         };
 
         dbMonitor.recordQueryMetrics(metrics);
@@ -361,11 +376,16 @@ export async function tracedQuery<T = Record<string, unknown>>(
     expressionAttributeNames?: Record<string, string>;
     expressionAttributeValues?: Record<string, unknown>;
   }
-): Promise<{ items: T[]; lastEvaluatedKey?: Record<string, unknown>; count: number; scannedCount: number }> {
+): Promise<{
+  items: T[];
+  lastEvaluatedKey?: Record<string, unknown>;
+  count: number;
+  scannedCount: number;
+}> {
   return traceAsyncWithMetrics(
     `query-items`,
     SubsystemType.DATABASE,
-    async (subsegment) => {
+    async subsegment => {
       const command = new QueryCommand({
         TableName: tableName,
         IndexName: options?.indexName,
@@ -377,7 +397,7 @@ export async function tracedQuery<T = Record<string, unknown>>(
         ScanIndexForward: options?.scanIndexForward,
         ExpressionAttributeNames: options?.expressionAttributeNames,
         ExpressionAttributeValues: options?.expressionAttributeValues,
-        ReturnConsumedCapacity: 'TOTAL'
+        ReturnConsumedCapacity: 'TOTAL',
       });
 
       subsegment?.addMetadata('dynamodb_operation', {
@@ -387,12 +407,12 @@ export async function tracedQuery<T = Record<string, unknown>>(
         keyCondition,
         filterExpression: options?.filterExpression,
         limit: options?.limit,
-        hasFilter: !!options?.filterExpression
+        hasFilter: !!options?.filterExpression,
       });
 
       try {
         const result = await client.send(command);
-        
+
         const itemCount = result.Count || 0;
         const scannedCount = result.ScannedCount || 0;
         const efficiency = scannedCount > 0 ? itemCount / scannedCount : 1;
@@ -400,18 +420,20 @@ export async function tracedQuery<T = Record<string, unknown>>(
         // 성능 문제 감지
         const isInefficient = efficiency < 0.3; // 30% 미만 효율성
         const isHotPartition = scannedCount > 100 && efficiency < 0.1; // 매우 비효율적
-        
+
         const metrics: QueryMetrics = {
           operation: DynamoOperation.QUERY,
           tableName,
           indexName: options?.indexName,
           itemCount,
           scannedCount,
-          consumedCapacity: result.ConsumedCapacity ? {
-            readCapacity: result.ConsumedCapacity.CapacityUnits
-          } : undefined,
+          consumedCapacity: result.ConsumedCapacity
+            ? {
+                readCapacity: result.ConsumedCapacity.CapacityUnits,
+              }
+            : undefined,
           isHotPartition,
-          isInefficient
+          isInefficient,
         };
 
         dbMonitor.recordQueryMetrics(metrics);
@@ -420,10 +442,10 @@ export async function tracedQuery<T = Record<string, unknown>>(
         subsegment?.addMetadata('dynamodb_result', {
           itemCount,
           scannedCount,
-          efficiency: (efficiency * 100).toFixed(2) + '%',
+          efficiency: `${(efficiency * 100).toFixed(2)}%`,
           consumedCapacity: result.ConsumedCapacity?.CapacityUnits || 0,
           isInefficient,
-          isHotPartition
+          isHotPartition,
         });
 
         subsegment?.addAnnotation('table_name', tableName);
@@ -436,7 +458,7 @@ export async function tracedQuery<T = Record<string, unknown>>(
           items: result.Items as T[],
           lastEvaluatedKey: result.LastEvaluatedKey,
           count: itemCount,
-          scannedCount
+          scannedCount,
         };
       } catch (error: unknown) {
         const dynamoError = error as { name?: string };
@@ -447,11 +469,11 @@ export async function tracedQuery<T = Record<string, unknown>>(
         throw error;
       }
     },
-    { 
-      tableName, 
-      indexName: options?.indexName, 
+    {
+      tableName,
+      indexName: options?.indexName,
       hasFilter: !!options?.filterExpression,
-      keyCondition 
+      keyCondition,
     }
   );
 }
@@ -474,7 +496,7 @@ export async function tracedUpdate(
   return traceAsyncWithMetrics(
     `update-item`,
     SubsystemType.DATABASE,
-    async (subsegment) => {
+    async subsegment => {
       const command = new UpdateCommand({
         TableName: tableName,
         Key: key,
@@ -483,7 +505,7 @@ export async function tracedUpdate(
         ExpressionAttributeNames: options?.expressionAttributeNames,
         ExpressionAttributeValues: options?.expressionAttributeValues,
         ReturnValues: options?.returnValues,
-        ReturnConsumedCapacity: 'TOTAL'
+        ReturnConsumedCapacity: 'TOTAL',
       });
 
       subsegment?.addMetadata('dynamodb_operation', {
@@ -491,7 +513,7 @@ export async function tracedUpdate(
         tableName,
         updateExpression,
         hasCondition: !!options?.conditionExpression,
-        keyAttributes: Object.keys(key)
+        keyAttributes: Object.keys(key),
       });
 
       try {
@@ -502,11 +524,13 @@ export async function tracedUpdate(
           tableName,
           itemCount: 1,
           scannedCount: 1,
-          consumedCapacity: result.ConsumedCapacity ? {
-            writeCapacity: result.ConsumedCapacity.CapacityUnits
-          } : undefined,
+          consumedCapacity: result.ConsumedCapacity
+            ? {
+                writeCapacity: result.ConsumedCapacity.CapacityUnits,
+              }
+            : undefined,
           isHotPartition: false,
-          isInefficient: false
+          isInefficient: false,
         };
 
         dbMonitor.recordQueryMetrics(metrics);
@@ -548,20 +572,20 @@ export async function tracedDelete(
   return traceAsyncWithMetrics(
     `delete-item`,
     SubsystemType.DATABASE,
-    async (subsegment) => {
+    async subsegment => {
       const command = new DeleteCommand({
         TableName: tableName,
         Key: key,
         ConditionExpression: options?.conditionExpression,
         ReturnValues: options?.returnValues,
-        ReturnConsumedCapacity: 'TOTAL'
+        ReturnConsumedCapacity: 'TOTAL',
       });
 
       subsegment?.addMetadata('dynamodb_operation', {
         operation: DynamoOperation.DELETE,
         tableName,
         keyAttributes: Object.keys(key),
-        hasCondition: !!options?.conditionExpression
+        hasCondition: !!options?.conditionExpression,
       });
 
       try {
@@ -572,11 +596,13 @@ export async function tracedDelete(
           tableName,
           itemCount: 1,
           scannedCount: 1,
-          consumedCapacity: result.ConsumedCapacity ? {
-            writeCapacity: result.ConsumedCapacity.CapacityUnits
-          } : undefined,
+          consumedCapacity: result.ConsumedCapacity
+            ? {
+                writeCapacity: result.ConsumedCapacity.CapacityUnits,
+              }
+            : undefined,
           isHotPartition: false,
-          isInefficient: false
+          isInefficient: false,
         };
 
         dbMonitor.recordQueryMetrics(metrics);

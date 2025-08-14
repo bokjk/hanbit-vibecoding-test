@@ -1,4 +1,4 @@
-import type { Todo, Priority, FilterType, TodoStats } from "types/index";
+import type { Todo, Priority, FilterType, TodoStats } from "@vive/types";
 
 /**
  * 스토리지 서비스의 추상 기본 클래스
@@ -107,6 +107,7 @@ export abstract class AbstractStorageService {
       total,
       completed,
       active,
+      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
       byPriority,
     };
   }

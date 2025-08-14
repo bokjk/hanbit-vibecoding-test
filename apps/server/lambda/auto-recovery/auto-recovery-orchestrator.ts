@@ -78,69 +78,66 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 // 복구 액션 정의
 const RECOVERY_ACTIONS: Record<string, RecoveryAction[]> = {
-  'TodoApiHealth': [
+  TodoApiHealth: [
     {
       type: 'RESTART_SERVICE',
       target: 'lambda-functions',
       priority: 1,
       cooldownMinutes: 10,
-      maxRetries: 3
+      maxRetries: 3,
     },
     {
       type: 'CLEAR_CACHE',
       target: 'api-gateway',
       priority: 2,
       cooldownMinutes: 5,
-      maxRetries: 2
-    }
+      maxRetries: 2,
+    },
   ],
-  'DynamoDBHealth': [
+  DynamoDBHealth: [
     {
       type: 'SCALE_UP',
       target: 'dynamodb-capacity',
       priority: 1,
       cooldownMinutes: 15,
-      maxRetries: 2
-    }
+      maxRetries: 2,
+    },
   ],
-  'MemoryUsage': [
+  MemoryUsage: [
     {
       type: 'RESTART_SERVICE',
       target: 'high-memory-functions',
       priority: 1,
       cooldownMinutes: 5,
-      maxRetries: 3
-    }
+      maxRetries: 3,
+    },
   ],
-  'ApiGatewayHealth': [
+  ApiGatewayHealth: [
     {
       type: 'CLEAR_CACHE',
       target: 'api-gateway',
       priority: 1,
       cooldownMinutes: 5,
-      maxRetries: 2
+      maxRetries: 2,
     },
     {
       type: 'FAILOVER',
       target: 'backup-endpoint',
       priority: 2,
       cooldownMinutes: 30,
-      maxRetries: 1
-    }
-  ]
+      maxRetries: 1,
+    },
+  ],
 };
 
-export const handler: Handler<AutoRecoveryRequest, RecoveryReport> = async (
-  event,
-  context
-) => {
+export const handler: Handler<AutoRecoveryRequest, RecoveryReport> = async (event, context) => {
   const startTime = Date.now();
   const triggerId = context.awsRequestId;
-  
-  console.log('🔧 자동 복구 시스템 시작', { 
-    triggerId, 
+
+  console.log('🔧 자동 복구 시스템 시작', {
+    triggerId,
     trigger: event.trigger,
-    unhealthyComponents: event.unhealthyComponents?.length 
+    unhealthyComponents: event.unhealthyComponents?.length,
   });
 
   try {
@@ -157,7 +154,7 @@ export const handler: Handler<AutoRecoveryRequest, RecoveryReport> = async (
     for (const action of filteredPlan) {
       const result = await executeRecoveryAction(action);
       results.push(result);
-      
+
       // 실패한 경우 다음 우선순위 액션으로 진행
       if (result.status === 'FAILED' && action.priority < 3) {
         console.log(`⚠️ 액션 실패, 다음 우선순위 액션으로 진행: ${action.type}`);
@@ -179,7 +176,7 @@ export const handler: Handler<AutoRecoveryRequest, RecoveryReport> = async (
       skippedActions: results.filter(r => r.status === 'SKIPPED').length,
       results,
       systemHealthBefore: event.systemHealth,
-      systemHealthAfter
+      systemHealthAfter,
     };
 
     // 복구 메트릭 발송
@@ -195,14 +192,13 @@ export const handler: Handler<AutoRecoveryRequest, RecoveryReport> = async (
     console.log(`✅ 자동 복구 완료 (${executionTime}ms)`, {
       success: report.successfulActions,
       failed: report.failedActions,
-      skipped: report.skippedActions
+      skipped: report.skippedActions,
     });
 
     return report;
-
   } catch (error) {
     console.error('❌ 자동 복구 실패', error);
-    
+
     // 복구 실패 메트릭 발송
     await publishErrorMetric('AutoRecoveryOrchestrator', error);
 
@@ -222,7 +218,7 @@ async function createRecoveryPlan(request: AutoRecoveryRequest): Promise<Recover
   if (request.unhealthyComponents) {
     for (const component of request.unhealthyComponents) {
       const componentActions = RECOVERY_ACTIONS[component.name] || [];
-      
+
       // 컴포넌트 상태에 따른 액션 우선순위 조정
       const prioritizedActions = componentActions
         .filter(action => shouldExecuteAction(component, action))
@@ -253,7 +249,7 @@ async function filterActionsByCooldown(actions: RecoveryAction[]): Promise<Recov
   for (const action of actions) {
     const cooldownKey = `${action.type}-${action.target}`;
     const lastExecution = await getLastExecutionTime(cooldownKey);
-    
+
     if (!lastExecution || isAfterCooldown(lastExecution, action.cooldownMinutes)) {
       filteredActions.push(action);
     } else {
@@ -273,7 +269,7 @@ async function executeRecoveryAction(action: RecoveryAction): Promise<RecoveryRe
 
   try {
     let result: Record<string, unknown>;
-    
+
     switch (action.type) {
       case 'RESTART_SERVICE': {
         result = await restartService(action.target);
@@ -310,9 +306,8 @@ async function executeRecoveryAction(action: RecoveryAction): Promise<RecoveryRe
       status: 'SUCCESS',
       executionTime,
       details: result,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-
   } catch (error) {
     const executionTime = Date.now() - startTime;
     console.error(`❌ 복구 액션 실패: ${action.type}`, error);
@@ -322,7 +317,7 @@ async function executeRecoveryAction(action: RecoveryAction): Promise<RecoveryRe
       status: 'FAILED',
       executionTime,
       details: { error: error instanceof Error ? error.message : 'Unknown error' },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
@@ -330,29 +325,31 @@ async function executeRecoveryAction(action: RecoveryAction): Promise<RecoveryRe
 // 개별 복구 액션 구현
 async function restartService(target: string): Promise<Record<string, unknown>> {
   console.log(`🔄 서비스 재시작: ${target}`);
-  
+
   switch (target) {
     case 'lambda-functions': {
       // Lambda 함수 컨테이너 재시작 (새로운 실행 환경 강제)
       const functions = ['TodoApp-Create', 'TodoApp-List', 'TodoApp-Update', 'TodoApp-Delete'];
       for (const functionName of functions) {
         try {
-          await lambda.invoke({
-            FunctionName: functionName,
-            InvocationType: 'Event',
-            Payload: JSON.stringify({ action: 'warmup' })
-          }).promise();
+          await lambda
+            .invoke({
+              FunctionName: functionName,
+              InvocationType: 'Event',
+              Payload: JSON.stringify({ action: 'warmup' }),
+            })
+            .promise();
         } catch (error) {
           console.error(`Lambda 함수 재시작 실패: ${functionName}`, error);
         }
       }
       return { restarted: functions };
     }
-      
+
     case 'high-memory-functions':
       // 메모리 사용량이 높은 함수들 재시작
       return { action: 'memory-intensive-functions-restarted' };
-      
+
     default:
       throw new Error(`알 수 없는 재시작 대상: ${target}`);
   }
@@ -360,20 +357,20 @@ async function restartService(target: string): Promise<Record<string, unknown>> 
 
 async function scaleUpService(target: string): Promise<Record<string, unknown>> {
   console.log(`📈 서비스 스케일 업: ${target}`);
-  
+
   switch (target) {
     case 'dynamodb-capacity':
       // DynamoDB 읽기/쓰기 용량 증설
-      return { 
+      return {
         action: 'dynamodb-capacity-increased',
         readCapacity: 'increased',
-        writeCapacity: 'increased' 
+        writeCapacity: 'increased',
       };
-      
+
     case 'lambda-provisioned-concurrency':
       // Lambda 예약된 동시 실행 수 증설
       return { action: 'lambda-concurrency-increased' };
-      
+
     default:
       throw new Error(`알 수 없는 스케일 업 대상: ${target}`);
   }
@@ -381,12 +378,12 @@ async function scaleUpService(target: string): Promise<Record<string, unknown>> 
 
 async function clearCache(target: string): Promise<Record<string, unknown>> {
   console.log(`🧹 캐시 정리: ${target}`);
-  
+
   switch (target) {
     case 'api-gateway':
       // API Gateway 캐시 비우기
       return { action: 'api-gateway-cache-cleared' };
-      
+
     default:
       throw new Error(`알 수 없는 캐시 정리 대상: ${target}`);
   }
@@ -394,12 +391,12 @@ async function clearCache(target: string): Promise<Record<string, unknown>> {
 
 async function performFailover(target: string): Promise<Record<string, unknown>> {
   console.log(`🔀 페일오버 실행: ${target}`);
-  
+
   switch (target) {
     case 'backup-endpoint':
       // 백업 엔드포인트로 트래픽 라우팅
       return { action: 'failover-to-backup', endpoint: 'backup-api-gateway' };
-      
+
     default:
       throw new Error(`알 수 없는 페일오버 대상: ${target}`);
   }
@@ -407,16 +404,18 @@ async function performFailover(target: string): Promise<Record<string, unknown>>
 
 async function executeCustomAction(target: string): Promise<Record<string, unknown>> {
   console.log(`⚙️ 커스텀 액션 실행: ${target}`);
-  
+
   // 커스텀 Lambda 함수 호출
   const customFunctionName = `TodoApp-CustomRecovery-${target}`;
-  
+
   try {
-    const result = await lambda.invoke({
-      FunctionName: customFunctionName,
-      InvocationType: 'RequestResponse'
-    }).promise();
-    
+    const result = await lambda
+      .invoke({
+        FunctionName: customFunctionName,
+        InvocationType: 'RequestResponse',
+      })
+      .promise();
+
     return { customAction: target, result: result.Payload };
   } catch (error) {
     throw new Error(`커스텀 액션 실행 실패: ${error.message}`);
@@ -428,21 +427,25 @@ async function executeCustomAction(target: string): Promise<Record<string, unkno
  */
 async function verifySystemHealthAfterRecovery(): Promise<SystemHealth | { error: string }> {
   console.log('🔍 복구 후 시스템 상태 검증 중...');
-  
+
   try {
     // 헬스 체크 오케스트레이터 호출
-    const result = await lambda.invoke({
-      FunctionName: 'TodoApp-HealthCheck-Orchestrator',
-      InvocationType: 'RequestResponse',
-      Payload: JSON.stringify({
-        checkType: 'comprehensive',
-        timestamp: new Date().toISOString()
+    const result = await lambda
+      .invoke({
+        FunctionName: 'TodoApp-HealthCheck-Orchestrator',
+        InvocationType: 'RequestResponse',
+        Payload: JSON.stringify({
+          checkType: 'comprehensive',
+          timestamp: new Date().toISOString(),
+        }),
       })
-    }).promise();
+      .promise();
 
     const healthReport = JSON.parse(result.Payload as string);
-    console.log(`📊 복구 후 시스템 상태: ${healthReport.overallStatus} (점수: ${healthReport.healthScore})`);
-    
+    console.log(
+      `📊 복구 후 시스템 상태: ${healthReport.overallStatus} (점수: ${healthReport.healthScore})`
+    );
+
     return healthReport;
   } catch (error) {
     console.error('시스템 상태 검증 실패', error);
@@ -459,25 +462,27 @@ async function publishRecoveryMetrics(report: RecoveryReport): Promise<void> {
       MetricName: 'RecoveryActionsExecuted',
       Value: report.totalActions,
       Unit: 'Count',
-      Dimensions: [{ Name: 'Trigger', Value: report.trigger }]
+      Dimensions: [{ Name: 'Trigger', Value: report.trigger }],
     },
     {
       MetricName: 'RecoverySuccessRate',
       Value: report.totalActions > 0 ? (report.successfulActions / report.totalActions) * 100 : 0,
-      Unit: 'Percent'
+      Unit: 'Percent',
     },
     {
       MetricName: 'RecoveryExecutionTime',
       Value: new Date(report.endTime).getTime() - new Date(report.startTime).getTime(),
-      Unit: 'Milliseconds'
-    }
+      Unit: 'Milliseconds',
+    },
   ];
 
   try {
-    await cloudwatch.putMetricData({
-      Namespace: 'TodoApp/AutoRecovery',
-      MetricData: metrics
-    }).promise();
+    await cloudwatch
+      .putMetricData({
+        Namespace: 'TodoApp/AutoRecovery',
+        MetricData: metrics,
+      })
+      .promise();
 
     console.log('📊 복구 메트릭 발송 완료');
   } catch (error) {
@@ -491,7 +496,7 @@ async function publishRecoveryMetrics(report: RecoveryReport): Promise<void> {
 async function sendRecoveryNotification(report: RecoveryReport): Promise<void> {
   const severity = report.failedActions > 0 ? 'WARNING' : 'INFO';
   const topicArn = await getNotificationTopicArn(severity);
-  
+
   if (!topicArn) return;
 
   const message = {
@@ -505,18 +510,20 @@ async function sendRecoveryNotification(report: RecoveryReport): Promise<void> {
       actions: report.results.map(r => ({
         type: r.action.type,
         target: r.action.target,
-        status: r.status
-      }))
+        status: r.status,
+      })),
     },
-    timestamp: report.endTime
+    timestamp: report.endTime,
   };
 
   try {
-    await sns.publish({
-      TopicArn: topicArn,
-      Message: JSON.stringify(message),
-      Subject: `[${severity}] Todo 앱 자동 복구 결과`
-    }).promise();
+    await sns
+      .publish({
+        TopicArn: topicArn,
+        Message: JSON.stringify(message),
+        Subject: `[${severity}] Todo 앱 자동 복구 결과`,
+      })
+      .promise();
 
     console.log('📧 복구 결과 알림 발송 완료');
   } catch (error) {
@@ -528,8 +535,8 @@ async function sendRecoveryNotification(report: RecoveryReport): Promise<void> {
  * 복구 실패 알림 발송
  */
 async function sendRecoveryFailureNotification(
-  triggerId: string, 
-  request: AutoRecoveryRequest, 
+  triggerId: string,
+  request: AutoRecoveryRequest,
   error: Error | unknown
 ): Promise<void> {
   const topicArn = await getNotificationTopicArn('CRITICAL');
@@ -543,43 +550,50 @@ async function sendRecoveryFailureNotification(
       triggerId,
       trigger: request.trigger,
       error: error instanceof Error ? error.message : String(error),
-      unhealthyComponents: request.unhealthyComponents?.map(c => c.name)
+      unhealthyComponents: request.unhealthyComponents?.map(c => c.name),
     },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   try {
-    await sns.publish({
-      TopicArn: topicArn,
-      Message: JSON.stringify(message),
-      Subject: '[CRITICAL] Todo 앱 자동 복구 시스템 실패'
-    }).promise();
+    await sns
+      .publish({
+        TopicArn: topicArn,
+        Message: JSON.stringify(message),
+        Subject: '[CRITICAL] Todo 앱 자동 복구 시스템 실패',
+      })
+      .promise();
   } catch (notificationError) {
     console.error('복구 실패 알림 발송 실패', notificationError);
   }
 }
 
 // 헬퍼 함수들
-function shouldExecuteAction(component: { name: string; status: string; details: ComponentHealth }, action: RecoveryAction): boolean {
+function shouldExecuteAction(
+  component: { name: string; status: string; details: ComponentHealth },
+  action: RecoveryAction
+): boolean {
   // 컴포넌트 상태와 액션의 적합성 검사
   if (component.status === 'UNHEALTHY') {
     return true; // 모든 액션 허용
   }
-  
+
   if (component.status === 'DEGRADED') {
     return action.priority <= 2; // 낮은 우선순위 액션만
   }
-  
+
   return false;
 }
 
 async function getLastExecutionTime(cooldownKey: string): Promise<Date | null> {
   try {
-    const result = await dynamodb.get({
-      TableName: 'TodoApp-RecoveryHistory',
-      Key: { actionKey: cooldownKey }
-    }).promise();
-    
+    const result = await dynamodb
+      .get({
+        TableName: 'TodoApp-RecoveryHistory',
+        Key: { actionKey: cooldownKey },
+      })
+      .promise();
+
     return result.Item ? new Date(result.Item.lastExecution) : null;
   } catch (error) {
     console.error('마지막 실행 시간 조회 실패', error);
@@ -595,17 +609,19 @@ function isAfterCooldown(lastExecution: Date, cooldownMinutes: number): boolean 
 
 async function recordExecutionTime(action: RecoveryAction): Promise<void> {
   const cooldownKey = `${action.type}-${action.target}`;
-  
+
   try {
-    await dynamodb.put({
-      TableName: 'TodoApp-RecoveryHistory',
-      Item: {
-        actionKey: cooldownKey,
-        lastExecution: new Date().toISOString(),
-        action: action,
-        ttl: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7일 후 삭제
-      }
-    }).promise();
+    await dynamodb
+      .put({
+        TableName: 'TodoApp-RecoveryHistory',
+        Item: {
+          actionKey: cooldownKey,
+          lastExecution: new Date().toISOString(),
+          action,
+          ttl: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7일 후 삭제
+        },
+      })
+      .promise();
   } catch (error) {
     console.error('실행 시간 기록 실패', error);
   }
@@ -613,14 +629,16 @@ async function recordExecutionTime(action: RecoveryAction): Promise<void> {
 
 async function saveRecoveryHistory(report: RecoveryReport): Promise<void> {
   try {
-    await dynamodb.put({
-      TableName: 'TodoApp-RecoveryHistory',
-      Item: {
-        ...report,
-        id: report.triggerId,
-        ttl: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60) // 30일 후 삭제
-      }
-    }).promise();
+    await dynamodb
+      .put({
+        TableName: 'TodoApp-RecoveryHistory',
+        Item: {
+          ...report,
+          id: report.triggerId,
+          ttl: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // 30일 후 삭제
+        },
+      })
+      .promise();
   } catch (error) {
     console.error('복구 이력 저장 실패', error);
   }
@@ -633,15 +651,19 @@ async function getNotificationTopicArn(severity: string): Promise<string | null>
 
 async function publishErrorMetric(component: string, _error: Error | unknown): Promise<void> {
   try {
-    await cloudwatch.putMetricData({
-      Namespace: 'TodoApp/AutoRecovery',
-      MetricData: [{
-        MetricName: 'RecoveryErrors',
-        Value: 1,
-        Unit: 'Count',
-        Dimensions: [{ Name: 'Component', Value: component }]
-      }]
-    }).promise();
+    await cloudwatch
+      .putMetricData({
+        Namespace: 'TodoApp/AutoRecovery',
+        MetricData: [
+          {
+            MetricName: 'RecoveryErrors',
+            Value: 1,
+            Unit: 'Count',
+            Dimensions: [{ Name: 'Component', Value: component }],
+          },
+        ],
+      })
+      .promise();
   } catch (metricsError) {
     console.error('에러 메트릭 발송 실패', metricsError);
   }

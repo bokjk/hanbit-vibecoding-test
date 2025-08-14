@@ -11,7 +11,7 @@ export class TestDataFactory {
    */
   static createTodo(overrides?: Partial<Todo>): Todo {
     const now = new Date().toISOString();
-    
+
     return {
       id: uuidv4(),
       title: `Test Todo ${Date.now()}`,
@@ -122,14 +122,16 @@ export class TestDataFactory {
     for (let i = 0; i < count; i++) {
       const priority = priorities[i % priorities.length];
       const completed = i % 4 === 0; // 25% 완료율
-      
-      todos.push(this.createTodo({
-        title: `Performance Test Todo ${i + 1}`,
-        priority,
-        completed,
-        userId,
-        createdAt: new Date(Date.now() - (i * 1000)).toISOString(), // 시간 간격 조정
-      }));
+
+      todos.push(
+        this.createTodo({
+          title: `Performance Test Todo ${i + 1}`,
+          priority,
+          completed,
+          userId,
+          createdAt: new Date(Date.now() - i * 1000).toISOString(), // 시간 간격 조정
+        })
+      );
     }
 
     return todos;
@@ -162,10 +164,12 @@ export class TestDataFactory {
     return {
       success,
       data: success ? data : undefined,
-      error: success ? undefined : {
-        code: 'TEST_ERROR',
-        message: 'Test error message',
-      },
+      error: success
+        ? undefined
+        : {
+            code: 'TEST_ERROR',
+            message: 'Test error message',
+          },
       timestamp: new Date().toISOString(),
     };
   }
@@ -185,8 +189,8 @@ export class TestDataFactory {
    */
   static createMockTokens() {
     return {
-      accessToken: 'mock-access-token-' + uuidv4(),
-      refreshToken: 'mock-refresh-token-' + uuidv4(),
+      accessToken: `mock-access-token-${uuidv4()}`,
+      refreshToken: `mock-refresh-token-${uuidv4()}`,
       expiresIn: 3600,
       tokenType: 'Bearer',
     };
@@ -195,21 +199,27 @@ export class TestDataFactory {
   /**
    * 페이지네이션 테스트 데이터
    */
-  static createPaginatedTodos(userId: string, page: number = 1, limit: number = 10): { 
-    todos: Todo[], 
-    pagination: Record<string, unknown> 
+  static createPaginatedTodos(
+    userId: string,
+    page: number = 1,
+    limit: number = 10
+  ): {
+    todos: Todo[];
+    pagination: Record<string, unknown>;
   } {
     const totalItems = 50;
     const startIndex = (page - 1) * limit;
     const endIndex = Math.min(startIndex + limit, totalItems);
-    
+
     const todos = [];
     for (let i = startIndex; i < endIndex; i++) {
-      todos.push(this.createTodo({
-        title: `Paginated Todo ${i + 1}`,
-        userId,
-        createdAt: new Date(Date.now() - (i * 1000)).toISOString(),
-      }));
+      todos.push(
+        this.createTodo({
+          title: `Paginated Todo ${i + 1}`,
+          userId,
+          createdAt: new Date(Date.now() - i * 1000).toISOString(),
+        })
+      );
     }
 
     return {

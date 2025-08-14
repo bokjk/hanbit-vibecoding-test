@@ -5,7 +5,7 @@
  * 온라인 복구 시 동기화할 수 있도록 관리하는 서비스
  */
 
-import type { Todo } from "types/index";
+import type { Todo } from "@vive/types";
 import type { PendingOperation } from "../contexts/todo.reducer";
 
 /**

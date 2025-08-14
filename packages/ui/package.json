@@ -2,14 +2,22 @@
   "name": "@vive/ui",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/index.ts",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
   "types": "./src/index.ts",
   "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js",
+      "types": "./src/index.ts"
+    },
     "./components/ui/*": "./src/components/ui/*",
     "./lib/utils": "./src/lib/utils.ts",
     "./styles": "./src/index.css"
   },
   "scripts": {
+    "build": "vite build",
+    "type-check": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

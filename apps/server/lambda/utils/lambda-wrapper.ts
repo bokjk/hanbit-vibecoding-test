@@ -1,11 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import * as AWSXRay from 'aws-xray-sdk-core';
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  logger, 
-  createErrorResponse, 
-  recordErrorToXRay 
-} from './error-handler';
+import { logger, createErrorResponse, recordErrorToXRay } from './error-handler';
 
 /**
  * Lambda 핸들러 타입
@@ -79,30 +75,22 @@ function collectRequestMetrics(
 function publishCustomMetrics(metrics: PerformanceMetrics): void {
   try {
     // CloudWatch 커스텀 메트릭을 콘솔로 출력 (CloudWatch가 자동으로 파싱)
-    console.log(
-      `MONITORING|${metrics.duration}|Milliseconds|${metrics.functionName}|Duration`
-    );
-    console.log(
-      `MONITORING|${metrics.memoryUsed}|Megabytes|${metrics.functionName}|MemoryUsed`
-    );
+    console.log(`MONITORING|${metrics.duration}|Milliseconds|${metrics.functionName}|Duration`);
+    console.log(`MONITORING|${metrics.memoryUsed}|Megabytes|${metrics.functionName}|MemoryUsed`);
     console.log(
       `MONITORING|${metrics.statusCode >= 400 ? 1 : 0}|Count|${metrics.functionName}|Errors`
     );
-    console.log(
-      `MONITORING|1|Count|${metrics.functionName}|Invocations`
-    );
+    console.log(`MONITORING|1|Count|${metrics.functionName}|Invocations`);
 
     // 성능 임계값 체크
-    if (metrics.duration > 5000) { // 5초 이상
-      console.log(
-        `MONITORING|1|Count|${metrics.functionName}|SlowRequests`
-      );
+    if (metrics.duration > 5000) {
+      // 5초 이상
+      console.log(`MONITORING|1|Count|${metrics.functionName}|SlowRequests`);
     }
 
-    if (metrics.memoryUsed / metrics.memoryLimit > 0.8) { // 메모리 사용률 80% 이상
-      console.log(
-        `MONITORING|1|Count|${metrics.functionName}|HighMemoryUsage`
-      );
+    if (metrics.memoryUsed / metrics.memoryLimit > 0.8) {
+      // 메모리 사용률 80% 이상
+      console.log(`MONITORING|1|Count|${metrics.functionName}|HighMemoryUsage`);
     }
   } catch (error) {
     logger.warn('Failed to publish custom metrics', {
@@ -117,7 +105,7 @@ function publishCustomMetrics(metrics: PerformanceMetrics): void {
  */
 function extractOrGenerateCorrelationId(event: APIGatewayProxyEvent): string {
   // 헤더에서 상관 ID 추출 (대소문자 무관)
-  const correlationId = 
+  const correlationId =
     event.headers['X-Correlation-ID'] ||
     event.headers['x-correlation-id'] ||
     event.headers['X-CORRELATION-ID'] ||
@@ -143,13 +131,9 @@ function parseRequestBody(body: string | null): unknown {
 /**
  * 요청 로깅
  */
-function logRequest(
-  event: APIGatewayProxyEvent,
-  context: Context,
-  correlationId: string
-): void {
+function logRequest(event: APIGatewayProxyEvent, context: Context, correlationId: string): void {
   const sanitizedBody = event.body ? parseRequestBody(event.body) : null;
-  
+
   // 민감한 정보 마스킹 (비밀번호, 토큰 등)
   const maskedBody = sanitizedBody ? maskSensitiveData(sanitizedBody) : null;
 
@@ -177,7 +161,7 @@ function logResponse(
   duration: number
 ): void {
   const responseBody = response.body ? JSON.parse(response.body) : null;
-  
+
   logger.info('Outgoing response', {
     correlationId,
     statusCode: response.statusCode,
@@ -200,7 +184,7 @@ function maskSensitiveData(data: unknown): unknown {
   }
 
   const sensitiveFields = ['password', 'token', 'secret', 'key', 'credential', 'auth'];
-  const masked = { ...data as Record<string, unknown> };
+  const masked = { ...(data as Record<string, unknown>) };
 
   for (const key in masked) {
     if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {
@@ -268,10 +252,7 @@ export function wrapLambdaHandler(
     logResponses = true,
   } = options || {};
 
-  return async (
-    event: APIGatewayProxyEvent,
-    context: Context
-  ): Promise<APIGatewayProxyResult> => {
+  return async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
     const startTime = Date.now();
     const correlationId = extractOrGenerateCorrelationId(event);
 
@@ -303,13 +284,12 @@ export function wrapLambdaHandler(
       // 성능 메트릭 수집 및 전송
       if (enableMetrics) {
         const metrics = collectRequestMetrics(event, context, correlationId, startTime, response);
-        
+
         logger.info('Performance metrics', metrics);
         publishCustomMetrics(metrics);
       }
 
       return response;
-
     } catch (error) {
       const errorInstance = error instanceof Error ? error : new Error(String(error));
 
@@ -323,8 +303,14 @@ export function wrapLambdaHandler(
 
       // 에러 메트릭 수집
       if (enableMetrics) {
-        const metrics = collectRequestMetrics(event, context, correlationId, startTime, errorResponse);
-        
+        const metrics = collectRequestMetrics(
+          event,
+          context,
+          correlationId,
+          startTime,
+          errorResponse
+        );
+
         logger.error('Error metrics', errorInstance, metrics);
         publishCustomMetrics(metrics);
       }

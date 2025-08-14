@@ -3,17 +3,20 @@
 ## 1. 프로젝트 개요
 
 ### 1.1 프로젝트 목적
+
 - 사용자가 할 일을 효율적으로 관리할 수 있는 웹 기반 TODO 애플리케이션 개발
 - 간단하고 직관적인 사용자 인터페이스 제공
 - 기본적인 CRUD(Create, Read, Update, Delete) 기능 구현
 
 ### 1.2 프로젝트 범위
+
 - 웹 브라우저에서 동작하는 클라이언트 사이드 애플리케이션
 - 로컬 스토리지를 활용한 데이터 저장 (초기 버전)
 
 ## 2. 기능 요구사항
 
 ### 2.1 핵심 기능
+
 1. **할 일 추가**
    - 새로운 TODO 항목을 입력하고 추가할 수 있어야 함
    - 제목은 필수 입력 항목
@@ -34,12 +37,11 @@
    - 기존 TODO 항목의 내용을 수정할 수 있어야 함
 
 ### 2.2 부가 기능 (선택사항)
+
 1. **필터링**
    - 전체/완료/미완료 항목별로 필터링
-   
 2. **우선순위**
    - TODO 항목에 우선순위 설정 (높음/보통/낮음)
-   
 3. **마감일**
    - TODO 항목에 마감일 설정
 
@@ -49,29 +51,34 @@
 ## 3. 비기능 요구사항
 
 ### 3.1 사용자 인터페이스
+
 - 반응형 디자인 (모바일, 태블릿, 데스크톱 지원)
 - 직관적이고 사용하기 쉬운 UI/UX
 - 접근성 고려 (키보드 네비게이션, 스크린 리더 지원)
 
 ### 3.2 성능
+
 - 페이지 로딩 시간 3초 이내
 - 사용자 액션에 대한 즉각적인 반응
 
 ### 3.3 호환성
+
 - 최신 웹 브라우저 지원 (Chrome, Firefox, Safari, Edge)
 - 모바일 브라우저 지원
 
 ### 3.4 데이터 저장
+
 - DynamoDB
 - 데이터 내보내기/가져오기 기능
-
 
 ## 4. 기술 스택 (제안)
 
 ### 모노레포
+
 - pnpm workspaces
 
 ### 프론트엔드
+
 - **프레임워크**: React.js
 - **UI Kit**: Shadcn/ui
 - **스타일링**: Tailwind CSS
@@ -80,6 +87,7 @@
 - 테스트 : Jest, React Testing Library
 
 ### 백엔드 + 인프라 (통합)
+
 - **런타임**: Node.js 18.x (TypeScript)
 - **아키텍처**: AWS 서버리스 (Lambda Functions)
 - **IaC**: AWS CDK v2 (TypeScript) - Lambda 코드와 인프라 통합 관리
@@ -93,12 +101,14 @@
 - **배포**: CDK로 Lambda 코드와 인프라를 함께 배포
 
 ### 데이터 저장
+
 - **초기 버전**: localStorage
 - **향후 확장**: REST API + 데이터베이스
 
 ## 5. 요건 정의를 위한 질문들
 
 ### 5.1 기능 관련 질문
+
 1. **우선순위가 가장 높은 핵심 기능은 무엇인가요?**
    - 상관없음
 
@@ -116,6 +126,7 @@
    - 필요없음
 
 ### 5.2 UI/UX 관련 질문
+
 1. **디자인 스타일은 어떻게 할까요?**
    - 미니멀한 디자인
 
@@ -126,6 +137,7 @@
    - 시각적 피드백이 중요
 
 ### 5.3 기술 관련 질문
+
 1. **선호하는 기술 스택이 있나요?**
    - React, Vue, Angular 중 선호하는 프레임워크가 있나요? React
    - TypeScript 사용을 원하시나요? 네
@@ -138,6 +150,7 @@
    - 단계별 개발이 필요한가요? 네
 
 ### 5.4 확장성 관련 질문
+
 1. **향후 확장 계획이 있나요?**
    - 팀 협업 기능이 필요할까요? 아니요
    - 알림 기능이 필요할까요? 아니요
@@ -150,6 +163,7 @@
 ## 6. 개발 단계별 계획
 
 ### 6.1 1단계: 프론트엔드 전용 버전 (MVP)
+
 - **목표**: 빠른 프로토타입 완성 및 사용자 피드백 수집
 - **기술 스택**: React + TypeScript + localStorage
 - **핵심 기능**:
@@ -161,8 +175,9 @@
 - **배포**: GitHub Pages를 통한 정적 사이트 배포
 
 ### 6.2 2단계: 백엔드 연동 버전
+
 - **목표**: 다중 사용자 지원 및 데이터 동기화
-- **기술 스택**: 
+- **기술 스택**:
   - 프론트엔드: 기존 React 앱 확장
   - 백엔드: AWS 서버리스 (API Gateway + Lambda + DynamoDB)
 - **추가 기능**:
@@ -177,6 +192,7 @@
 ### 7.1 AWS 서버리스 아키텍처 설계
 
 #### 7.1.1 전체 아키텍처
+
 ```
 [Client] → [CloudFront] → [API Gateway] → [Lambda] → [DynamoDB]
     ↓                                                      ↑
@@ -184,6 +200,7 @@
 ```
 
 #### 7.1.2 핵심 컴포넌트
+
 1. **Amazon API Gateway**
    - REST API 엔드포인트 제공
    - CORS 설정으로 프론트엔드 통신 허용
@@ -205,6 +222,7 @@
 ### 7.2 인증 시스템 (Amazon Cognito)
 
 #### 7.2.1 게스트 사용자 지원 설계
+
 학습용 프로젝트이므로 **로그인 없는 게스트 사용자**도 앱을 사용할 수 있도록 설계
 
 1. **Cognito User Pool**
@@ -218,31 +236,33 @@
    - 디바이스별 익명 식별자 생성
 
 #### 7.2.2 권한 모델
+
 ```typescript
 // 게스트 사용자 권한
 interface GuestPermissions {
-  canRead: boolean;      // true - 샘플 데이터 읽기
-  canCreate: boolean;    // true - 임시 TODO 생성 (세션 기반)
-  canUpdate: boolean;    // true - 세션 내 수정
-  canDelete: boolean;    // true - 세션 내 삭제
-  persistData: boolean;  // false - 영구 저장 불가
-  maxItems: number;      // 10 - 최대 항목 수 제한
+  canRead: boolean; // true - 샘플 데이터 읽기
+  canCreate: boolean; // true - 임시 TODO 생성 (세션 기반)
+  canUpdate: boolean; // true - 세션 내 수정
+  canDelete: boolean; // true - 세션 내 삭제
+  persistData: boolean; // false - 영구 저장 불가
+  maxItems: number; // 10 - 최대 항목 수 제한
 }
 
-// 인증된 사용자 권한  
+// 인증된 사용자 권한
 interface AuthenticatedPermissions {
-  canRead: boolean;      // true - 본인 데이터 읽기
-  canCreate: boolean;    // true - 무제한 생성
-  canUpdate: boolean;    // true - 본인 데이터 수정
-  canDelete: boolean;    // true - 본인 데이터 삭제
-  persistData: boolean;  // true - 영구 저장
-  maxItems: number;      // 1000 - 최대 항목 수
+  canRead: boolean; // true - 본인 데이터 읽기
+  canCreate: boolean; // true - 무제한 생성
+  canUpdate: boolean; // true - 본인 데이터 수정
+  canDelete: boolean; // true - 본인 데이터 삭제
+  persistData: boolean; // true - 영구 저장
+  maxItems: number; // 1000 - 최대 항목 수
 }
 ```
 
 ### 7.3 API 설계 (REST API)
 
 #### 7.3.1 API 엔드포인트
+
 ```typescript
 // 기본 CRUD 엔드포인트
 GET    /api/todos           // TODO 목록 조회
@@ -262,23 +282,24 @@ POST   /api/migrate         // localStorage 마이그레이션
 ```
 
 #### 7.3.2 데이터 모델
+
 ```typescript
 interface TodoItem {
-  id: string;                 // UUID
-  userId: string;             // Cognito User ID 또는 게스트 세션 ID
-  title: string;              // TODO 제목
-  description?: string;       // 설명 (선택사항)
-  priority: 'low' | 'medium' | 'high';
+  id: string; // UUID
+  userId: string; // Cognito User ID 또는 게스트 세션 ID
+  title: string; // TODO 제목
+  description?: string; // 설명 (선택사항)
+  priority: "low" | "medium" | "high";
   completed: boolean;
-  createdAt: string;          // ISO 8601
-  updatedAt: string;          // ISO 8601
-  isGuest: boolean;           // 게스트 데이터 여부
-  sessionId?: string;         // 게스트 세션 ID
+  createdAt: string; // ISO 8601
+  updatedAt: string; // ISO 8601
+  isGuest: boolean; // 게스트 데이터 여부
+  sessionId?: string; // 게스트 세션 ID
 }
 
 interface User {
-  id: string;                 // Cognito User ID
-  email?: string;             // 인증된 사용자만
+  id: string; // Cognito User ID
+  email?: string; // 인증된 사용자만
   isGuest: boolean;
   createdAt: string;
   lastLoginAt: string;
@@ -286,7 +307,7 @@ interface User {
 }
 
 interface UserSettings {
-  theme: 'light' | 'dark';
+  theme: "light" | "dark";
   defaultPriority: Priority;
   autoSort: boolean;
 }
@@ -295,6 +316,7 @@ interface UserSettings {
 ### 7.4 데이터베이스 설계 (DynamoDB)
 
 #### 7.4.1 Single Table Design
+
 ```typescript
 // Primary Table: todos-app-data
 interface DynamoDBItem {
@@ -311,7 +333,7 @@ interface DynamoDBItem {
 {
   PK: "USER#auth0|123456",
   SK: "TODO#uuid-1234",
-  GSI1PK: "USER#auth0|123456", 
+  GSI1PK: "USER#auth0|123456",
   GSI1SK: "TODO#2024-01-15T10:00:00Z",
   itemType: "TODO",
   data: { /* TodoItem */ }
@@ -319,7 +341,7 @@ interface DynamoDBItem {
 
 {
   PK: "GUEST#session-abcd",
-  SK: "TODO#uuid-5678", 
+  SK: "TODO#uuid-5678",
   itemType: "TODO",
   data: { /* TodoItem */ },
   ttl: 1642291200  // 24시간 후 자동 삭제
@@ -329,6 +351,7 @@ interface DynamoDBItem {
 ### 7.5 통합 백엔드 구조 (Lambda + CDK)
 
 #### 7.5.1 통합 프로젝트 구조
+
 ```typescript
 // 📁 apps/server/                   // 백엔드 + 인프라 통합 관리
 // ├── infrastructure/               // CDK 인프라 코드
@@ -369,12 +392,14 @@ interface DynamoDBItem {
 ```
 
 #### 7.5.2 통합 개발의 장점
+
 1. **개발 효율성**
    - 하나의 `package.json`으로 백엔드와 인프라 의존성 통합 관리
    - 한 번의 빌드 명령으로 Lambda 코드 컴파일 + CDK 배포
    - 로컬 개발환경 설정 간소화
 
 2. **배포 편의성**
+
    ```bash
    # 하나의 명령으로 전체 백엔드 + 인프라 배포
    cd apps/server
@@ -395,15 +420,16 @@ interface DynamoDBItem {
    - 롤백 시 인프라와 코드 함께 롤백 가능
 
 #### 7.5.3 CDK에서 Lambda 참조 방식
+
 ```typescript
 // infrastructure/lib/api-stack.ts
 export class ApiStack extends NestedStack {
   private createLambdaFunctions(props: ApiStackProps) {
-    this.lambdaFunctions.getTodos = new Function(this, 'GetTodosFunction', {
+    this.lambdaFunctions.getTodos = new Function(this, "GetTodosFunction", {
       runtime: Runtime.NODEJS_18_X,
       // 같은 프로젝트 내 Lambda 코드 참조
-      code: Code.fromAsset('../lambda/dist/functions/get-todos'),
-      handler: 'index.handler',
+      code: Code.fromAsset("../lambda/dist/functions/get-todos"),
+      handler: "index.handler",
       environment: {
         TABLE_NAME: props.table.tableName,
       },
@@ -413,6 +439,7 @@ export class ApiStack extends NestedStack {
 ```
 
 #### 7.5.4 통합 빌드 스크립트
+
 ```json
 {
   "scripts": {
@@ -432,6 +459,7 @@ export class ApiStack extends NestedStack {
 ```
 
 #### 7.5.2 환경별 배포
+
 - **개발 환경** (`dev`): 단일 개발자용, 최소 리소스
 - **테스트 환경** (`test`): CI/CD 파이프라인용, 자동 삭제
 - **프로덕션 환경** (`prod`): 실제 사용자용, 백업 및 모니터링
@@ -439,6 +467,7 @@ export class ApiStack extends NestedStack {
 ### 7.6 CI/CD 파이프라인 (GitHub Actions)
 
 #### 7.6.1 백엔드 배포 워크플로우
+
 ```yaml
 # .github/workflows/backend-deploy.yml
 name: Backend Deploy
@@ -453,15 +482,15 @@ on:
 jobs:
   test:
     - Unit Tests (Jest)
-    - Integration Tests  
+    - Integration Tests
     - Type Checking
     - Linting & Formatting
-    
+
   deploy-dev:
     if: github.ref == 'refs/heads/main'
     - AWS CDK Deploy to dev environment
     - API smoke tests
-    
+
   deploy-prod:
     if: github.event_name == 'release'
     - Manual approval required
@@ -470,6 +499,7 @@ jobs:
 ```
 
 #### 7.6.2 보안 및 시크릿 관리
+
 - **GitHub Secrets**: AWS 인증 정보
 - **AWS Parameter Store**: 환경별 설정값
 - **AWS Secrets Manager**: API 키 및 민감 정보
@@ -477,6 +507,7 @@ jobs:
 ### 7.7 개발 방법론 (TDD)
 
 #### 7.7.1 TDD 사이클 적용
+
 ```typescript
 // 📁 apps/server/src/functions/
 // ├── create-todo/
@@ -486,29 +517,32 @@ jobs:
 ```
 
 #### 7.7.2 테스트 전략
+
 1. **Unit Tests**: 개별 함수 로직 검증
-2. **Integration Tests**: DynamoDB와의 연동 테스트  
+2. **Integration Tests**: DynamoDB와의 연동 테스트
 3. **E2E Tests**: API Gateway를 통한 전체 플로우 테스트
 4. **Contract Tests**: 프론트엔드와 API 계약 검증
 
 ### 7.8 모니터링 및 로깅
 
 #### 7.8.1 관찰 가능성(Observability)
+
 - **CloudWatch Logs**: 구조화된 로그 수집
-- **X-Ray Tracing**: 분산 추적을 통한 성능 모니터링  
+- **X-Ray Tracing**: 분산 추적을 통한 성능 모니터링
 - **CloudWatch Metrics**: 비즈니스 메트릭 및 알람
 - **CloudWatch Dashboards**: 실시간 모니터링 대시보드
 
 #### 7.8.2 핵심 메트릭
+
 ```typescript
 interface BusinessMetrics {
-  totalTodos: number;           // 전체 TODO 개수
-  activeTodos: number;          // 미완료 TODO 개수  
-  completionRate: number;       // 완료율
-  dailyActiveUsers: number;     // 일일 활성 사용자
-  guestUserRatio: number;       // 게스트 사용자 비율
-  apiLatencyP95: number;        // API 응답시간 95 percentile
-  errorRate: number;            // 에러율
+  totalTodos: number; // 전체 TODO 개수
+  activeTodos: number; // 미완료 TODO 개수
+  completionRate: number; // 완료율
+  dailyActiveUsers: number; // 일일 활성 사용자
+  guestUserRatio: number; // 게스트 사용자 비율
+  apiLatencyP95: number; // API 응답시간 95 percentile
+  errorRate: number; // 에러율
 }
 ```
 
@@ -526,4 +560,4 @@ interface BusinessMetrics {
 
 **작성일**: 2025년 07월 15일  
 **작성자**: 개발팀  
-**버전**: 1.0 
+**버전**: 1.0

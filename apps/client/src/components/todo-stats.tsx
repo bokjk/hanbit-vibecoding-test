@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import type { TodoStats } from "types/index";
+import type { TodoStats } from "@vive/types";
 
 interface TodoStatsProps {
   stats: TodoStats;

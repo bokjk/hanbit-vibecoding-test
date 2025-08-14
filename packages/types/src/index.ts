@@ -8,6 +8,10 @@ export type Todo = {
   priority: Priority;
   createdAt: string;
   updatedAt: string;
+  dueDate?: string;
+  tags?: string[];
+  userId?: string;
+  isGuest?: boolean;
 }
 
 export type FilterType = 'all' | 'active' | 'completed';
@@ -27,4 +31,26 @@ export interface TodoStats {
   active: number;
   completed: number;
   completionRate: number;
+  byPriority: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+}
+
+export interface CreateTodoRequest {
+  title: string;
+  description?: string;
+  priority: Priority;
+  dueDate?: string;
+  tags?: string[];
+}
+
+export interface UpdateTodoRequest {
+  title?: string;
+  description?: string;
+  completed?: boolean;
+  priority?: Priority;
+  dueDate?: string;
+  tags?: string[];
 }

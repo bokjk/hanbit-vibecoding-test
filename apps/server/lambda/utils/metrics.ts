@@ -7,35 +7,35 @@ import { correlationId } from './correlation';
 /**
  * 메트릭 타입 정의
  */
-export type MetricType = 
-  | 'business' 
-  | 'performance' 
-  | 'error' 
-  | 'user_activity' 
+export type MetricType =
+  | 'business'
+  | 'performance'
+  | 'error'
+  | 'user_activity'
   | 'api_usage'
   | 'security';
 
 /**
  * TODO 작업 타입
  */
-export type TodoOperation = 
-  | 'create' 
-  | 'read' 
-  | 'update' 
-  | 'delete' 
-  | 'list' 
-  | 'bulk_update' 
+export type TodoOperation =
+  | 'create'
+  | 'read'
+  | 'update'
+  | 'delete'
+  | 'list'
+  | 'bulk_update'
   | 'bulk_delete';
 
 /**
  * 사용자 활동 타입
  */
-export type UserActivity = 
-  | 'login' 
-  | 'logout' 
-  | 'session_start' 
-  | 'session_end' 
-  | 'page_view' 
+export type UserActivity =
+  | 'login'
+  | 'logout'
+  | 'session_start'
+  | 'session_end'
+  | 'page_view'
   | 'feature_usage'
   | 'error_encountered';
 
@@ -143,7 +143,12 @@ interface ErrorMetric extends BaseMetric {
  */
 interface SecurityMetric extends BaseMetric {
   type: 'security';
-  event: 'auth_success' | 'auth_failure' | 'token_refresh' | 'suspicious_activity' | 'rate_limit_exceeded';
+  event:
+    | 'auth_success'
+    | 'auth_failure'
+    | 'token_refresh'
+    | 'suspicious_activity'
+    | 'rate_limit_exceeded';
   ipAddress?: string;
   userAgent?: string;
   authMethod?: string;
@@ -154,7 +159,13 @@ interface SecurityMetric extends BaseMetric {
 /**
  * 통합 메트릭 타입
  */
-export type Metric = TodoMetric | PerformanceMetric | UserActivityMetric | ApiUsageMetric | ErrorMetric | SecurityMetric;
+export type Metric =
+  | TodoMetric
+  | PerformanceMetric
+  | UserActivityMetric
+  | ApiUsageMetric
+  | ErrorMetric
+  | SecurityMetric;
 
 /**
  * 메트릭 매니저 클래스
@@ -169,7 +180,7 @@ class MetricsManager {
   constructor() {
     this.environment = process.env.NODE_ENV || 'development';
     this.serviceName = process.env.SERVICE_NAME || 'hanbit-todo-api';
-    
+
     // 주기적으로 메트릭 플러시
     setInterval(() => {
       this.flush().catch(error => {
@@ -183,7 +194,7 @@ class MetricsManager {
    */
   private createBaseMetric(type: MetricType, name: string): BaseMetric {
     const context = correlationId.getCurrent();
-    
+
     return {
       type,
       name,
@@ -316,13 +327,20 @@ class MetricsManager {
       tags?: Record<string, string>;
     } = {}
   ): void {
-    const status: ApiStatus = 
-      statusCode >= 200 && statusCode < 300 ? 'success' :
-      statusCode === 429 ? 'rate_limited' :
-      statusCode >= 500 ? 'timeout' : 'error';
+    const status: ApiStatus =
+      statusCode >= 200 && statusCode < 300
+        ? 'success'
+        : statusCode === 429
+          ? 'rate_limited'
+          : statusCode >= 500
+            ? 'timeout'
+            : 'error';
 
     const metric: ApiUsageMetric = {
-      ...this.createBaseMetric('api_usage', `api_${method.toLowerCase()}_${endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`),
+      ...this.createBaseMetric(
+        'api_usage',
+        `api_${method.toLowerCase()}_${endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`
+      ),
       type: 'api_usage',
       endpoint,
       method,
@@ -389,7 +407,12 @@ class MetricsManager {
    * 보안 메트릭 기록
    */
   recordSecurityEvent(
-    event: 'auth_success' | 'auth_failure' | 'token_refresh' | 'suspicious_activity' | 'rate_limit_exceeded',
+    event:
+      | 'auth_success'
+      | 'auth_failure'
+      | 'token_refresh'
+      | 'suspicious_activity'
+      | 'rate_limit_exceeded',
     options: {
       ipAddress?: string;
       userAgent?: string;
@@ -422,11 +445,13 @@ class MetricsManager {
    */
   private emit(metric: Metric): void {
     // CloudWatch Logs에 메트릭 출력 (구조화된 로그)
-    console.log(JSON.stringify({
-      ...metric,
-      logType: 'metric',
-      service: this.serviceName,
-    }));
+    console.log(
+      JSON.stringify({
+        ...metric,
+        logType: 'metric',
+        service: this.serviceName,
+      })
+    );
 
     // 버퍼에 추가
     this.metricsBuffer.push(metric);
@@ -466,34 +491,40 @@ class MetricsManager {
         await this.sendMetricToCloudWatch(cloudWatchMetrics, metric);
       }
 
-      console.log(JSON.stringify({
-        logType: 'metrics_batch_sent',
-        service: this.serviceName,
-        timestamp: new Date().toISOString(),
-        metricsCount: this.metricsBuffer.length,
-        status: 'success'
-      }));
-
+      console.log(
+        JSON.stringify({
+          logType: 'metrics_batch_sent',
+          service: this.serviceName,
+          timestamp: new Date().toISOString(),
+          metricsCount: this.metricsBuffer.length,
+          status: 'success',
+        })
+      );
     } catch (error) {
-      console.error(JSON.stringify({
-        logType: 'metrics_batch_error',
-        service: this.serviceName,
-        timestamp: new Date().toISOString(),
-        metricsCount: this.metricsBuffer.length,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        status: 'failed'
-      }));
+      console.error(
+        JSON.stringify({
+          logType: 'metrics_batch_error',
+          service: this.serviceName,
+          timestamp: new Date().toISOString(),
+          metricsCount: this.metricsBuffer.length,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          status: 'failed',
+        })
+      );
     }
   }
 
   /**
    * 개별 메트릭을 CloudWatch로 전송
    */
-  private async sendMetricToCloudWatch(cloudWatchMetrics: Record<string, unknown>, metric: Metric): Promise<void> {
+  private async sendMetricToCloudWatch(
+    cloudWatchMetrics: Record<string, unknown>,
+    metric: Metric
+  ): Promise<void> {
     const dimensions = {
       Service: this.serviceName,
       Environment: this.environment,
-      ...(metric.dimensions as Record<string, string>)
+      ...(metric.dimensions as Record<string, string>),
     };
 
     switch (metric.type) {
@@ -574,7 +605,7 @@ class MetricsManager {
    */
   startSessionTimer(userId: string): () => void {
     const startTime = Date.now();
-    
+
     this.recordUserActivity('session_start', {
       tags: { userId },
     });

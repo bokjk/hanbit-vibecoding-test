@@ -8,10 +8,10 @@
  * - AuthContext와 연동하여 권한 기반 작업 처리
  */
 
-import type { Todo, CreateTodoRequest, UpdateTodoRequest } from "types/index";
+import type { Todo, CreateTodoRequest, UpdateTodoRequest } from "@vive/types";
 import type { PendingOperation } from "../contexts/todo.reducer";
 import { offlineStorage } from "./offline-storage";
-import { todoApiService } from "./api/todo-api.service";
+import { todoApiService } from "./api/todo-api-client";
 import { authService } from "./auth.service";
 import { syncManager } from "./sync-manager";
 
@@ -108,11 +108,11 @@ class IntegratedStorageService {
     this.cache.clear();
   }
 
-  private handleSyncError(event: string, data: unknown): void {
+  private handleSyncError(_event: string, data: unknown): void {
     console.error("🔄 Sync failed:", data);
   }
 
-  private handleSyncConflict(event: string, data: unknown): void {
+  private handleSyncConflict(_event: string, data: unknown): void {
     console.warn("🔄 Sync conflicts detected:", data);
     // 충돌 해결 로직은 상위 레벨에서 처리
   }

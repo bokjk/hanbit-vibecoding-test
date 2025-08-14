@@ -16,7 +16,7 @@ const PERFORMANCE_THRESHOLDS = {
   SLOW_API_CALL_MS: 200,
   VERY_SLOW_API_CALL_MS: 1000,
   MEMORY_WARNING_MB: 100,
-  MEMORY_CRITICAL_MB: 200
+  MEMORY_CRITICAL_MB: 200,
 } as const;
 
 // 서브시스템 카테고리
@@ -26,7 +26,7 @@ export enum SubsystemType {
   BUSINESS_LOGIC = 'business_logic',
   AUTHENTICATION = 'authentication',
   VALIDATION = 'validation',
-  SERIALIZATION = 'serialization'
+  SERIALIZATION = 'serialization',
 }
 
 // 성능 메트릭 인터페이스
@@ -64,7 +64,7 @@ class PerformanceCollector {
 
   recordMetric(metric: PerformanceMetric): void {
     this.metrics.push(metric);
-    
+
     // 성능 병목 감지 및 자동 알림
     if (metric.isBottleneck) {
       this.notifyBottleneck(metric);
@@ -72,11 +72,14 @@ class PerformanceCollector {
   }
 
   private notifyBottleneck(metric: PerformanceMetric): void {
-    console.warn(`[BOTTLENECK DETECTED] ${metric.subsystem}:${metric.operation} - ${metric.duration}ms`, {
-      severity: metric.severity,
-      threshold: this.getThresholdForSubsystem(metric.subsystem),
-      memoryUsage: metric.memoryUsage
-    });
+    console.warn(
+      `[BOTTLENECK DETECTED] ${metric.subsystem}:${metric.operation} - ${metric.duration}ms`,
+      {
+        severity: metric.severity,
+        threshold: this.getThresholdForSubsystem(metric.subsystem),
+        memoryUsage: metric.memoryUsage,
+      }
+    );
   }
 
   private getThresholdForSubsystem(subsystem: SubsystemType): number {
@@ -161,26 +164,26 @@ export function traceAsyncWithMetrics<T>(
             operation,
             startTime,
             startMemory: Math.round(startMemory.heapUsed / 1024 / 1024),
-            ...metadata
+            ...metadata,
           });
-          
+
           // 서브시스템별 주석 추가
           subsegment.addAnnotation('subsystem', subsystem);
           subsegment.addAnnotation('operation', operation);
         }
 
         const result = await fn(subsegment);
-        
+
         // 성능 메트릭 수집
         const endTime = Date.now();
         const endMemory = process.memoryUsage();
         const duration = endTime - startTime;
         const memoryDelta = Math.round((endMemory.heapUsed - startMemory.heapUsed) / 1024 / 1024);
-        
+
         // 성능 병목 감지
         const isBottleneck = detectBottleneck(subsystem, duration);
         const severity = getSeverityLevel(subsystem, duration, memoryDelta);
-        
+
         // 성능 메트릭 기록
         const metric: PerformanceMetric = {
           subsystem,
@@ -188,11 +191,11 @@ export function traceAsyncWithMetrics<T>(
           duration,
           memoryUsage: memoryDelta,
           isBottleneck,
-          severity
+          severity,
         };
-        
+
         performanceCollector.recordMetric(metric);
-        
+
         // X-Ray 세그먼트에 성능 데이터 추가
         if (subsegment) {
           subsegment.addMetadata('performance_result', {
@@ -200,9 +203,9 @@ export function traceAsyncWithMetrics<T>(
             memoryDelta,
             isBottleneck,
             severity,
-            endMemory: Math.round(endMemory.heapUsed / 1024 / 1024)
+            endMemory: Math.round(endMemory.heapUsed / 1024 / 1024),
           });
-          
+
           // 성능 주석 추가
           subsegment.addAnnotation('duration_ms', duration);
           subsegment.addAnnotation('memory_mb', memoryDelta);
@@ -220,23 +223,26 @@ export function traceAsyncWithMetrics<T>(
           operation,
           subsystem,
           inputData: metadata,
-          stackTrace: error instanceof Error ? error.stack || '' : String(error)
+          stackTrace: error instanceof Error ? error.stack || '' : String(error),
         };
-        
+
         // X-Ray 세그먼트에 에러 정보 추가
         if (subsegment) {
           subsegment.addError(error as Error);
           subsegment.addMetadata('error_context', errorContext);
-          subsegment.addAnnotation('error_type', error instanceof Error ? error.constructor.name : 'UnknownError');
+          subsegment.addAnnotation(
+            'error_type',
+            error instanceof Error ? error.constructor.name : 'UnknownError'
+          );
           subsegment.close(error as Error);
         }
-        
+
         // 에러 로깅
         console.error(`[${subsystem}:${operation}] Error occurred:`, {
           error: error instanceof Error ? error.message : String(error),
-          context: errorContext
+          context: errorContext,
         });
-        
+
         reject(error);
       }
     });
@@ -251,12 +257,7 @@ export function traceAsync<T>(
   fn: (subsegment?: AWSXRay.Subsegment) => Promise<T>,
   metadata?: Record<string, unknown>
 ): Promise<T> {
-  return traceAsyncWithMetrics(
-    name,
-    SubsystemType.BUSINESS_LOGIC,
-    fn,
-    metadata
-  );
+  return traceAsyncWithMetrics(name, SubsystemType.BUSINESS_LOGIC, fn, metadata);
 }
 
 /**
@@ -273,7 +274,7 @@ export function traceSyncWithMetrics<T>(
   }
 
   const startTime = Date.now();
-  
+
   return AWSXRay.captureFunc(`${subsystem}:${operation}`, subsegment => {
     try {
       if (subsegment) {
@@ -281,38 +282,39 @@ export function traceSyncWithMetrics<T>(
           subsystem,
           operation,
           startTime,
-          ...metadata
+          ...metadata,
         });
-        
+
         subsegment.addAnnotation('subsystem', subsystem);
         subsegment.addAnnotation('operation', operation);
       }
-      
+
       const result = fn(subsegment);
-      
+
       const duration = Date.now() - startTime;
-      
+
       // 빠른 성능 체크 (동기 작업은 일반적으로 매우 빠름)
-      if (duration > 10) { // 10ms 이상인 동기 작업은 주목할 만함
+      if (duration > 10) {
+        // 10ms 이상인 동기 작업은 주목할 만함
         const metric: PerformanceMetric = {
           subsystem,
           operation,
           duration,
           isBottleneck: duration > 50,
-          severity: duration > 50 ? 'warning' : 'info'
+          severity: duration > 50 ? 'warning' : 'info',
         };
-        
+
         performanceCollector.recordMetric(metric);
-        
+
         if (subsegment) {
           subsegment.addMetadata('sync_performance', {
             duration,
-            isUnexpectedlySlow: duration > 10
+            isUnexpectedlySlow: duration > 10,
           });
           subsegment.addAnnotation('duration_ms', duration);
         }
       }
-      
+
       return result;
     } catch (error) {
       if (subsegment) {
@@ -320,9 +322,9 @@ export function traceSyncWithMetrics<T>(
           operation,
           subsystem,
           inputData: metadata,
-          stackTrace: error instanceof Error ? error.stack || '' : String(error)
+          stackTrace: error instanceof Error ? error.stack || '' : String(error),
         };
-        
+
         subsegment.addError(error as Error);
         subsegment.addMetadata('sync_error_context', errorContext);
       }
@@ -339,12 +341,7 @@ export function traceSync<T>(
   fn: (subsegment?: AWSXRay.Subsegment) => T,
   metadata?: Record<string, unknown>
 ): T {
-  return traceSyncWithMetrics(
-    name,
-    SubsystemType.BUSINESS_LOGIC,
-    fn,
-    metadata
-  );
+  return traceSyncWithMetrics(name, SubsystemType.BUSINESS_LOGIC, fn, metadata);
 }
 
 /**
@@ -414,11 +411,11 @@ function detectBottleneck(subsystem: SubsystemType, duration: number): boolean {
     case SubsystemType.AUTHENTICATION:
       return duration > 200; // 인증 200ms 임계값
     case SubsystemType.VALIDATION:
-      return duration > 50;  // 검증 50ms 임계값
+      return duration > 50; // 검증 50ms 임계값
     case SubsystemType.SERIALIZATION:
-      return duration > 25;  // 직렬화 25ms 임계값
+      return duration > 25; // 직렬화 25ms 임계값
     default:
-      return duration > 50;  // 기본 50ms 임계값
+      return duration > 50; // 기본 50ms 임계값
   }
 }
 
@@ -437,7 +434,7 @@ function getSeverityLevel(
   if (memoryUsage > PERFORMANCE_THRESHOLDS.MEMORY_WARNING_MB) {
     return 'warning';
   }
-  
+
   // 서브시스템별 성능 임계값 기준
   const criticalThresholds = {
     [SubsystemType.DATABASE]: PERFORMANCE_THRESHOLDS.VERY_SLOW_QUERY_MS,
@@ -445,25 +442,25 @@ function getSeverityLevel(
     [SubsystemType.BUSINESS_LOGIC]: 500,
     [SubsystemType.AUTHENTICATION]: 1000,
     [SubsystemType.VALIDATION]: 200,
-    [SubsystemType.SERIALIZATION]: 100
+    [SubsystemType.SERIALIZATION]: 100,
   };
-  
+
   const warningThresholds = {
     [SubsystemType.DATABASE]: PERFORMANCE_THRESHOLDS.SLOW_QUERY_MS,
     [SubsystemType.API_CALL]: PERFORMANCE_THRESHOLDS.SLOW_API_CALL_MS,
     [SubsystemType.BUSINESS_LOGIC]: 100,
     [SubsystemType.AUTHENTICATION]: 200,
     [SubsystemType.VALIDATION]: 50,
-    [SubsystemType.SERIALIZATION]: 25
+    [SubsystemType.SERIALIZATION]: 25,
   };
-  
+
   if (duration > criticalThresholds[subsystem]) {
     return 'critical';
   }
   if (duration > warningThresholds[subsystem]) {
     return 'warning';
   }
-  
+
   return 'info';
 }
 
@@ -477,15 +474,15 @@ export function generatePerformanceReport(): {
   slowestOperations: PerformanceMetric[];
 } {
   const bottlenecks = performanceCollector.getBottlenecks();
-  const slowestOperations = bottlenecks
-    .sort((a, b) => b.duration - a.duration)
-    .slice(0, 5);
-    
+  const slowestOperations = bottlenecks.sort((a, b) => b.duration - a.duration).slice(0, 5);
+
   return {
     totalOperations: performanceCollector['metrics'].length,
     bottlenecks,
-    averageDuration: performanceCollector['metrics'].reduce((sum, m) => sum + m.duration, 0) / performanceCollector['metrics'].length || 0,
-    slowestOperations
+    averageDuration:
+      performanceCollector['metrics'].reduce((sum, m) => sum + m.duration, 0) /
+        performanceCollector['metrics'].length || 0,
+    slowestOperations,
   };
 }
 
@@ -499,7 +496,9 @@ export function resetPerformanceMetrics(): void {
 /**
  * 성능 임계값 동적 조정 (운영 환경용)
  */
-export function updatePerformanceThresholds(newThresholds: Partial<typeof PERFORMANCE_THRESHOLDS>): void {
+export function updatePerformanceThresholds(
+  newThresholds: Partial<typeof PERFORMANCE_THRESHOLDS>
+): void {
   Object.assign(performanceCollector['bottleneckThresholds'], newThresholds);
 }
 

@@ -201,7 +201,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
         type: "AUTH_INIT_FAILURE",
         payload: errorMessage,
       });
-      throw loginError;
+      throw new Error(errorMessage);
     }
   }, [initOptions, emitEvent]);
 
@@ -226,7 +226,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
         payload: errorMessage,
       });
       emitEvent("login", { error: errorMessage });
-      throw loginError;
+      throw new Error(errorMessage);
     }
   }, [emitEvent]);
 
@@ -243,7 +243,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
           : "Registration failed";
       dispatch({ type: "AUTH_SET_LOADING", payload: false });
       dispatch({ type: "AUTH_LOGIN_FAILURE", payload: errorMessage });
-      throw loginError;
+      throw new Error(errorMessage);
     }
   }, []);
 
@@ -299,7 +299,7 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
         payload: errorMessage,
       });
       emitEvent("token_expired", { error: errorMessage });
-      throw loginError;
+      throw new Error(errorMessage);
     }
   }, [emitEvent]);
 

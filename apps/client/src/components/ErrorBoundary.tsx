@@ -1,4 +1,4 @@
-import React, { Component, ReactNode } from "react";
+import React, { Component, type ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@vive/ui";
 import { Button } from "@vive/ui";
 

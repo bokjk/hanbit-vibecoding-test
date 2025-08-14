@@ -162,7 +162,9 @@ describe('Error Responses & Status Codes Contract Tests', () => {
         ApiResponseValidator.validateErrorResponseStructure(responseData.error);
 
         expect(responseData.success, `${endpoint.name} success 필드`).toBe(false);
-        expect(responseData.error.message, `${endpoint.name} 에러 메시지`).toContain('Unauthorized');
+        expect(responseData.error.message, `${endpoint.name} 에러 메시지`).toContain(
+          'Unauthorized'
+        );
         expect(responseData.timestamp, `${endpoint.name} timestamp`).toBeDefined();
       }
     });
@@ -207,8 +209,10 @@ describe('Error Responses & Status Codes Contract Tests', () => {
           expect(responseData.timestamp, `${testCase.name} timestamp`).toBeDefined();
         } else {
           // 다른 상태 코드인 경우에도 적절한 에러 응답이어야 함
-          expect([400, 403, 500].includes(response.statusCode), 
-            `${testCase.name} 적절한 에러 상태 코드`).toBe(true);
+          expect(
+            [400, 403, 500].includes(response.statusCode),
+            `${testCase.name} 적절한 에러 상태 코드`
+          ).toBe(true);
         }
       }
     });
@@ -283,20 +287,22 @@ describe('Error Responses & Status Codes Contract Tests', () => {
         const response = await testCase.handler(testCase.event, mockContext);
 
         // Then - 예상 상태 코드 또는 다른 적절한 에러 상태 코드
-        expect([testCase.expectedStatus, 400, 401, 500].includes(response.statusCode),
-          `${testCase.endpoint} 적절한 에러 상태 코드`).toBe(true);
+        expect(
+          [testCase.expectedStatus, 400, 401, 500].includes(response.statusCode),
+          `${testCase.endpoint} 적절한 에러 상태 코드`
+        ).toBe(true);
 
         // OpenAPI 스키마 검증
         if ([400, 401, 404, 500].includes(response.statusCode)) {
           const responseData = ApiResponseValidator.validateJsonBody(response.body);
-          
+
           const isResponseValid = contractEnv.validateResponse(
             testCase.event.httpMethod,
             testCase.endpoint.split(' ')[1],
             response.statusCode,
             responseData
           );
-          
+
           expect(isResponseValid, `${testCase.endpoint} OpenAPI 스키마 검증`).toBe(true);
         }
       }
@@ -350,10 +356,14 @@ describe('Error Responses & Status Codes Contract Tests', () => {
         ];
 
         sensitivePatterns.forEach(pattern => {
-          expect(pattern.test(errorMessage), 
-            `${testCase.name} - 에러 메시지에 민감한 정보 노출`).toBe(false);
-          expect(pattern.test(errorDetails), 
-            `${testCase.name} - 에러 세부사항에 민감한 정보 노출`).toBe(false);
+          expect(
+            pattern.test(errorMessage),
+            `${testCase.name} - 에러 메시지에 민감한 정보 노출`
+          ).toBe(false);
+          expect(
+            pattern.test(errorDetails),
+            `${testCase.name} - 에러 세부사항에 민감한 정보 노출`
+          ).toBe(false);
         });
       }
     });
@@ -426,14 +436,18 @@ describe('Error Responses & Status Codes Contract Tests', () => {
         const response = await testCase.handler(testCase.event, mockContext);
 
         // Then
-        expect([400, 401, 500].includes(response.statusCode), 
-          `${testCase.name} 에러 상태 코드`).toBe(true);
-        
+        expect(
+          [400, 401, 500].includes(response.statusCode),
+          `${testCase.name} 에러 상태 코드`
+        ).toBe(true);
+
         ApiResponseValidator.validateContentType(response.headers || {});
-        
+
         // 필수 헤더 검증
-        expect(response.headers?.['Access-Control-Allow-Origin'], 
-          `${testCase.name} CORS 헤더`).toBeDefined();
+        expect(
+          response.headers?.['Access-Control-Allow-Origin'],
+          `${testCase.name} CORS 헤더`
+        ).toBeDefined();
       }
     });
 
@@ -452,12 +466,11 @@ describe('Error Responses & Status Codes Contract Tests', () => {
       // Then
       const responseData = ApiResponseValidator.validateJsonBody(response.body);
       expect(responseData.timestamp).toBeDefined();
-      
+
       // ISO 8601 형식 검증
       const timestampRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-      expect(timestampRegex.test(responseData.timestamp), 
-        'ISO 8601 타임스탬프 형식').toBe(true);
-      
+      expect(timestampRegex.test(responseData.timestamp), 'ISO 8601 타임스탬프 형식').toBe(true);
+
       // 유효한 날짜인지 검증
       const timestamp = new Date(responseData.timestamp);
       expect(timestamp.getTime(), '유효한 타임스탬프').not.toBeNaN();

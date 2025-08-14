@@ -233,7 +233,7 @@ export function useAuth() {
   // 특정 이벤트용 편의 메서드들
   const onLogin = useCallback(
     (listener: (data?: unknown) => void) => {
-      const wrappedListener: AuthEventListener = (event, data) =>
+      const wrappedListener: AuthEventListener = (_event, data) =>
         listener(data);
       addEventListener("login", wrappedListener);
       return () => removeEventListener("login", wrappedListener);
@@ -243,7 +243,7 @@ export function useAuth() {
 
   const onLogout = useCallback(
     (listener: (data?: unknown) => void) => {
-      const wrappedListener: AuthEventListener = (event, data) =>
+      const wrappedListener: AuthEventListener = (_event, data) =>
         listener(data);
       addEventListener("logout", wrappedListener);
       return () => removeEventListener("logout", wrappedListener);
@@ -253,7 +253,7 @@ export function useAuth() {
 
   const onTokenExpired = useCallback(
     (listener: (data?: unknown) => void) => {
-      const wrappedListener: AuthEventListener = (event, data) =>
+      const wrappedListener: AuthEventListener = (_event, data) =>
         listener(data);
       addEventListener("token_expired", wrappedListener);
       return () => removeEventListener("token_expired", wrappedListener);
@@ -263,7 +263,7 @@ export function useAuth() {
 
   const onTokenRefreshed = useCallback(
     (listener: (data?: unknown) => void) => {
-      const wrappedListener: AuthEventListener = (event, data) =>
+      const wrappedListener: AuthEventListener = (_event, data) =>
         listener(data);
       addEventListener("token_refreshed", wrappedListener);
       return () => removeEventListener("token_refreshed", wrappedListener);
@@ -347,6 +347,7 @@ export function useAuth() {
   return {
     // 상태
     ...authState,
+    state: authState, // 하위 호환성을 위해 추가
     permissions,
     user: userInfo,
 

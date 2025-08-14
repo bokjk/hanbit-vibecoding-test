@@ -1,4 +1,4 @@
-import type { Todo } from "types/index";
+import type { Todo } from "@vive/types";
 
 export class LocalStorageService {
   private readonly TODOS_KEY = "todos";
@@ -50,3 +50,6 @@ export class LocalStorageService {
     }
   }
 }
+
+// 인스턴스 export
+export const localStorageService = new LocalStorageService();

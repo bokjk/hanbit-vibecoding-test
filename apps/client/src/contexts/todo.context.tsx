@@ -15,7 +15,7 @@ import type {
   Priority,
   CreateTodoRequest,
   UpdateTodoRequest,
-} from "types/index";
+} from "@vive/types";
 import { todoReducer, initialTodoState, todoSelectors } from "./todo.reducer";
 import type { TodoState, TodoAction, ConnectionStatus } from "./todo.reducer";
 import {
@@ -84,11 +84,24 @@ function calculateStats(todos: Todo[]): TodoStats {
   const active = total - completed;
   const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
+  const byPriority = todos.reduce(
+    (acc, todo) => {
+      acc[todo.priority] = (acc[todo.priority] || 0) + 1;
+      return acc;
+    },
+    { high: 0, medium: 0, low: 0 } as Record<string, number>,
+  );
+
   return {
     total,
     active,
     completed,
     completionRate,
+    byPriority: {
+      high: byPriority.high || 0,
+      medium: byPriority.medium || 0,
+      low: byPriority.low || 0,
+    },
   };
 }
 
@@ -178,7 +191,7 @@ export function TodoProvider({
     };
 
     const handleSyncSuccess = (
-      event: string,
+      _event: string,
       data: { syncedTodos?: unknown },
     ) => {
       dispatch({
@@ -190,7 +203,7 @@ export function TodoProvider({
       });
     };
 
-    const handleSyncError = (event: string, data: { error?: string }) => {
+    const handleSyncError = (_event: string, data: { error?: string }) => {
       dispatch({
         type: "SYNC_ERROR",
         payload: data?.error || "Sync failed",
@@ -198,7 +211,7 @@ export function TodoProvider({
     };
 
     const handleConnectionChange = (
-      event: string,
+      _event: string,
       data: { isOnline?: boolean },
     ) => {
       dispatch({

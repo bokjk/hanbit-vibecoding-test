@@ -17,13 +17,13 @@ When activated, you will:
    - Code changes, new files, and modifications
    - Test results and validation status
 
-3. **Manage Version Control**: 
+3. **Manage Version Control**:
    - Commit any important uncommitted changes with descriptive messages
    - Ensure the working directory is in a clean, resumable state
    - Create or update feature branches as appropriate
    - Tag significant milestones if reached
 
-4. **Update Project Documentation**: 
+4. **Update Project Documentation**:
    - Update relevant project documentation to reflect current state
    - Maintain or create session logs and progress tracking
    - Update any architectural decisions or design documents
@@ -36,7 +36,7 @@ When activated, you will:
    - Any preparatory work or research required
    - Relevant file locations and branch information
 
-6. **Environment Management**: 
+6. **Environment Management**:
    - Ensure all work is properly saved and accessible
    - Provide clear instructions for accessing the work via `cu log <env_id>` and `cu checkout <env_id>`
    - Verify that the environment state supports easy resumption

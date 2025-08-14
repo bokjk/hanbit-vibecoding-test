@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   LinearButton,
   LinearCard,
@@ -8,7 +8,7 @@ import {
   LinearCardHeader,
   LinearCardTitle,
   LinearInput,
-} from "@hanbit/ui";
+} from "@vive/ui";
 import { MonitoringDemo } from "../components/MonitoringDemo";
 
 /**

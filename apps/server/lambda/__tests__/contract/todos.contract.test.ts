@@ -64,12 +64,7 @@ describe('TODO API Contract Tests', () => {
       });
       expect(isRequestValid).toBe(true);
 
-      const isResponseValid = contractEnv.validateResponse(
-        'POST',
-        '/todos',
-        201,
-        responseData
-      );
+      const isResponseValid = contractEnv.validateResponse('POST', '/todos', 201, responseData);
       expect(isResponseValid).toBe(true);
 
       // Then - 비즈니스 로직 검증
@@ -97,7 +92,11 @@ describe('TODO API Contract Tests', () => {
       const response = await createTodoHandler(event, mockContext);
 
       // Then - HTTP 상태 코드 검증
-      ApiResponseValidator.validateStatusCode(response.statusCode, 400, 'createTodo-validation-error');
+      ApiResponseValidator.validateStatusCode(
+        response.statusCode,
+        400,
+        'createTodo-validation-error'
+      );
 
       // Then - 에러 응답 구조 검증
       const responseData = ApiResponseValidator.validateJsonBody(response.body);
@@ -105,12 +104,7 @@ describe('TODO API Contract Tests', () => {
       ApiResponseValidator.validateErrorResponseStructure(responseData.error);
 
       // Then - OpenAPI 에러 스키마 검증
-      const isResponseValid = contractEnv.validateResponse(
-        'POST',
-        '/todos',
-        400,
-        responseData
-      );
+      const isResponseValid = contractEnv.validateResponse('POST', '/todos', 400, responseData);
       expect(isResponseValid).toBe(true);
 
       // Then - 에러 내용 검증
@@ -138,7 +132,7 @@ describe('TODO API Contract Tests', () => {
       // Then - 에러 응답 검증
       const responseData = ApiResponseValidator.validateJsonBody(response.body);
       ApiResponseValidator.validateApiResponseStructure(responseData);
-      
+
       expect(responseData.success).toBe(false);
       expect(responseData.error.message).toContain('Unauthorized');
     });
@@ -152,7 +146,7 @@ describe('TODO API Contract Tests', () => {
         body: JSON.stringify(requestData),
         headers: {
           ...validAuthHeaders,
-          'Origin': 'https://todo-app.example.com',
+          Origin: 'https://todo-app.example.com',
         },
       });
 
@@ -196,12 +190,7 @@ describe('TODO API Contract Tests', () => {
       });
       expect(isRequestValid).toBe(true);
 
-      const isResponseValid = contractEnv.validateResponse(
-        'GET',
-        '/todos',
-        200,
-        responseData
-      );
+      const isResponseValid = contractEnv.validateResponse('GET', '/todos', 200, responseData);
       expect(isResponseValid).toBe(true);
 
       // Then - 데이터 구조 검증
@@ -229,7 +218,7 @@ describe('TODO API Contract Tests', () => {
       // Then
       ApiResponseValidator.validateStatusCode(response.statusCode, 200);
       ApiResponseValidator.validateJsonBody(response.body);
-      
+
       // 필터링 파라미터 스키마 검증
       const isRequestValid = contractEnv.validateRequest('GET', '/todos', {
         query: event.queryStringParameters,
@@ -364,7 +353,7 @@ describe('TODO API Contract Tests', () => {
       if (response.statusCode === 204) {
         // 삭제 성공 - 본문 없음
         expect(response.body).toBe('');
-        
+
         // OpenAPI 스키마 검증 (204는 본문이 없음)
         const isRequestValid = contractEnv.validateRequest('DELETE', '/todos/{id}', {
           headers: event.headers,
@@ -403,16 +392,27 @@ describe('TODO API Contract Tests', () => {
       const endpoints = [
         { method: 'POST', path: '/todos', handler: createTodoHandler, needsAuth: true },
         { method: 'GET', path: '/todos', handler: listTodosHandler, needsAuth: true },
-        { method: 'PUT', path: `/todos/${TestDataGenerator.generateValidId()}`, handler: updateTodoHandler, needsAuth: true },
-        { method: 'DELETE', path: `/todos/${TestDataGenerator.generateValidId()}`, handler: deleteTodoHandler, needsAuth: true },
+        {
+          method: 'PUT',
+          path: `/todos/${TestDataGenerator.generateValidId()}`,
+          handler: updateTodoHandler,
+          needsAuth: true,
+        },
+        {
+          method: 'DELETE',
+          path: `/todos/${TestDataGenerator.generateValidId()}`,
+          handler: deleteTodoHandler,
+          needsAuth: true,
+        },
       ];
 
       for (const endpoint of endpoints) {
         // Given
         const headers = endpoint.needsAuth ? validAuthHeaders : {};
-        const body = endpoint.method === 'POST' || endpoint.method === 'PUT' 
-          ? JSON.stringify(TestDataGenerator.createValidTodoRequest()) 
-          : null;
+        const body =
+          endpoint.method === 'POST' || endpoint.method === 'PUT'
+            ? JSON.stringify(TestDataGenerator.createValidTodoRequest())
+            : null;
 
         const event = createMockApiGatewayEvent({
           httpMethod: endpoint.method,
@@ -420,10 +420,10 @@ describe('TODO API Contract Tests', () => {
           body,
           headers: {
             ...headers,
-            'Origin': 'https://todo-app.example.com',
+            Origin: 'https://todo-app.example.com',
           },
-          pathParameters: endpoint.path.includes('{id}') 
-            ? { id: TestDataGenerator.generateValidId() } 
+          pathParameters: endpoint.path.includes('{id}')
+            ? { id: TestDataGenerator.generateValidId() }
             : null,
         });
 
@@ -454,7 +454,9 @@ describe('TODO API Contract Tests', () => {
       if (response.headers?.['X-Rate-Limit-Limit']) {
         expect(response.headers?.['X-Rate-Limit-Remaining']).toBeDefined();
         expect(Number(response.headers?.['X-Rate-Limit-Limit'] || '0')).toBeGreaterThan(0);
-        expect(Number(response.headers?.['X-Rate-Limit-Remaining'] || '0')).toBeGreaterThanOrEqual(0);
+        expect(Number(response.headers?.['X-Rate-Limit-Remaining'] || '0')).toBeGreaterThanOrEqual(
+          0
+        );
       }
     });
   });

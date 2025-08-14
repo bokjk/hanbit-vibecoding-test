@@ -262,7 +262,7 @@ export class HealthCheckSystem extends constructs.Construct {
 
     // 개별 복구 액션 함수들
     const recoveryActions = ['restart-service', 'scale-up', 'clear-cache', 'failover'];
-    
+
     recoveryActions.forEach(action => {
       const recoveryFunction = new lambda.Function(this, `AutoRecovery-${action}`, {
         functionName: `TodoApp-AutoRecovery-${action}`,
@@ -402,12 +402,14 @@ export class HealthCheckSystem extends constructs.Construct {
     const systemHealthAlarm = new cloudwatch.Alarm(this, 'SystemHealthDegraded', {
       alarmName: 'TodoApp-SystemHealthDegraded',
       alarmDescription: '시스템 전체 건강도가 임계값 이하로 떨어짐',
-      metric: this.healthMetrics.find(m => m.metricName === 'SystemHealthScore') || new cloudwatch.Metric({
-        namespace: 'TodoApp/HealthChecks',
-        metricName: 'SystemHealthScore',
-        statistic: cloudwatch.Statistic.AVERAGE,
-        period: Duration.minutes(5),
-      }),
+      metric:
+        this.healthMetrics.find(m => m.metricName === 'SystemHealthScore') ||
+        new cloudwatch.Metric({
+          namespace: 'TodoApp/HealthChecks',
+          metricName: 'SystemHealthScore',
+          statistic: cloudwatch.Statistic.AVERAGE,
+          period: Duration.minutes(5),
+        }),
       threshold: 70, // 70% 이하
       evaluationPeriods: 3,
       datapointsToAlarm: 2,

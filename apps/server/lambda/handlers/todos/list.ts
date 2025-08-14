@@ -45,7 +45,7 @@ const listTodosHandler: LambdaHandler = async (
         endpoint: '/todos',
         method: 'GET',
       });
-      
+
       throw new AuthenticationError(
         'Missing or invalid authorization header',
         ErrorCode.MISSING_CREDENTIALS,
@@ -56,7 +56,7 @@ const listTodosHandler: LambdaHandler = async (
 
     const token = authHeader.substring(7);
     let authContext;
-    
+
     try {
       authContext = await validateJWTToken(token);
     } catch (error) {
@@ -64,7 +64,7 @@ const listTodosHandler: LambdaHandler = async (
         correlationId,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
-      
+
       throw new AuthenticationError(
         'Invalid or expired token',
         ErrorCode.INVALID_TOKEN,
@@ -117,7 +117,7 @@ const listTodosHandler: LambdaHandler = async (
     // 3. TODO 서비스를 통해 목록 조회
     const todoService = getTodoService();
     let result;
-    
+
     try {
       result = await todoService.listTodos(authContext, listRequest);
     } catch (error) {
@@ -175,7 +175,7 @@ const listTodosHandler: LambdaHandler = async (
   } catch (error) {
     const duration = Date.now() - startTime;
     const errorInstance = error instanceof Error ? error : new Error(String(error));
-    
+
     logger.error('TODO listing failed', errorInstance, {
       correlationId,
       duration,

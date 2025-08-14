@@ -14,7 +14,7 @@ export default defineConfig({
       '**/node_modules/**',
       '**/dist/**',
       '**/__tests__/unit/**',
-      '**/__tests__/integration/**'
+      '**/__tests__/integration/**',
     ],
     setupFiles: ['__tests__/contract/setup.ts'],
     testTimeout: 30000, // Contract 테스트는 시간이 더 오래 걸릴 수 있음

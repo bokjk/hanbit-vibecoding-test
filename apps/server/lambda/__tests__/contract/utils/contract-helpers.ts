@@ -37,7 +37,7 @@ export function createMockApiGatewayEvent(options: {
     multiValueQueryStringParameters: null,
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'User-Agent': 'contract-test-agent',
       ...headers,
     },
@@ -146,11 +146,7 @@ export class ApiResponseValidator {
   /**
    * HTTP 상태 코드 검증
    */
-  static validateStatusCode(
-    actual: number,
-    expected: number,
-    operationId?: string
-  ): void {
+  static validateStatusCode(actual: number, expected: number, operationId?: string): void {
     if (actual !== expected) {
       throw new Error(
         `HTTP 상태 코드 불일치 ${operationId ? `[${operationId}]` : ''}: 예상=${expected}, 실제=${actual}`
@@ -166,7 +162,7 @@ export class ApiResponseValidator {
     requiredHeaders: string[] = []
   ): void {
     const headerKeys = Object.keys(headers).map(h => h.toLowerCase());
-    
+
     requiredHeaders.forEach(requiredHeader => {
       const headerLower = requiredHeader.toLowerCase();
       if (!headerKeys.includes(headerLower)) {
@@ -184,7 +180,9 @@ export class ApiResponseValidator {
   ): void {
     const contentType = headers['Content-Type'] || headers['content-type'];
     if (!contentType || !contentType.includes(expectedType)) {
-      throw new Error(`Content-Type 불일치: 예상=${expectedType}, 실제=${contentType || 'undefined'}`);
+      throw new Error(
+        `Content-Type 불일치: 예상=${expectedType}, 실제=${contentType || 'undefined'}`
+      );
     }
   }
 
@@ -195,7 +193,9 @@ export class ApiResponseValidator {
     try {
       return JSON.parse(body);
     } catch (error) {
-      throw new Error(`유효하지 않은 JSON 응답: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `유효하지 않은 JSON 응답: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -269,7 +269,9 @@ export class TestDataGenerator {
   /**
    * 유효한 TODO 업데이트 요청 데이터
    */
-  static createValidTodoUpdateRequest(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  static createValidTodoUpdateRequest(
+    overrides: Record<string, unknown> = {}
+  ): Record<string, unknown> {
     return {
       title: '수정된 할일',
       completed: false,

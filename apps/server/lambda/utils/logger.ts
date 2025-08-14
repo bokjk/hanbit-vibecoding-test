@@ -13,7 +13,7 @@ export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
 /**
  * 에러 분류 타입
  */
-export type ErrorCategory = 
+export type ErrorCategory =
   | 'business' // 비즈니스 로직 에러
   | 'system' // 시스템 레벨 에러
   | 'network' // 네트워크 관련 에러
@@ -34,33 +34,33 @@ export interface LogContext {
   userId?: string;
   operation?: string;
   duration?: number;
-  
+
   // 상관 ID 컨텍스트
   correlationId?: string;
   traceId?: string;
   sessionId?: string;
-  
+
   // 에러 분류 정보
   errorCategory?: ErrorCategory;
   errorSeverity?: ErrorSeverity;
   recoverable?: boolean;
   retryAttempt?: number;
-  
+
   // 성능 메트릭
   memoryUsage?: number;
   cpuUsage?: number;
   coldStart?: boolean;
-  
+
   // 비즈니스 컨텍스트
   entityId?: string;
   entityType?: string;
   businessProcess?: string;
-  
+
   // CloudWatch 최적화
   logGroup?: string;
   tags?: Record<string, string>;
   dimensions?: Record<string, string | number>;
-  
+
   [key: string]: unknown;
 }
 
@@ -107,7 +107,7 @@ class Logger {
   private formatLog(level: LogLevel, message: string, context?: LogContext): string {
     // 상관 ID 컨텍스트 자동 병합
     const correlationContext = correlationId.getLoggingContext();
-    
+
     // 성능 정보 추가
     const memoryUsage = process.memoryUsage();
     const performanceInfo = {
@@ -123,16 +123,16 @@ class Logger {
       '@service': this.serviceName,
       '@environment': this.environment,
       '@version': this.version,
-      
+
       // 상관 ID 및 추적 정보 (CloudWatch 검색 최적화)
       ...correlationContext,
-      
+
       // 성능 정보
       performance: performanceInfo,
-      
+
       // 사용자 제공 컨텍스트
       ...context,
-      
+
       // CloudWatch Insights 최적화 태그
       tags: {
         service: this.serviceName,
@@ -158,50 +158,75 @@ class Logger {
     const name = error.name.toLowerCase();
 
     // 네트워크 에러
-    if (name.includes('network') || message.includes('network') || 
-        message.includes('connection') || message.includes('timeout')) {
+    if (
+      name.includes('network') ||
+      message.includes('network') ||
+      message.includes('connection') ||
+      message.includes('timeout')
+    ) {
       category = 'network';
       severity = 'high';
       recoverable = true;
     }
     // 데이터베이스 에러
-    else if (name.includes('db') || name.includes('database') || 
-             message.includes('database') || message.includes('query')) {
+    else if (
+      name.includes('db') ||
+      name.includes('database') ||
+      message.includes('database') ||
+      message.includes('query')
+    ) {
       category = 'database';
       severity = 'high';
       recoverable = false;
     }
     // 인증/인가 에러
-    else if (name.includes('auth') || name.includes('unauthorized') || 
-             message.includes('unauthorized') || message.includes('forbidden')) {
+    else if (
+      name.includes('auth') ||
+      name.includes('unauthorized') ||
+      message.includes('unauthorized') ||
+      message.includes('forbidden')
+    ) {
       category = 'authentication';
       severity = 'medium';
       recoverable = false;
     }
     // 검증 에러
-    else if (name.includes('validation') || message.includes('invalid') || 
-             message.includes('validation') || message.includes('required')) {
+    else if (
+      name.includes('validation') ||
+      message.includes('invalid') ||
+      message.includes('validation') ||
+      message.includes('required')
+    ) {
       category = 'validation';
       severity = 'low';
       recoverable = false;
     }
     // 타임아웃 에러
-    else if (name.includes('timeout') || message.includes('timeout') || 
-             message.includes('timed out')) {
+    else if (
+      name.includes('timeout') ||
+      message.includes('timeout') ||
+      message.includes('timed out')
+    ) {
       category = 'timeout';
       severity = 'medium';
       recoverable = true;
     }
     // 시스템 에러
-    else if (name.includes('system') || name.includes('internal') || 
-             message.includes('internal server error')) {
+    else if (
+      name.includes('system') ||
+      name.includes('internal') ||
+      message.includes('internal server error')
+    ) {
       category = 'system';
       severity = 'critical';
       recoverable = false;
     }
     // 설정 에러
-    else if (name.includes('config') || message.includes('configuration') || 
-             message.includes('environment')) {
+    else if (
+      name.includes('config') ||
+      message.includes('configuration') ||
+      message.includes('environment')
+    ) {
       category = 'configuration';
       severity = 'high';
       recoverable = false;
@@ -215,7 +240,9 @@ class Logger {
       category,
       severity,
       recoverable,
-      cause: (error as { cause?: Error }).cause ? this.analyzeError((error as { cause?: Error }).cause) : undefined,
+      cause: (error as { cause?: Error }).cause
+        ? this.analyzeError((error as { cause?: Error }).cause)
+        : undefined,
     };
   }
 
@@ -240,10 +267,10 @@ class Logger {
   error(message: string, error?: Error, context?: LogContext): void {
     if (this.shouldLog('error')) {
       let errorInfo: ErrorInfo | undefined;
-      
+
       if (error) {
         errorInfo = this.analyzeError(error);
-        
+
         // 메트릭 기록
         metrics.recordError(
           errorInfo.category,
@@ -269,9 +296,9 @@ class Logger {
           error: errorInfo,
         }),
       };
-      
+
       console.error(this.formatLog('error', message, errorContext));
-      
+
       // 심각한 에러는 별도 알림 (추후 확장)
       if (errorInfo?.severity === 'critical') {
         this.handleCriticalError(message, errorInfo, context);
@@ -329,7 +356,7 @@ class Logger {
   ): void {
     const level: LogLevel = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
     const icon = statusCode >= 500 ? '🔴' : statusCode >= 400 ? '🟡' : '🟢';
-    
+
     this[level](`${icon} ${method} ${path} - ${statusCode} (${duration}ms)`, {
       ...context,
       type: 'response',
@@ -363,7 +390,7 @@ class Logger {
   ): void {
     const level: LogLevel = duration > 1000 ? 'warn' : 'info';
     const icon = duration > 1000 ? '⚠️' : '📊';
-    
+
     this[level](`${icon} DB ${operation.toUpperCase()} ${table} (${duration}ms)`, {
       ...context,
       type: 'database',
@@ -427,7 +454,7 @@ class Logger {
   ): void {
     const level: LogLevel = success ? 'info' : 'error';
     const icon = success ? '🌐' : '🔴';
-    
+
     this[level](`${icon} External ${service}.${operation} (${duration}ms)`, {
       ...context,
       type: 'external_call',
@@ -453,14 +480,11 @@ class Logger {
   /**
    * 보안 이벤트 로깅
    */
-  logSecurityEvent(
-    event: string,
-    severity: ErrorSeverity,
-    context?: LogContext
-  ): void {
-    const level: LogLevel = severity === 'critical' ? 'error' : severity === 'high' ? 'warn' : 'info';
+  logSecurityEvent(event: string, severity: ErrorSeverity, context?: LogContext): void {
+    const level: LogLevel =
+      severity === 'critical' ? 'error' : severity === 'high' ? 'warn' : 'info';
     const icon = severity === 'critical' ? '🚨' : severity === 'high' ? '⚠️' : '🔒';
-    
+
     this[level](`${icon} SECURITY: ${event}`, {
       ...context,
       type: 'security',
@@ -476,7 +500,12 @@ class Logger {
 
     // 보안 메트릭 기록
     metrics.recordSecurityEvent(
-      event as 'login_attempt' | 'authentication_failure' | 'authorization_failure' | 'suspicious_activity' | 'data_access_violation', 
+      event as
+        | 'login_attempt'
+        | 'authentication_failure'
+        | 'authorization_failure'
+        | 'suspicious_activity'
+        | 'data_access_violation',
       {
         threatLevel: severity,
         tags: context?.tags,
@@ -519,7 +548,7 @@ class Logger {
       },
       endWithError: (error: Error, context?: LogContext) => {
         const duration = Date.now() - startTime;
-        
+
         this.error(`❌ ${operation} failed after ${duration}ms`, error, {
           ...context,
           operation,

@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Priority } from "types/index";
+import type { Priority } from "@vive/types";
 import { useTodoForm } from "../hooks/use-todo";
 import { useSafeInput, logSecurityWarning } from "../utils/client-security";
 

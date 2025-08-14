@@ -61,10 +61,10 @@ export interface MonitoringStats {
  * 모니터링 시스템을 React 애플리케이션에 통합하는 훅
  */
 export function useMonitoring(config?: MonitoringConfig) {
-  const configRef = useRef<MonitoringConfig>();
-  const performanceMonitorRef = useRef<PerformanceMonitor>();
-  const errorReporterRef = useRef<ErrorReporter>();
-  const analyticsServiceRef = useRef<AnalyticsService>();
+  const configRef = useRef<MonitoringConfig | null>(null);
+  const performanceMonitorRef = useRef<PerformanceMonitor | null>(null);
+  const errorReporterRef = useRef<ErrorReporter | null>(null);
+  const analyticsServiceRef = useRef<AnalyticsService | null>(null);
   const isInitializedRef = useRef(false);
 
   // 기본 설정
@@ -189,7 +189,7 @@ export function useMonitoring(config?: MonitoringConfig) {
       debugLog("Analytics service enabled");
     }
 
-    configRef.current = mergedConfig;
+    configRef.current = mergedConfig as MonitoringConfig;
     isInitializedRef.current = true;
     debugLog("Monitoring initialization complete");
   }, [isEnabled, mergedConfig, debugLog]);
@@ -204,17 +204,17 @@ export function useMonitoring(config?: MonitoringConfig) {
 
     if (performanceMonitorRef.current) {
       performanceMonitorRef.current.destroy();
-      performanceMonitorRef.current = undefined;
+      performanceMonitorRef.current = null;
     }
 
     if (errorReporterRef.current) {
       errorReporterRef.current.destroy();
-      errorReporterRef.current = undefined;
+      errorReporterRef.current = null;
     }
 
     if (analyticsServiceRef.current) {
       analyticsServiceRef.current.destroy();
-      analyticsServiceRef.current = undefined;
+      analyticsServiceRef.current = null;
     }
 
     isInitializedRef.current = false;

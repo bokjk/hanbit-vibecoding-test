@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { Todo, Priority } from "types/index";
+import type { Todo, Priority } from "@vive/types";
 import { todoReducer } from "./todo.reducer";
 import type { TodoState, TodoAction } from "./todo.reducer";
 
@@ -13,6 +13,13 @@ describe("todoReducer", () => {
     },
     loading: false,
     error: null,
+    syncStatus: "idle",
+    lastSyncAt: null,
+    pendingOperations: [],
+    connectionStatus: "online",
+    isOfflineMode: false,
+    conflictedTodos: [],
+    syncErrors: [],
   };
 
   const mockTodo: Todo = {

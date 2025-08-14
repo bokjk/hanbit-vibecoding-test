@@ -145,6 +145,7 @@ GitHub Actions에서 자동으로 실행됩니다:
 ### 새로운 API 엔드포인트 추가
 
 1. **OpenAPI 스키마에 엔드포인트 정의**:
+
    ```yaml
    /new-endpoint:
      post:
@@ -156,6 +157,7 @@ GitHub Actions에서 자동으로 실행됩니다:
    ```
 
 2. **Contract 테스트 작성**:
+
    ```typescript
    describe('POST /new-endpoint', () => {
      it('✅ 유효한 요청으로 성공해야 함', async () => {

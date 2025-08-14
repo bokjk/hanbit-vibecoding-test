@@ -2,7 +2,7 @@
  * Error Boundary 데모 및 테스트 컴포넌트
  * 개발 환경에서 Error Boundary의 동작을 테스트할 수 있습니다.
  */
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@vive/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@vive/ui";
 import {

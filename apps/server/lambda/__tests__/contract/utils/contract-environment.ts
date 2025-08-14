@@ -26,10 +26,10 @@ export class ContractTestEnvironment {
       const schemaPath = path.resolve(__dirname, '../../../openapi/api-schema.yaml');
       const schemaContent = await fs.readFile(schemaPath, 'utf-8');
       const parsedSpec = yaml.parse(schemaContent) as OpenAPIV3.Document;
-      
+
       // 스키마 검증
-      this.openApiSpec = await SwaggerParser.validate(parsedSpec) as OpenAPIV3.Document;
-      
+      this.openApiSpec = (await SwaggerParser.validate(parsedSpec)) as OpenAPIV3.Document;
+
       // OpenAPI Backend 초기화
       this.openApiBackend = new OpenAPIBackend({
         definition: this.openApiSpec,
@@ -45,7 +45,7 @@ export class ContractTestEnvironment {
       });
 
       await this.openApiBackend.init();
-      
+
       logger.info('✅ OpenAPI 스키마 로드 및 검증 완료');
     } catch (error) {
       logger.error('❌ OpenAPI 스키마 초기화 실패', error as Error);
@@ -84,7 +84,7 @@ export class ContractTestEnvironment {
         this.mockServerScope.persist(false);
         nock.cleanAll();
       }
-      
+
       logger.info('✅ Mock 서버 정리 완료');
     } catch (error) {
       logger.error('❌ Mock 서버 정리 실패', error as Error);
@@ -117,11 +117,15 @@ export class ContractTestEnvironment {
   /**
    * 요청 스키마 검증
    */
-  validateRequest(method: string, path: string, requestData: {
-    body?: unknown;
-    query?: Record<string, string>;
-    headers?: Record<string, string>;
-  }): boolean {
+  validateRequest(
+    method: string,
+    path: string,
+    requestData: {
+      body?: unknown;
+      query?: Record<string, string>;
+      headers?: Record<string, string>;
+    }
+  ): boolean {
     if (!this.openApiBackend) {
       throw new Error('OpenAPI Backend가 초기화되지 않았습니다');
     }
@@ -143,7 +147,7 @@ export class ContractTestEnvironment {
       logger.error('요청 스키마 검증 실패', error as Error, {
         method,
         path,
-        requestData
+        requestData,
       });
       return false;
     }
@@ -152,20 +156,22 @@ export class ContractTestEnvironment {
   /**
    * 응답 스키마 검증
    */
-  validateResponse(method: string, path: string, statusCode: number, responseData: unknown): boolean {
+  validateResponse(
+    method: string,
+    path: string,
+    statusCode: number,
+    responseData: unknown
+  ): boolean {
     if (!this.openApiBackend) {
       throw new Error('OpenAPI Backend가 초기화되지 않았습니다');
     }
 
     try {
-      const result = this.openApiBackend.validateResponse(
-        responseData,
-        {
-          method: method.toLowerCase(),
-          path,
-          status: statusCode,
-        }
-      );
+      const result = this.openApiBackend.validateResponse(responseData, {
+        method: method.toLowerCase(),
+        path,
+        status: statusCode,
+      });
 
       return result.valid;
     } catch (error) {
@@ -173,7 +179,7 @@ export class ContractTestEnvironment {
         method,
         path,
         statusCode,
-        responseData
+        responseData,
       });
       return false;
     }
@@ -189,7 +195,7 @@ export class ContractTestEnvironment {
 
     const methodLower = method.toLowerCase() as keyof OpenAPIV3.PathItemObject;
     const pathItem = this.openApiSpec.paths[path];
-    
+
     if (!pathItem || typeof pathItem !== 'object') {
       return null;
     }
@@ -207,7 +213,7 @@ export class ContractTestEnvironment {
       'Access-Control-Allow-Methods',
     ];
 
-    return requiredCorsHeaders.every(header => 
+    return requiredCorsHeaders.every(header =>
       Object.keys(headers).some(h => h.toLowerCase() === header.toLowerCase())
     );
   }
@@ -216,10 +222,7 @@ export class ContractTestEnvironment {
    * Rate Limiting 헤더 검증
    */
   validateRateLimitHeaders(headers: Record<string, string>): boolean {
-    const rateLimitHeaders = [
-      'X-Rate-Limit-Limit',
-      'X-Rate-Limit-Remaining',
-    ];
+    const rateLimitHeaders = ['X-Rate-Limit-Limit', 'X-Rate-Limit-Remaining'];
 
     // Rate Limit 헤더가 있으면 모두 있어야 함
     const hasAnyRateLimitHeader = rateLimitHeaders.some(header =>
@@ -244,9 +247,7 @@ export class ContractTestEnvironment {
     hasRateLimit: boolean;
   } {
     return {
-      hasContentType: Object.keys(headers).some(h => 
-        h.toLowerCase() === 'content-type'
-      ),
+      hasContentType: Object.keys(headers).some(h => h.toLowerCase() === 'content-type'),
       hasCors: this.validateCorsHeaders(headers),
       hasRateLimit: this.validateRateLimitHeaders(headers),
     };

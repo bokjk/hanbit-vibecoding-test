@@ -1,4 +1,4 @@
-import type { Todo, Priority, FilterType } from "types/index";
+import type { Todo, Priority, FilterType } from "@vive/types";
 import { AbstractStorageService } from "./abstract-storage.service";
 import { TodoAPIClient } from "../api/todo-api-client";
 import { APIError } from "../../errors/api-error";

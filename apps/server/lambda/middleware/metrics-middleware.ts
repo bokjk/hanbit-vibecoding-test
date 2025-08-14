@@ -4,11 +4,11 @@ import { getCloudWatchMetrics } from '../utils/cloudwatch-metrics';
 import { correlationId } from '../utils/correlation';
 
 // X-Ray 통합
-import { 
+import {
   generatePerformanceReport,
   resetPerformanceMetrics,
   addAnnotation,
-  addMetadata
+  addMetadata,
 } from '../utils/xray-tracer';
 import { getDynamoPerformanceReport } from '../utils/db-tracer';
 
@@ -48,24 +48,29 @@ export function withMetrics(
   return async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
     const startTime = Date.now();
     const cloudWatch = getCloudWatchMetrics();
-    
+
     // X-Ray 성능 메트릭 초기화
     if (options.enableXRayIntegration) {
       resetPerformanceMetrics();
-      
+
       // 미들웨어 어노테이션 추가
       addAnnotation('middleware_enabled', true);
       addAnnotation('operation', options.operation);
       addAnnotation('performance_tracking', options.collectPerformance || false);
       addAnnotation('user_activity_tracking', options.trackUserActivity || false);
     }
-    
+
     // Correlation ID 설정
-    const correlationIdValue = event.headers['x-correlation-id'] || event.headers['X-Correlation-Id'] || context.awsRequestId;
+    const correlationIdValue =
+      event.headers['x-correlation-id'] ||
+      event.headers['X-Correlation-Id'] ||
+      context.awsRequestId;
     correlationId.set({
       correlationId: correlationIdValue,
       requestId: context.awsRequestId,
-      userId: event.headers.authorization ? extractUserIdFromToken(event.headers.authorization) : undefined,
+      userId: event.headers.authorization
+        ? extractUserIdFromToken(event.headers.authorization)
+        : undefined,
     });
 
     // Cold start 감지
@@ -95,10 +100,9 @@ export function withMetrics(
       await recordSuccessMetrics(event, result, options, startTime, tags, isColdStart);
 
       return result;
-
     } catch (err) {
       error = err as Error;
-      
+
       // 에러 응답 생성
       result = createErrorResponse(error);
 
@@ -106,13 +110,12 @@ export function withMetrics(
       await recordErrorMetrics(event, error, options, startTime, tags);
 
       return result;
-
     } finally {
       // X-Ray 성능 리포트 생성 및 통합
       if (options.enableXRayIntegration) {
         await recordXRayPerformanceMetrics(options, startTime, error);
       }
-      
+
       // 공통 메트릭 기록
       if (result) {
         await recordFinalMetrics(event, result, options, startTime, tags, error);
@@ -144,22 +147,17 @@ async function recordRequestStartMetrics(
 
   // API 사용량 시작 메트릭
   metrics.recordApiUsage(endpoint, method, 0, 0, {
-    tags: { ...tags, status: 'started' }
+    tags: { ...tags, status: 'started' },
   });
 
   // CloudWatch 비즈니스 메트릭
   const cloudWatch = getCloudWatchMetrics();
-  await cloudWatch.recordBusinessMetric(
-    'RequestStarted',
-    1,
-    'Count',
-    {
-      Operation: options.operation,
-      Method: method,
-      Endpoint: endpoint,
-      ...tags
-    }
-  );
+  await cloudWatch.recordBusinessMetric('RequestStarted', 1, 'Count', {
+    Operation: options.operation,
+    Method: method,
+    Endpoint: endpoint,
+    ...tags,
+  });
 }
 
 /**
@@ -181,17 +179,17 @@ async function recordSuccessMetrics(
   metrics.recordApiUsage(endpoint, method, result.statusCode, responseTime, {
     requestSize: JSON.stringify(event.body).length,
     responseSize: result.body?.length || 0,
-    tags: { ...tags, success: 'true' }
+    tags: { ...tags, success: 'true' },
   });
 
   // 성능 메트릭
   if (options.collectPerformance !== false) {
     const memoryUsed = process.memoryUsage().heapUsed;
-    
+
     metrics.recordPerformance(options.operation, responseTime, {
       memoryUsed,
       coldStart: isColdStart,
-      tags
+      tags,
     });
 
     // CloudWatch 성능 메트릭
@@ -208,10 +206,10 @@ async function recordSuccessMetrics(
     const todoAction = extractTodoAction(options.operation, method);
     if (todoAction) {
       const userId = extractUserIdFromEvent(event);
-      
+
       metrics.recordTodoOperation(todoAction, responseTime, {
         success: true,
-        tags: { ...tags, statusCode: result.statusCode.toString() }
+        tags: { ...tags, statusCode: result.statusCode.toString() },
       });
 
       // CloudWatch TODO 메트릭
@@ -236,34 +234,25 @@ async function recordErrorMetrics(
   const method = event.httpMethod;
 
   // 에러 메트릭
-  metrics.recordError(
-    error.constructor.name,
-    error.message,
-    options.operation,
-    {
-      severity: getErrorSeverity(error),
-      recoverable: isRecoverableError(error),
-      tags: { ...tags, endpoint, method }
-    }
-  );
+  metrics.recordError(error.constructor.name, error.message, options.operation, {
+    severity: getErrorSeverity(error),
+    recoverable: isRecoverableError(error),
+    tags: { ...tags, endpoint, method },
+  });
 
   // CloudWatch 에러 메트릭
   const cloudWatch = getCloudWatchMetrics();
-  await cloudWatch.recordErrorMetric(
-    options.operation,
-    error.constructor.name,
-    error.message
-  );
+  await cloudWatch.recordErrorMetric(options.operation, error.constructor.name, error.message);
 
   // TODO 관련 작업 실패 메트릭
   if (isTodoOperation(options.operation)) {
     const todoAction = extractTodoAction(options.operation, method);
     if (todoAction) {
       const userId = extractUserIdFromEvent(event);
-      
+
       metrics.recordTodoOperation(todoAction, responseTime, {
         success: false,
-        tags: { ...tags, errorType: error.constructor.name }
+        tags: { ...tags, errorType: error.constructor.name },
       });
 
       // CloudWatch TODO 실패 메트릭
@@ -291,29 +280,24 @@ async function recordFinalMetrics(
   metrics.recordApiUsage(endpoint, method, result.statusCode, responseTime, {
     requestSize: event.body?.length || 0,
     responseSize: result.body?.length || 0,
-    tags: { 
-      ...tags, 
+    tags: {
+      ...tags,
       finalStatus: error ? 'error' : 'success',
-      statusCode: result.statusCode.toString()
-    }
+      statusCode: result.statusCode.toString(),
+    },
   });
 
   // CloudWatch 최종 메트릭
   const cloudWatch = getCloudWatchMetrics();
-  await cloudWatch.recordBusinessMetric(
-    'RequestCompleted',
-    1,
-    'Count',
-    {
-      Operation: options.operation,
-      Method: method,
-      Endpoint: endpoint,
-      StatusCode: result.statusCode.toString(),
-      Success: (!error).toString(),
-      ResponseTime: responseTime.toString(),
-      ...tags
-    }
-  );
+  await cloudWatch.recordBusinessMetric('RequestCompleted', 1, 'Count', {
+    Operation: options.operation,
+    Method: method,
+    Endpoint: endpoint,
+    StatusCode: result.statusCode.toString(),
+    Success: (!error).toString(),
+    ResponseTime: responseTime.toString(),
+    ...tags,
+  });
 }
 
 /**
@@ -326,14 +310,14 @@ async function recordXRayPerformanceMetrics(
 ): Promise<void> {
   try {
     const duration = Date.now() - startTime;
-    
+
     // X-Ray 성능 리포트 생성
     const xrayReport = generatePerformanceReport();
     const dbReport = getDynamoPerformanceReport();
-    
+
     // CloudWatch에 X-Ray 성능 메트릭 전송
     const cloudWatch = getCloudWatchMetrics();
-    
+
     // 전체 성능 메트릭
     await cloudWatch.recordCustomMetric(
       'XRay/Performance/TotalOperations',
@@ -341,10 +325,10 @@ async function recordXRayPerformanceMetrics(
       'Count',
       {
         Operation: options.operation,
-        HasError: (!!error).toString()
+        HasError: (!!error).toString(),
       }
     );
-    
+
     if (xrayReport.totalOperations > 0) {
       await cloudWatch.recordCustomMetric(
         'XRay/Performance/AverageDuration',
@@ -353,7 +337,7 @@ async function recordXRayPerformanceMetrics(
         { Operation: options.operation }
       );
     }
-    
+
     // 병목 메트릭
     if (xrayReport.bottlenecks.length > 0) {
       await cloudWatch.recordCustomMetric(
@@ -362,13 +346,16 @@ async function recordXRayPerformanceMetrics(
         'Count',
         { Operation: options.operation }
       );
-      
+
       // 서브시스템별 병목 메트릭
-      const bottlenecksBySubsystem = xrayReport.bottlenecks.reduce((acc, bottleneck) => {
-        acc[bottleneck.subsystem] = (acc[bottleneck.subsystem] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      
+      const bottlenecksBySubsystem = xrayReport.bottlenecks.reduce(
+        (acc, bottleneck) => {
+          acc[bottleneck.subsystem] = (acc[bottleneck.subsystem] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
+
       for (const [subsystem, count] of Object.entries(bottlenecksBySubsystem)) {
         await cloudWatch.recordCustomMetric(
           'XRay/Performance/BottleneckBySubsystem',
@@ -376,12 +363,12 @@ async function recordXRayPerformanceMetrics(
           'Count',
           {
             Operation: options.operation,
-            Subsystem: subsystem
+            Subsystem: subsystem,
           }
         );
       }
     }
-    
+
     // 데이터베이스 성능 메트릭
     if (dbReport && dbReport.queryCount > 0) {
       await cloudWatch.recordCustomMetric(
@@ -390,7 +377,7 @@ async function recordXRayPerformanceMetrics(
         'Count',
         { Operation: options.operation }
       );
-      
+
       if (dbReport.avgEfficiency !== 'N/A') {
         await cloudWatch.recordCustomMetric(
           'XRay/Database/QueryEfficiency',
@@ -399,7 +386,7 @@ async function recordXRayPerformanceMetrics(
           { Operation: options.operation }
         );
       }
-      
+
       // 핫 파티션 감지
       if (dbReport.hotPartitions.length > 0) {
         await cloudWatch.recordCustomMetric(
@@ -409,7 +396,7 @@ async function recordXRayPerformanceMetrics(
           { Operation: options.operation }
         );
       }
-      
+
       // 스로틀링 감지
       const throttleCount = Object.keys(dbReport.throttleStats).length;
       if (throttleCount > 0) {
@@ -421,26 +408,22 @@ async function recordXRayPerformanceMetrics(
         );
       }
     }
-    
+
     // X-Ray 메타데이터 추가
     addMetadata('performance_summary', {
       middlewareDuration: duration,
       xrayReport,
       dbReport,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
   } catch (xrayError) {
     console.warn('Failed to record X-Ray performance metrics:', xrayError);
-    
+
     // X-Ray 메트릭 수집 실패 메트릭
     const cloudWatch = getCloudWatchMetrics();
-    await cloudWatch.recordCustomMetric(
-      'XRay/Errors/MetricCollectionFailed',
-      1,
-      'Count',
-      { Operation: options.operation }
-    );
+    await cloudWatch.recordCustomMetric('XRay/Errors/MetricCollectionFailed', 1, 'Count', {
+      Operation: options.operation,
+    });
   }
 }
 
@@ -464,17 +447,13 @@ async function recordUserActivityMetrics(
     deviceType,
     tags: {
       operation: options.operation,
-      statusCode: result.statusCode.toString()
-    }
+      statusCode: result.statusCode.toString(),
+    },
   });
 
   // CloudWatch 사용자 활동
   const cloudWatch = getCloudWatchMetrics();
-  await cloudWatch.recordUserActivityMetric(
-    userId,
-    'api_call',
-    1
-  );
+  await cloudWatch.recordUserActivityMetric(userId, 'api_call', 1);
 }
 
 /**
@@ -493,68 +472,76 @@ function extractUserIdFromToken(authorization: string): string | undefined {
 }
 
 function extractUserIdFromEvent(event: APIGatewayProxyEvent): string | undefined {
-  return event.requestContext?.authorizer?.principalId || 
-         event.headers.authorization ? extractUserIdFromToken(event.headers.authorization) : undefined;
+  return event.requestContext?.authorizer?.principalId || event.headers.authorization
+    ? extractUserIdFromToken(event.headers.authorization)
+    : undefined;
 }
 
 function isTodoOperation(operation: string): boolean {
   return operation.toLowerCase().includes('todo');
 }
 
-function extractTodoAction(operation: string, method: string): 'create' | 'read' | 'update' | 'delete' | undefined {
+function extractTodoAction(
+  operation: string,
+  method: string
+): 'create' | 'read' | 'update' | 'delete' | undefined {
   const op = operation.toLowerCase();
-  
+
   if (op.includes('create') || method === 'POST') return 'create';
   if (op.includes('read') || op.includes('get') || method === 'GET') return 'read';
   if (op.includes('update') || method === 'PUT' || method === 'PATCH') return 'update';
   if (op.includes('delete') || method === 'DELETE') return 'delete';
-  
+
   return undefined;
 }
 
 function getErrorSeverity(error: Error): 'low' | 'medium' | 'high' | 'critical' {
   const errorName = error.constructor.name.toLowerCase();
-  
+
   if (errorName.includes('validation') || errorName.includes('bad request')) return 'low';
   if (errorName.includes('unauthorized') || errorName.includes('forbidden')) return 'medium';
   if (errorName.includes('server') || errorName.includes('database')) return 'high';
   if (errorName.includes('timeout') || errorName.includes('critical')) return 'critical';
-  
+
   return 'medium';
 }
 
 function isRecoverableError(error: Error): boolean {
   const errorName = error.constructor.name.toLowerCase();
-  
+
   // 복구 불가능한 에러들
-  if (errorName.includes('syntax') || errorName.includes('type') || errorName.includes('reference')) {
+  if (
+    errorName.includes('syntax') ||
+    errorName.includes('type') ||
+    errorName.includes('reference')
+  ) {
     return false;
   }
-  
+
   // 대부분의 에러는 복구 가능
   return true;
 }
 
 function detectDeviceType(userAgent?: string): 'mobile' | 'tablet' | 'desktop' {
   if (!userAgent) return 'desktop';
-  
+
   const ua = userAgent.toLowerCase();
-  
+
   if (ua.includes('mobile') || ua.includes('iphone') || ua.includes('android')) {
     return 'mobile';
   }
-  
+
   if (ua.includes('tablet') || ua.includes('ipad')) {
     return 'tablet';
   }
-  
+
   return 'desktop';
 }
 
 function createErrorResponse(error: Error): APIGatewayProxyResult {
   const errorName = error.constructor.name;
   let statusCode = 500;
-  
+
   // 에러 타입에 따른 적절한 상태 코드
   if (errorName.includes('Validation') || errorName.includes('BadRequest')) statusCode = 400;
   else if (errorName.includes('Unauthorized')) statusCode = 401;
@@ -562,18 +549,18 @@ function createErrorResponse(error: Error): APIGatewayProxyResult {
   else if (errorName.includes('NotFound')) statusCode = 404;
   else if (errorName.includes('Conflict')) statusCode = 409;
   else if (errorName.includes('Timeout')) statusCode = 408;
-  
+
   return {
     statusCode,
     headers: {
       'Content-Type': 'application/json',
       'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY'
+      'X-Frame-Options': 'DENY',
     },
     body: JSON.stringify({
       error: errorName,
       message: error.message,
-      timestamp: new Date().toISOString()
-    })
+      timestamp: new Date().toISOString(),
+    }),
   };
 }

@@ -1,16 +1,19 @@
 # 의사소통 규칙
 
-> **참조 설계 문서**: 
+> **참조 설계 문서**:
+>
 > - [데이터 모델 설계](../docs/design/03-data-models.md) - 변수명, 인터페이스명 명명 규칙
 
 ## 🇰🇷 언어 사용 원칙
 
 ### 기본 원칙
+
 - **모든 응답과 커뮤니케이션은 반드시 한국어로 제공하세요**
 - 기술적 결정에 대한 명확한 설명을 제공하세요
 - 사용자와의 모든 대화는 한국어로 진행하세요
 
 ### 코드 작성 시 명명 규칙
+
 - **변수/함수명은 영어로 작성하되 설명적으로 명명하세요**
 - **컴포넌트명, 인터페이스명은 영어로 작성하세요**
 - 주석과 문서는 한국어로 작성하세요
@@ -19,8 +22,8 @@
 // ✅ 올바른 예시
 interface TodoItem {
   id: string;
-  title: string;  // 할일 제목
-  completed: boolean;  // 완료 여부
+  title: string; // 할일 제목
+  completed: boolean; // 완료 여부
 }
 
 function createTodoItem(title: string): TodoItem {
@@ -28,7 +31,7 @@ function createTodoItem(title: string): TodoItem {
   return {
     id: generateId(),
     title,
-    completed: false
+    completed: false,
   };
 }
 ```
@@ -36,6 +39,7 @@ function createTodoItem(title: string): TodoItem {
 ## 📝 문서 작성 규칙
 
 ### 커밋 메시지
+
 **한국어로 작성하고 Conventional Commits 규칙을 따르세요:**
 
 ```bash
@@ -46,6 +50,7 @@ test: 할일 생성 함수 테스트 케이스 추가
 ```
 
 ### JSDoc 주석
+
 ```typescript
 /**
  * 할일 아이템을 생성하는 함수
@@ -59,6 +64,7 @@ function createTodo(title: string, priority?: Priority): TodoItem {
 ```
 
 ### README 및 문서
+
 - 사용자 가이드는 한국어로 작성
 - 기술 문서는 한국어로 작성하되 코드 예시는 영어 명명 유지
 - API 문서는 한국어 설명과 영어 파라미터명 병행
@@ -66,11 +72,13 @@ function createTodo(title: string, priority?: Priority): TodoItem {
 ## 🔧 기술 용어 처리
 
 ### 유지해야 할 영어 용어
+
 - 라이브러리 이름: React, TypeScript, Vite, Tailwind CSS
 - 기술 용어: component, hook, state, props, reducer
 - 파일명과 폴더명: camelCase, kebab-case, PascalCase
 
 ### 한국어로 번역할 용어
+
 - 비즈니스 로직 설명
 - 사용자 인터페이스 텍스트
 - 에러 메시지 (사용자 대상)
@@ -79,24 +87,28 @@ function createTodo(title: string, priority?: Priority): TodoItem {
 ## 💬 대화 스타일
 
 ### 응답 방식
+
 - 정중하고 전문적인 톤 유지
 - 복잡한 기술 개념을 쉽게 설명
 - 구체적인 예시와 코드 샘플 제공
 - 질문에 대한 명확하고 완전한 답변
 
 ### 설명 구조
+
 1. **요약**: 핵심 내용을 간단히 설명
 2. **상세 설명**: 기술적 배경과 이유 제시
 3. **예시**: 실제 코드나 사용 사례 제공
 4. **주의사항**: 고려해야 할 점들 안내
 
 ## 🚨 절대 준수 사항
+
 - 🚨 **모든 커뮤니케이션은 반드시 한국어로**
 - 🚨 **기술 용어는 원문을 유지하되 설명은 한국어로**
 - 🚨 **사용자 대상 메시지는 100% 한국어로**
 - 🚨 **코드 주석과 문서는 한국어로 작성**
 
 ## 📋 체크리스트
+
 응답 전 반드시 확인하세요:
 
 - [ ] 모든 설명이 한국어로 작성되었나?

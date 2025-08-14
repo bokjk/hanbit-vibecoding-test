@@ -3,7 +3,7 @@
  * 개발 환경에서 모니터링 기능을 테스트하고 확인할 수 있는 데모를 제공합니다.
  */
 
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@vive/ui";
 import { Button } from "@vive/ui";
 import useMonitoring from "../hooks/use-monitoring";

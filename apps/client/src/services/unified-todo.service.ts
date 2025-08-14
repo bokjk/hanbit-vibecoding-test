@@ -1,4 +1,4 @@
-import type { Todo, Priority, FilterType, TodoStats } from "types/index";
+import type { Todo, Priority, FilterType, TodoStats } from "@vive/types";
 import { AbstractStorageService } from "./storage/abstract-storage.service";
 import { LocalStorageService } from "./localStorage.service";
 import { APIStorageService } from "./storage/api-storage.service";
@@ -10,11 +10,13 @@ import { APIError } from "../errors/api-error";
 /**
  * 스토리지 모드 열거형
  */
-export enum StorageMode {
-  LOCAL_STORAGE = "localStorage",
-  API = "api",
-  HYBRID = "hybrid", // 향후 확장을 위한 예약
-}
+export const StorageMode = {
+  LOCAL_STORAGE: "localStorage",
+  API: "api",
+  HYBRID: "hybrid", // 향후 확장을 위한 예약
+} as const;
+
+export type StorageMode = (typeof StorageMode)[keyof typeof StorageMode];
 
 /**
  * 통합 TODO 서비스
@@ -197,6 +199,7 @@ export class UnifiedTodoService {
         total: 0,
         active: 0,
         completed: 0,
+        completionRate: 0,
         byPriority: { high: 0, medium: 0, low: 0 },
       });
     }

@@ -9,7 +9,7 @@ graph TB
     E2E[E2E Tests<br/>5%<br/>End-to-End 시나리오]
     INT[Integration Tests<br/>15%<br/>컴포넌트 통합]
     UNIT[Unit Tests<br/>80%<br/>개별 함수/컴포넌트]
-    
+
     E2E --> INT
     INT --> UNIT
 ```
@@ -17,12 +17,14 @@ graph TB
 ### 10.1.2 단계별 테스트 전략
 
 **1단계 (MVP - localStorage 기반)**
+
 - Unit Tests: 비즈니스 로직, 유틸리티 함수
 - Component Tests: React 컴포넌트
 - Integration Tests: Context + Reducer + localStorage
 - E2E Tests: 주요 사용자 플로우
 
 **2단계 (API 통합)**
+
 - API Tests: 백엔드 API 엔드포인트
 - Contract Tests: API 계약 검증
 - Performance Tests: 로드 테스트
@@ -34,11 +36,11 @@ graph TB
 
 ```typescript
 // apps/server/src/services/__tests__/todo.service.test.ts
-import { TodoService } from '../todo.service';
-import { DynamoTodoRepository } from '../repositories/dynamo-todo.repository';
-import { Logger } from '../utils/logger';
+import { TodoService } from "../todo.service";
+import { DynamoTodoRepository } from "../repositories/dynamo-todo.repository";
+import { Logger } from "../utils/logger";
 
-describe('TodoService', () => {
+describe("TodoService", () => {
   let todoService: TodoService;
   let mockRepository: jest.Mocked<DynamoTodoRepository>;
   let mockLogger: jest.Mocked<Logger>;
@@ -62,22 +64,22 @@ describe('TodoService', () => {
     todoService = new TodoService(mockRepository, mockLogger);
   });
 
-  describe('createTodo', () => {
-    it('should create a new todo with valid data', async () => {
+  describe("createTodo", () => {
+    it("should create a new todo with valid data", async () => {
       // Given
-      const userId = 'user-123';
+      const userId = "user-123";
       const todoData = {
-        title: 'Test Todo',
-        priority: 'high' as Priority,
+        title: "Test Todo",
+        priority: "high" as Priority,
       };
       const expectedTodo: Todo = {
-        id: 'todo-123',
+        id: "todo-123",
         ...todoData,
         completed: false,
         userId,
         isGuest: false,
-        createdAt: '2024-01-15T10:00:00Z',
-        updatedAt: '2024-01-15T10:00:00Z',
+        createdAt: "2024-01-15T10:00:00Z",
+        updatedAt: "2024-01-15T10:00:00Z",
       };
 
       mockRepository.create.mockResolvedValue(expectedTodo);
@@ -95,18 +97,18 @@ describe('TodoService', () => {
         ...todoData,
         userId,
       });
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Todo created',
-        { todoId: expectedTodo.id, userId }
-      );
+      expect(mockLogger.info).toHaveBeenCalledWith("Todo created", {
+        todoId: expectedTodo.id,
+        userId,
+      });
     });
 
-    it('should throw error when user exceeds quota', async () => {
+    it("should throw error when user exceeds quota", async () => {
       // Given
-      const userId = 'guest-session-123';
+      const userId = "guest-session-123";
       const todoData = {
-        title: 'Test Todo',
-        priority: 'high' as Priority,
+        title: "Test Todo",
+        priority: "high" as Priority,
       };
 
       mockRepository.getUserQuota.mockResolvedValue({
@@ -115,50 +117,50 @@ describe('TodoService', () => {
       });
 
       // When & Then
-      await expect(
-        todoService.createTodo(userId, todoData)
-      ).rejects.toThrow('Maximum todo limit reached');
+      await expect(todoService.createTodo(userId, todoData)).rejects.toThrow(
+        "Maximum todo limit reached",
+      );
 
       expect(mockRepository.create).not.toHaveBeenCalled();
     });
 
-    it('should handle repository errors gracefully', async () => {
+    it("should handle repository errors gracefully", async () => {
       // Given
-      const userId = 'user-123';
+      const userId = "user-123";
       const todoData = {
-        title: 'Test Todo',
-        priority: 'high' as Priority,
+        title: "Test Todo",
+        priority: "high" as Priority,
       };
 
       mockRepository.getUserQuota.mockResolvedValue({
         currentCount: 5,
         maxItems: 1000,
       });
-      mockRepository.create.mockRejectedValue(new Error('Database error'));
+      mockRepository.create.mockRejectedValue(new Error("Database error"));
 
       // When & Then
-      await expect(
-        todoService.createTodo(userId, todoData)
-      ).rejects.toThrow('Database error');
+      await expect(todoService.createTodo(userId, todoData)).rejects.toThrow(
+        "Database error",
+      );
 
       expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
-  describe('toggleTodo', () => {
-    it('should toggle todo completion status', async () => {
+  describe("toggleTodo", () => {
+    it("should toggle todo completion status", async () => {
       // Given
-      const userId = 'user-123';
-      const todoId = 'todo-123';
+      const userId = "user-123";
+      const todoId = "todo-123";
       const existingTodo: Todo = {
         id: todoId,
-        title: 'Test Todo',
-        priority: 'medium',
+        title: "Test Todo",
+        priority: "medium",
         completed: false,
         userId,
         isGuest: false,
-        createdAt: '2024-01-15T10:00:00Z',
-        updatedAt: '2024-01-15T10:00:00Z',
+        createdAt: "2024-01-15T10:00:00Z",
+        updatedAt: "2024-01-15T10:00:00Z",
       };
       const updatedTodo = { ...existingTodo, completed: true };
 
@@ -170,24 +172,22 @@ describe('TodoService', () => {
 
       // Then
       expect(result).toEqual(updatedTodo);
-      expect(mockRepository.update).toHaveBeenCalledWith(
-        userId,
-        todoId,
-        { completed: true }
-      );
+      expect(mockRepository.update).toHaveBeenCalledWith(userId, todoId, {
+        completed: true,
+      });
     });
 
-    it('should throw error when todo not found', async () => {
+    it("should throw error when todo not found", async () => {
       // Given
-      const userId = 'user-123';
-      const todoId = 'non-existent';
+      const userId = "user-123";
+      const todoId = "non-existent";
 
       mockRepository.findById.mockResolvedValue(null);
 
       // When & Then
-      await expect(
-        todoService.toggleTodo(userId, todoId)
-      ).rejects.toThrow('Todo not found');
+      await expect(todoService.toggleTodo(userId, todoId)).rejects.toThrow(
+        "Todo not found",
+      );
     });
   });
 });
@@ -245,7 +245,7 @@ describe('useTodos', () => {
   it('should toggle todo completion', async () => {
     // Given
     const { result } = renderHook(() => useTodos(), { wrapper });
-    
+
     await act(async () => {
       result.current.addTodo('Test Todo', 'medium');
     });
@@ -264,14 +264,14 @@ describe('useTodos', () => {
   it('should filter todos correctly', async () => {
     // Given
     const { result } = renderHook(() => useTodos(), { wrapper });
-    
+
     await act(async () => {
       result.current.addTodo('Todo 1', 'high');
       result.current.addTodo('Todo 2', 'medium');
     });
 
     const todoId = result.current.todos[0].id;
-    
+
     await act(async () => {
       result.current.toggleTodo(todoId);
     });
@@ -486,13 +486,13 @@ describe('TodoItem', () => {
 
 ```typescript
 // apps/server/src/__tests__/integration/todos.integration.test.ts
-import { APIGatewayProxyEvent, Context } from 'aws-lambda';
-import { handler as getTodosHandler } from '../../handlers/get-todos';
-import { handler as createTodoHandler } from '../../handlers/create-todo';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { TestContainer } from '../utils/test-container';
+import { APIGatewayProxyEvent, Context } from "aws-lambda";
+import { handler as getTodosHandler } from "../../handlers/get-todos";
+import { handler as createTodoHandler } from "../../handlers/create-todo";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { TestContainer } from "../utils/test-container";
 
-describe('Todos API Integration', () => {
+describe("Todos API Integration", () => {
   let testContainer: TestContainer;
   let dynamoClient: DynamoDBClient;
 
@@ -510,12 +510,12 @@ describe('Todos API Integration', () => {
     await testContainer.clearTables();
   });
 
-  describe('GET /todos', () => {
-    it('should return empty array for new user', async () => {
+  describe("GET /todos", () => {
+    it("should return empty array for new user", async () => {
       // Given
-      const event = createAPIGatewayEvent('GET', '/todos', null, {
-        userId: 'user-123',
-        userType: 'authenticated',
+      const event = createAPIGatewayEvent("GET", "/todos", null, {
+        userId: "user-123",
+        userType: "authenticated",
       });
 
       // When
@@ -528,14 +528,14 @@ describe('Todos API Integration', () => {
       expect(body.data.todos).toEqual([]);
     });
 
-    it('should return user todos with pagination', async () => {
+    it("should return user todos with pagination", async () => {
       // Given
-      const userId = 'user-123';
+      const userId = "user-123";
       await createTestTodos(dynamoClient, userId, 25);
 
-      const event = createAPIGatewayEvent('GET', '/todos?limit=10', null, {
+      const event = createAPIGatewayEvent("GET", "/todos?limit=10", null, {
         userId,
-        userType: 'authenticated',
+        userType: "authenticated",
       });
 
       // When
@@ -551,16 +551,16 @@ describe('Todos API Integration', () => {
     });
   });
 
-  describe('POST /todos', () => {
-    it('should create a new todo', async () => {
+  describe("POST /todos", () => {
+    it("should create a new todo", async () => {
       // Given
       const todoData = {
-        title: 'Integration Test Todo',
-        priority: 'high',
+        title: "Integration Test Todo",
+        priority: "high",
       };
-      const event = createAPIGatewayEvent('POST', '/todos', todoData, {
-        userId: 'user-123',
-        userType: 'authenticated',
+      const event = createAPIGatewayEvent("POST", "/todos", todoData, {
+        userId: "user-123",
+        userType: "authenticated",
       });
 
       // When
@@ -571,22 +571,22 @@ describe('Todos API Integration', () => {
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
       expect(body.data.todo).toMatchObject({
-        title: 'Integration Test Todo',
-        priority: 'high',
+        title: "Integration Test Todo",
+        priority: "high",
         completed: false,
       });
       expect(body.data.todo.id).toBeDefined();
     });
 
-    it('should reject invalid todo data', async () => {
+    it("should reject invalid todo data", async () => {
       // Given
       const invalidData = {
-        title: '', // Empty title should be rejected
-        priority: 'invalid-priority',
+        title: "", // Empty title should be rejected
+        priority: "invalid-priority",
       };
-      const event = createAPIGatewayEvent('POST', '/todos', invalidData, {
-        userId: 'user-123',
-        userType: 'authenticated',
+      const event = createAPIGatewayEvent("POST", "/todos", invalidData, {
+        userId: "user-123",
+        userType: "authenticated",
       });
 
       // When
@@ -596,21 +596,21 @@ describe('Todos API Integration', () => {
       expect(response.statusCode).toBe(400);
       const body = JSON.parse(response.body);
       expect(body.success).toBe(false);
-      expect(body.error.code).toBe('VALIDATION_ERROR');
+      expect(body.error.code).toBe("VALIDATION_ERROR");
     });
 
-    it('should enforce guest user quota', async () => {
+    it("should enforce guest user quota", async () => {
       // Given
-      const guestUserId = 'guest-session-123';
+      const guestUserId = "guest-session-123";
       await createTestTodos(dynamoClient, guestUserId, 10); // Max guest todos
 
       const todoData = {
-        title: 'Quota Exceeded Todo',
-        priority: 'medium',
+        title: "Quota Exceeded Todo",
+        priority: "medium",
       };
-      const event = createAPIGatewayEvent('POST', '/todos', todoData, {
+      const event = createAPIGatewayEvent("POST", "/todos", todoData, {
         userId: guestUserId,
-        userType: 'guest',
+        userType: "guest",
         permissions: JSON.stringify({ maxItems: 10 }),
       });
 
@@ -621,7 +621,7 @@ describe('Todos API Integration', () => {
       expect(response.statusCode).toBe(403);
       const body = JSON.parse(response.body);
       expect(body.success).toBe(false);
-      expect(body.error.code).toBe('QUOTA_EXCEEDED');
+      expect(body.error.code).toBe("QUOTA_EXCEEDED");
     });
   });
 });
@@ -631,7 +631,7 @@ function createAPIGatewayEvent(
   httpMethod: string,
   path: string,
   body: any,
-  authorizer: any
+  authorizer: any,
 ): APIGatewayProxyEvent {
   return {
     httpMethod,
@@ -650,7 +650,7 @@ function createAPIGatewayEvent(
 async function createTestTodos(
   dynamoClient: DynamoDBClient,
   userId: string,
-  count: number
+  count: number,
 ): Promise<void> {
   // Implementation to create test todos in DynamoDB
 }
@@ -662,34 +662,42 @@ async function createTestTodos(
 
 ```typescript
 // apps/client/e2e/todo-flow.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Todo Application E2E', () => {
+test.describe("Todo Application E2E", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto("/");
     // Clear localStorage
     await page.evaluate(() => localStorage.clear());
   });
 
-  test('should complete full todo lifecycle', async ({ page }) => {
+  test("should complete full todo lifecycle", async ({ page }) => {
     // Add a new todo
-    await page.fill('[data-testid="todo-input"]', 'Buy groceries');
-    await page.selectOption('[data-testid="priority-select"]', 'high');
+    await page.fill('[data-testid="todo-input"]', "Buy groceries");
+    await page.selectOption('[data-testid="priority-select"]', "high");
     await page.click('[data-testid="add-todo-button"]');
 
     // Verify todo appears in list
-    await expect(page.locator('[data-testid="todo-item"]')).toContainText('Buy groceries');
-    await expect(page.locator('[data-testid="priority-badge"]')).toContainText('high');
+    await expect(page.locator('[data-testid="todo-item"]')).toContainText(
+      "Buy groceries",
+    );
+    await expect(page.locator('[data-testid="priority-badge"]')).toContainText(
+      "high",
+    );
 
     // Mark todo as completed
     await page.click('[data-testid="todo-checkbox"]');
-    await expect(page.locator('[data-testid="todo-title"]')).toHaveClass(/line-through/);
+    await expect(page.locator('[data-testid="todo-title"]')).toHaveClass(
+      /line-through/,
+    );
 
     // Edit todo
     await page.click('[data-testid="edit-button"]');
-    await page.fill('[data-testid="edit-input"]', 'Buy organic groceries');
-    await page.keyboard.press('Enter');
-    await expect(page.locator('[data-testid="todo-item"]')).toContainText('Buy organic groceries');
+    await page.fill('[data-testid="edit-input"]', "Buy organic groceries");
+    await page.keyboard.press("Enter");
+    await expect(page.locator('[data-testid="todo-item"]')).toContainText(
+      "Buy organic groceries",
+    );
 
     // Delete todo
     await page.click('[data-testid="delete-button"]');
@@ -697,12 +705,12 @@ test.describe('Todo Application E2E', () => {
     await expect(page.locator('[data-testid="todo-item"]')).toHaveCount(0);
   });
 
-  test('should filter todos correctly', async ({ page }) => {
+  test("should filter todos correctly", async ({ page }) => {
     // Add multiple todos
     const todos = [
-      { title: 'Active Todo', priority: 'medium' },
-      { title: 'Completed Todo', priority: 'low' },
-      { title: 'High Priority Todo', priority: 'high' },
+      { title: "Active Todo", priority: "medium" },
+      { title: "Completed Todo", priority: "low" },
+      { title: "High Priority Todo", priority: "high" },
     ];
 
     for (const todo of todos) {
@@ -712,7 +720,11 @@ test.describe('Todo Application E2E', () => {
     }
 
     // Complete one todo
-    await page.locator('[data-testid="todo-item"]').nth(1).locator('[data-testid="todo-checkbox"]').click();
+    await page
+      .locator('[data-testid="todo-item"]')
+      .nth(1)
+      .locator('[data-testid="todo-checkbox"]')
+      .click();
 
     // Filter active todos
     await page.click('[data-testid="filter-active"]');
@@ -721,52 +733,64 @@ test.describe('Todo Application E2E', () => {
     // Filter completed todos
     await page.click('[data-testid="filter-completed"]');
     await expect(page.locator('[data-testid="todo-item"]')).toHaveCount(1);
-    await expect(page.locator('[data-testid="todo-item"]')).toContainText('Completed Todo');
+    await expect(page.locator('[data-testid="todo-item"]')).toContainText(
+      "Completed Todo",
+    );
 
     // Show all todos
     await page.click('[data-testid="filter-all"]');
     await expect(page.locator('[data-testid="todo-item"]')).toHaveCount(3);
   });
 
-  test('should persist todos after page reload', async ({ page }) => {
+  test("should persist todos after page reload", async ({ page }) => {
     // Add a todo
-    await page.fill('[data-testid="todo-input"]', 'Persistent Todo');
+    await page.fill('[data-testid="todo-input"]', "Persistent Todo");
     await page.click('[data-testid="add-todo-button"]');
 
     // Reload page
     await page.reload();
 
     // Verify todo persists
-    await expect(page.locator('[data-testid="todo-item"]')).toContainText('Persistent Todo');
+    await expect(page.locator('[data-testid="todo-item"]')).toContainText(
+      "Persistent Todo",
+    );
   });
 
-  test('should handle empty state correctly', async ({ page }) => {
+  test("should handle empty state correctly", async ({ page }) => {
     // Verify empty state message
     await expect(page.locator('[data-testid="empty-state"]')).toBeVisible();
-    await expect(page.locator('[data-testid="empty-state"]')).toContainText('No todos yet');
+    await expect(page.locator('[data-testid="empty-state"]')).toContainText(
+      "No todos yet",
+    );
 
     // Add a todo
-    await page.fill('[data-testid="todo-input"]', 'First Todo');
+    await page.fill('[data-testid="todo-input"]', "First Todo");
     await page.click('[data-testid="add-todo-button"]');
 
     // Verify empty state disappears
     await expect(page.locator('[data-testid="empty-state"]')).not.toBeVisible();
   });
 
-  test('should validate input correctly', async ({ page }) => {
+  test("should validate input correctly", async ({ page }) => {
     // Try to add empty todo
     await page.click('[data-testid="add-todo-button"]');
-    await expect(page.locator('[data-testid="error-message"]')).toContainText('Title is required');
+    await expect(page.locator('[data-testid="error-message"]')).toContainText(
+      "Title is required",
+    );
 
     // Try to add todo with only whitespace
-    await page.fill('[data-testid="todo-input"]', '   ');
+    await page.fill('[data-testid="todo-input"]', "   ");
     await page.click('[data-testid="add-todo-button"]');
-    await expect(page.locator('[data-testid="error-message"]')).toContainText('Title is required');
+    await expect(page.locator('[data-testid="error-message"]')).toContainText(
+      "Title is required",
+    );
 
     // Add valid todo
-    await page.fill('[data-testid="todo-input"]', 'Valid Todo');
+    await page.fill('[data-testid="todo-input"]', "Valid Todo");
     await page.click('[data-testid="add-todo-button"]');
-    await expect(page.locator('[data-testid="error-message"]')).not.toBeVisible();
+    await expect(
+      page.locator('[data-testid="error-message"]'),
+    ).not.toBeVisible();
   });
 });
 ```
@@ -778,7 +802,7 @@ test.describe('Todo Application E2E', () => {
 ```yaml
 # performance/load-test.yml
 config:
-  target: 'https://api.todo-app.example.com'
+  target: "https://api.todo-app.example.com"
   phases:
     - duration: 60
       arrivalRate: 5
@@ -844,10 +868,10 @@ scenarios:
 
 ```typescript
 // performance/performance.test.ts
-import { performance } from 'perf_hooks';
-import { TodoService } from '../apps/server/src/services/todo.service';
+import { performance } from "perf_hooks";
+import { TodoService } from "../apps/server/src/services/todo.service";
 
-describe('Performance Tests', () => {
+describe("Performance Tests", () => {
   let todoService: TodoService;
 
   beforeAll(() => {
@@ -855,36 +879,36 @@ describe('Performance Tests', () => {
     todoService = new TodoService(/* real dependencies */);
   });
 
-  test('should handle 1000 todo creations within 5 seconds', async () => {
-    const userId = 'perf-test-user';
+  test("should handle 1000 todo creations within 5 seconds", async () => {
+    const userId = "perf-test-user";
     const startTime = performance.now();
-    
+
     const promises = Array.from({ length: 1000 }, (_, i) =>
       todoService.createTodo(userId, {
         title: `Performance Test Todo ${i}`,
-        priority: 'medium',
-      })
+        priority: "medium",
+      }),
     );
 
     await Promise.all(promises);
-    
+
     const endTime = performance.now();
     const duration = endTime - startTime;
-    
+
     expect(duration).toBeLessThan(5000); // 5 seconds
   });
 
-  test('should retrieve 10,000 todos within 2 seconds', async () => {
-    const userId = 'perf-test-user-large';
-    
+  test("should retrieve 10,000 todos within 2 seconds", async () => {
+    const userId = "perf-test-user-large";
+
     // Pre-populate with 10,000 todos (done in setup)
-    
+
     const startTime = performance.now();
     const todos = await todoService.getTodos(userId, { limit: 10000 });
     const endTime = performance.now();
-    
+
     const duration = endTime - startTime;
-    
+
     expect(todos.length).toBe(10000);
     expect(duration).toBeLessThan(2000); // 2 seconds
   });
@@ -911,25 +935,25 @@ jobs:
     strategy:
       matrix:
         node-version: [18, 20]
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: pnpm/action-setup@v2
         with:
           version: 8
-          
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Run unit tests
         run: pnpm test:unit --coverage
-        
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
         with:
@@ -942,17 +966,17 @@ jobs:
         image: amazon/dynamodb-local
         ports:
           - 8000:8000
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: pnpm/action-setup@v2
         with:
           version: 8
-          
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Run integration tests
         env:
           DYNAMODB_ENDPOINT: http://localhost:8000
@@ -960,26 +984,26 @@ jobs:
 
   e2e-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: pnpm/action-setup@v2
         with:
           version: 8
-          
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Install Playwright
         run: pnpm exec playwright install --with-deps
-        
+
       - name: Build application
         run: pnpm build
-        
+
       - name: Run E2E tests
         run: pnpm test:e2e
-        
+
       - name: Upload test results
         if: failure()
         uses: actions/upload-artifact@v3
@@ -989,13 +1013,13 @@ jobs:
 
   security-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run security audit
         run: pnpm audit --audit-level moderate
-        
+
       - name: Run SAST scan
         uses: github/super-linter@v4
         env:
@@ -1038,7 +1062,7 @@ jobs:
 
 ```typescript
 // scripts/quality-gate.ts
-import { execSync } from 'child_process';
+import { execSync } from "child_process";
 
 interface QualityMetrics {
   testCoverage: number;
@@ -1049,20 +1073,20 @@ interface QualityMetrics {
 
 async function runQualityGate(): Promise<void> {
   const metrics = await collectMetrics();
-  
+
   const passed = [
     metrics.testCoverage >= 85,
     metrics.eslintIssues === 0,
     metrics.typeScriptErrors === 0,
     metrics.securityVulnerabilities === 0,
   ].every(Boolean);
-  
+
   if (!passed) {
-    console.error('Quality gate failed:', metrics);
+    console.error("Quality gate failed:", metrics);
     process.exit(1);
   }
-  
-  console.log('Quality gate passed:', metrics);
+
+  console.log("Quality gate passed:", metrics);
 }
 
 async function collectMetrics(): Promise<QualityMetrics> {

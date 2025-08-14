@@ -35,15 +35,6 @@
       "@/handlers/*": ["./lambda/handlers/*"]
     }
   },
-  "include": [
-    "lambda/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "dist",
-    "infrastructure/node_modules"
-  ]
-
+  "include": ["lambda/**/*.ts"],
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.spec.ts", "dist", "infrastructure/node_modules"]
 }

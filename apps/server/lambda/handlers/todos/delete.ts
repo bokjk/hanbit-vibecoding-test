@@ -30,29 +30,43 @@ const deleteTodoHandler: LambdaHandler = async (
     // 인증, 검증, 삭제 로직을 간단히 처리
     const authHeader = event.headers.Authorization || event.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new AuthenticationError('Missing authorization header', ErrorCode.MISSING_CREDENTIALS, {}, correlationId);
+      throw new AuthenticationError(
+        'Missing authorization header',
+        ErrorCode.MISSING_CREDENTIALS,
+        {},
+        correlationId
+      );
     }
 
     const authContext = await validateJWTToken(authHeader.substring(7));
     const { id } = validatePathParams(event.pathParameters, IdParamSchema);
 
     const todoService = getTodoService();
-    
+
     try {
       await todoService.deleteTodo(authContext, id);
     } catch (error) {
       if (error instanceof ItemNotFoundError) {
-        throw new NotFoundError(`TODO item with id ${id} not found`, ErrorCode.TODO_NOT_FOUND, {}, correlationId);
+        throw new NotFoundError(
+          `TODO item with id ${id} not found`,
+          ErrorCode.TODO_NOT_FOUND,
+          {},
+          correlationId
+        );
       }
       if (error instanceof AuthError) {
-        throw new AuthorizationError('Insufficient permissions', ErrorCode.INSUFFICIENT_PERMISSIONS, {}, correlationId);
+        throw new AuthorizationError(
+          'Insufficient permissions',
+          ErrorCode.INSUFFICIENT_PERMISSIONS,
+          {},
+          correlationId
+        );
       }
       throw error;
     }
 
     logger.info('TODO deleted successfully', { correlationId, todoId: id });
     return createSuccessResponse({ message: 'TODO deleted successfully' }, 204);
-    
   } catch (error) {
     logger.error('TODO deletion failed', error as Error, { correlationId });
     throw error;

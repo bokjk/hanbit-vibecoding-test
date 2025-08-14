@@ -42,7 +42,7 @@ vi.mock('uuid', () => ({
 
 // AWS X-Ray 모킹
 vi.mock('aws-xray-sdk-core', () => ({
-  captureAWS: vi.fn((aws) => aws),
+  captureAWS: vi.fn(aws => aws),
   captureHTTPs: vi.fn(),
   capturePromise: vi.fn(),
   getSegment: vi.fn(),

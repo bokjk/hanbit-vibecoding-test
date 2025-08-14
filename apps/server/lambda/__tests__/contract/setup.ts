@@ -13,22 +13,22 @@ const contractEnv = new ContractTestEnvironment();
 // 전역 설정
 beforeAll(async () => {
   logger.info('🧪 Contract Testing 환경 초기화 시작');
-  
+
   // OpenAPI 스키마 로드 및 검증
   await contractEnv.initializeSchema();
-  
+
   // Mock 서버 설정 (필요시)
   await contractEnv.setupMockServer();
-  
+
   logger.info('✅ Contract Testing 환경 초기화 완료');
 });
 
 afterAll(async () => {
   logger.info('🧪 Contract Testing 환경 정리 시작');
-  
+
   // Mock 서버 정리
   await contractEnv.teardownMockServer();
-  
+
   logger.info('✅ Contract Testing 환경 정리 완료');
 });
 
