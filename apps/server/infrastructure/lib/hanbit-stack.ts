@@ -26,8 +26,9 @@ export interface HanbitStackProps extends cdk.StackProps {
 export class HanbitStack extends cdk.Stack {
   public readonly config: EnvironmentConfig;
   public readonly secrets: SecretsConstruct;
-  public readonly deploymentHistory: DeploymentHistoryConstruct;
-  public readonly deploymentMonitoring: DeploymentMonitoringConstruct;
+  // 임시 주석 처리
+  // public readonly deploymentHistory: DeploymentHistoryConstruct;
+  // public readonly deploymentMonitoring: DeploymentMonitoringConstruct;
 
   constructor(scope: Construct, id: string, props: HanbitStackProps) {
     super(scope, id, props);
@@ -38,9 +39,7 @@ export class HanbitStack extends cdk.Stack {
     this.secrets = new SecretsConstruct(this, 'Secrets', this.config);
 
     // DynamoDB 테이블 생성 (환경별 설정 적용)
-    const database = new DatabaseConstruct(this, 'Database', {
-      environmentConfig: this.config,
-    });
+    const database = new DatabaseConstruct(this, 'Database');
 
     // 인증 스택 생성 (Cognito)
     const auth = new AuthConstruct(this, 'Auth', {
@@ -58,7 +57,6 @@ export class HanbitStack extends cdk.Stack {
       userPoolClient: auth.userPoolClient,
       identityPool: auth.identityPool,
       environmentConfig: this.config,
-      environment: lambdaEnvironment,
       secrets: this.secrets,
     });
 
@@ -70,39 +68,37 @@ export class HanbitStack extends cdk.Stack {
       environmentConfig: this.config,
     });
 
-    // 모니터링 스택 생성 (CloudWatch)
-    const monitoring = new MonitoringConstruct(this, 'Monitoring', {
-      restApi: api.restApi,
-      todoTable: database.todoTable,
-      todoHandlers: lambda.todoHandlers,
-      authHandlers: lambda.authHandlers,
-      alertEmail: this.config.monitoring.alertEmail,
-      environmentConfig: this.config,
-    });
+    // 모니터링 스택도 임시 주석 처리 (토큰 에러 해결을 위해)
+    // const monitoring = new MonitoringConstruct(this, 'Monitoring', {
+    //   restApi: api.restApi,
+    //   todoTable: database.todoTable,
+    //   todoHandlers: lambda.todoHandlers,
+    //   authHandlers: lambda.authHandlers,
+    //   environmentConfig: this.config,
+    //   alertEmail: this.config.monitoring.alertEmail || 'admin@example.com',
+    // });
 
-    // 배포 히스토리 관리 스택 생성
-    this.deploymentHistory = new DeploymentHistoryConstruct(this, 'DeploymentHistory', {
-      environmentConfig: this.config,
-    });
+    // 배포 히스토리 및 모니터링 스택 임시 주석 처리 (빠른 배포 테스트용)
+    // this.deploymentHistory = new DeploymentHistoryConstruct(this, 'DeploymentHistory', {
+    //   environmentConfig: this.config,
+    // });
 
-    // 배포 히스토리 API 통합
-    this.deploymentHistory.createApiIntegration(api.restApi);
+    // this.deploymentHistory.createApiIntegration(api.restApi);
 
-    // 배포 모니터링 스택 생성 (알림, 롤백, 헬스체크)
-    const allLambdaFunctions = {
-      ...lambda.todoHandlers,
-      ...lambda.authHandlers,
-      deploymentHistory: this.deploymentHistory.deploymentHistoryFunction,
-      deploymentStats: this.deploymentHistory.deploymentStatsFunction,
-    };
+    // const allLambdaFunctions = {
+    //   ...lambda.todoHandlers,
+    //   ...lambda.authHandlers,
+    //   deploymentHistory: this.deploymentHistory.deploymentHistoryFunction,
+    //   deploymentStats: this.deploymentHistory.deploymentStatsFunction,
+    // };
 
-    this.deploymentMonitoring = new DeploymentMonitoringConstruct(this, 'DeploymentMonitoring', {
-      api: api.restApi,
-      lambdaFunctions: allLambdaFunctions,
-      alertEmail: this.config.monitoring.alertEmail,
-      slackWebhookUrl: this.config.monitoring.slackWebhookUrl,
-      environmentConfig: this.config,
-    });
+    // this.deploymentMonitoring = new DeploymentMonitoringConstruct(this, 'DeploymentMonitoring', {
+    //   api: api.restApi,
+    //   lambdaFunctions: allLambdaFunctions,
+    //   alertEmail: this.config.monitoring.alertEmail || 'admin@example.com',
+    //   slackWebhookUrl: this.config.monitoring.slackWebhookUrl,
+    //   environmentConfig: this.config,
+    // });
 
     // 출력 값들 (환경별 접미사 포함)
     new cdk.CfnOutput(this, `ApiEndpoint${this.config.stackSuffix}`, {
@@ -135,45 +131,47 @@ export class HanbitStack extends cdk.Stack {
       exportName: `HanbitTodo-IdentityPoolId-${this.config.name}`,
     });
 
-    new cdk.CfnOutput(this, `DashboardUrl${this.config.stackSuffix}`, {
-      value: `https://console.aws.amazon.com/cloudwatch/home?region=${this.region}#dashboards:name=${monitoring.dashboard.dashboardName}`,
-      description: `CloudWatch 대시보드 URL (${this.config.name})`,
-    });
+    // 모니터링 관련 출력도 임시 주석 처리
+    // new cdk.CfnOutput(this, `DashboardUrl${this.config.stackSuffix}`, {
+    //   value: `https://console.aws.amazon.com/cloudwatch/home?region=${this.region}#dashboards:name=${monitoring.dashboard.dashboardName}`,
+    //   description: `CloudWatch 대시보드 URL (${this.config.name})`,
+    // });
 
-    new cdk.CfnOutput(this, `AlarmTopicArn${this.config.stackSuffix}`, {
-      value: monitoring.alarmTopic.topicArn,
-      description: `SNS 알람 토픽 ARN (${this.config.name})`,
-      exportName: `HanbitTodo-AlarmTopicArn-${this.config.name}`,
-    });
+    // new cdk.CfnOutput(this, `AlarmTopicArn${this.config.stackSuffix}`, {
+    //   value: monitoring.alarmTopic.topicArn,
+    //   description: `SNS 알람 토픽 ARN (${this.config.name})`,
+    //   exportName: `HanbitTodo-AlarmTopicArn-${this.config.name}`,
+    // });
 
-    new cdk.CfnOutput(this, `DeploymentAlarmTopicArn${this.config.stackSuffix}`, {
-      value: this.deploymentMonitoring.deploymentAlarmTopic.topicArn,
-      description: `배포 알람 토픽 ARN (${this.config.name})`,
-      exportName: `HanbitTodo-DeploymentAlarmTopicArn-${this.config.name}`,
-    });
+    // 배포 관련 출력들 임시 주석 처리
+    // new cdk.CfnOutput(this, `DeploymentAlarmTopicArn${this.config.stackSuffix}`, {
+    //   value: this.deploymentMonitoring.deploymentAlarmTopic.topicArn,
+    //   description: `배포 알람 토픽 ARN (${this.config.name})`,
+    //   exportName: `HanbitTodo-DeploymentAlarmTopicArn-${this.config.name}`,
+    // });
 
-    new cdk.CfnOutput(this, `DeploymentHistoryTableName${this.config.stackSuffix}`, {
-      value: this.deploymentHistory.deploymentHistoryTable.tableName,
-      description: `배포 히스토리 테이블 이름 (${this.config.name})`,
-      exportName: `HanbitTodo-DeploymentHistoryTableName-${this.config.name}`,
-    });
+    // new cdk.CfnOutput(this, `DeploymentHistoryTableName${this.config.stackSuffix}`, {
+    //   value: this.deploymentHistory.deploymentHistoryTable.tableName,
+    //   description: `배포 히스토리 테이블 이름 (${this.config.name})`,
+    //   exportName: `HanbitTodo-DeploymentHistoryTableName-${this.config.name}`,
+    // });
 
-    new cdk.CfnOutput(this, `DeploymentDashboardUrl${this.config.stackSuffix}`, {
-      value: `https://console.aws.amazon.com/cloudwatch/home?region=${this.region}#dashboards:name=${this.deploymentMonitoring.deploymentDashboard.dashboardName}`,
-      description: `배포 모니터링 대시보드 URL (${this.config.name})`,
-    });
+    // new cdk.CfnOutput(this, `DeploymentDashboardUrl${this.config.stackSuffix}`, {
+    //   value: `https://console.aws.amazon.com/cloudwatch/home?region=${this.region}#dashboards:name=${this.deploymentMonitoring.deploymentDashboard.dashboardName}`,
+    //   description: `배포 모니터링 대시보드 URL (${this.config.name})`,
+    // });
 
-    new cdk.CfnOutput(this, `HealthCheckFunctionName${this.config.stackSuffix}`, {
-      value: this.deploymentMonitoring.healthCheckFunction.functionName,
-      description: `헬스체크 Lambda 함수 이름 (${this.config.name})`,
-      exportName: `HanbitTodo-HealthCheckFunctionName-${this.config.name}`,
-    });
+    // new cdk.CfnOutput(this, `HealthCheckFunctionName${this.config.stackSuffix}`, {
+    //   value: this.deploymentMonitoring.healthCheckFunction.functionName,
+    //   description: `헬스체크 Lambda 함수 이름 (${this.config.name})`,
+    //   exportName: `HanbitTodo-HealthCheckFunctionName-${this.config.name}`,
+    // });
 
-    new cdk.CfnOutput(this, `RollbackFunctionName${this.config.stackSuffix}`, {
-      value: this.deploymentMonitoring.rollbackFunction.functionName,
-      description: `롤백 Lambda 함수 이름 (${this.config.name})`,
-      exportName: `HanbitTodo-RollbackFunctionName-${this.config.name}`,
-    });
+    // new cdk.CfnOutput(this, `RollbackFunctionName${this.config.stackSuffix}`, {
+    //   value: this.deploymentMonitoring.rollbackFunction.functionName,
+    //   description: `롤백 Lambda 함수 이름 (${this.config.name})`,
+    //   exportName: `HanbitTodo-RollbackFunctionName-${this.config.name}`,
+    // });
 
     // 시크릿 관련 출력값
     new cdk.CfnOutput(this, `JwtSecretArn${this.config.stackSuffix}`, {

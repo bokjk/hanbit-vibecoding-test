@@ -8,6 +8,7 @@ import * as sns from 'aws-cdk-lib/aws-sns';
 import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
+import { EnvironmentConfig } from '../config/environment';
 
 export interface MonitoringConstructProps {
   restApi: apigateway.RestApi;
@@ -23,6 +24,7 @@ export interface MonitoringConstructProps {
     refresh: lambda.Function;
     guestAuth: lambda.Function;
   };
+  environmentConfig: EnvironmentConfig;
   alertEmail?: string;
 }
 
@@ -98,12 +100,10 @@ export class MonitoringConstruct extends Construct {
       const errorRateAlarm = new cloudwatch.Alarm(this, `${functionName}ErrorRateAlarm`, {
         alarmName: `${functionName}-error-rate`,
         alarmDescription: `${functionName} 에러율이 임계치를 초과했습니다`,
-        metric: func
-          .metricErrors({
-            period: cdk.Duration.minutes(5),
-            statistic: cloudwatch.Statistic.SUM,
-          })
-          .createAlarmMetric(),
+        metric: func.metricErrors({
+          period: cdk.Duration.minutes(5),
+          statistic: cloudwatch.Statistic.SUM,
+        }),
         threshold: isProduction ? 10 : 5, // 프로덕션에서는 더 엄격
         evaluationPeriods: 2,
         treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,

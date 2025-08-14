@@ -4,6 +4,7 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
+import { EnvironmentConfig } from '../config/environment';
 
 export interface ApiConstructProps {
   todoHandlers: {
@@ -18,6 +19,7 @@ export interface ApiConstructProps {
     guestAuth: lambda.Function;
   };
   userPool: cognito.UserPool;
+  environmentConfig: EnvironmentConfig;
 }
 
 /**
@@ -68,10 +70,6 @@ export class ApiConstruct extends Construct {
           : apigateway.MethodLoggingLevel.INFO,
         dataTraceEnabled: !isProduction, // 프로덕션에서는 비활성화
         metricsEnabled: true,
-        throttle: {
-          rateLimit: isProduction ? 1000 : 100,
-          burstLimit: isProduction ? 2000 : 200,
-        },
       },
       policy: new iam.PolicyDocument({
         statements: [

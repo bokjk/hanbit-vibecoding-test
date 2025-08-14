@@ -6,12 +6,16 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { resolve } from 'path';
+import { EnvironmentConfig } from '../config/environment';
+import { SecretsConstruct } from '../config/secrets';
 
 export interface LambdaConstructProps {
   todoTable: dynamodb.Table;
   userPool: cognito.UserPool;
   userPoolClient: cognito.UserPoolClient;
   identityPool: cognito.CfnIdentityPool;
+  environmentConfig: EnvironmentConfig;
+  secrets: SecretsConstruct;
 }
 
 /**
@@ -48,10 +52,9 @@ export class LambdaConstruct extends Construct {
         COGNITO_USER_POOL_ID: userPool.userPoolId,
         COGNITO_CLIENT_ID: userPoolClient.userPoolClientId,
         COGNITO_IDENTITY_POOL_ID: identityPool.ref,
-        AWS_REGION: cdk.Stack.of(this).region,
+        // AWS_REGION과 _X_AMZN_TRACE_ID는 Lambda 런타임에서 자동 제공됨
         NODE_ENV: process.env.NODE_ENV || 'development',
         LOG_LEVEL: process.env.LOG_LEVEL || 'info',
-        _X_AMZN_TRACE_ID: '', // X-Ray SDK 활성화를 위한 환경 변수
       },
       logRetention: logs.RetentionDays.ONE_WEEK,
       bundling: {

@@ -3,6 +3,7 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
+import { EnvironmentConfig } from '../config/environment';
 
 /**
  * 인증 및 인가를 관리하는 Construct
@@ -15,6 +16,7 @@ import { Construct } from 'constructs';
  */
 export interface AuthConstructProps {
   todoTable: dynamodb.Table;
+  environmentConfig: EnvironmentConfig;
 }
 
 export class AuthConstruct extends Construct {
@@ -162,7 +164,7 @@ export class AuthConstruct extends Construct {
         },
         'sts:AssumeRoleWithWebIdentity'
       ),
-      description: '인증된 사용자가 TODO 데이터에 접근하기 위한 역할',
+      description: 'IAM role for authenticated users to access TODO data',
     });
 
     // 게스트 사용자용 IAM 역할
@@ -180,7 +182,7 @@ export class AuthConstruct extends Construct {
         },
         'sts:AssumeRoleWithWebIdentity'
       ),
-      description: '게스트 사용자가 제한된 TODO 데이터에 접근하기 위한 역할',
+      description: 'IAM role for guest users to access limited TODO data',
     });
 
     // 인증된 사용자 권한 정책
@@ -291,13 +293,13 @@ export class AuthConstruct extends Construct {
 
     new cdk.CfnOutput(this, 'AuthenticatedRoleArn', {
       value: this.authenticatedRole.roleArn,
-      description: '인증된 사용자 IAM 역할 ARN',
+      description: 'Authenticated user IAM role ARN',
       exportName: 'TodoAuthenticatedRoleArn',
     });
 
     new cdk.CfnOutput(this, 'GuestRoleArn', {
       value: this.guestRole.roleArn,
-      description: '게스트 사용자 IAM 역할 ARN',
+      description: 'Guest user IAM role ARN',
       exportName: 'TodoGuestRoleArn',
     });
   }

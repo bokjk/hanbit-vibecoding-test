@@ -1,3 +1,4 @@
+import * as cdk from 'aws-cdk-lib';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
@@ -67,7 +68,7 @@ export class SecretsConstruct extends Construct {
     this.apiKeysSecret = new secretsmanager.Secret(this, 'ApiKeysSecret', {
       secretName: `/hanbit-todo/${config.name}/api-keys`,
       description: `External API keys for ${config.name} environment`,
-      secretStringValue: secretsmanager.SecretValue.unsafePlainText(
+      secretStringValue: cdk.SecretValue.unsafePlainText(
         JSON.stringify({
           externalService: 'PLACEHOLDER_API_KEY',
           analytics: 'PLACEHOLDER_ANALYTICS_KEY',

@@ -54,31 +54,21 @@ export class DatabaseConstruct extends Construct {
       // TTL 설정 - 게스트 사용자 데이터 7일 후 자동 삭제
       timeToLiveAttribute: 'ttl',
 
-      // GSI for querying todos by status and priority
-      globalSecondaryIndexes: [
-        {
-          // GSI1: 사용자별 상태 및 우선순위 쿼리
-          // PK: USER#<userId>#STATUS#<completed> SK: PRIORITY#<priority>#<createdAt>
-          indexName: 'GSI1-StatusPriority',
-          partitionKey: {
-            name: 'GSI1PK',
-            type: dynamodb.AttributeType.STRING,
-          },
-          sortKey: {
-            name: 'GSI1SK',
-            type: dynamodb.AttributeType.STRING,
-          },
-          projectionType: dynamodb.ProjectionType.ALL, // 모든 속성 프로젝션
-          readCapacity:
-            this.getBillingMode() === dynamodb.BillingMode.PROVISIONED
-              ? Math.ceil(this.getReadCapacity() * 0.5)
-              : undefined,
-          writeCapacity:
-            this.getBillingMode() === dynamodb.BillingMode.PROVISIONED
-              ? Math.ceil(this.getWriteCapacity() * 0.5)
-              : undefined,
-        },
-      ],
+    });
+
+    // GSI1: 사용자별 상태 및 우선순위 쿼리
+    // PK: USER#<userId>#STATUS#<completed> SK: PRIORITY#<priority>#<createdAt>
+    this.todoTable.addGlobalSecondaryIndex({
+      indexName: 'GSI1-StatusPriority',
+      partitionKey: {
+        name: 'GSI1PK',
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'GSI1SK',
+        type: dynamodb.AttributeType.STRING,
+      },
+      projectionType: dynamodb.ProjectionType.ALL,
     });
 
     // GSI2: 검색 및 제목별 정렬 최적화
@@ -237,25 +227,10 @@ export class DatabaseConstruct extends Construct {
       });
 
       // GSI 오토스케일링 (프로덕션만)
-      if (environment === 'production') {
-        // GSI1 스케일링
-        const gsi1 = this.todoTable.node.children.find(
-          child => child.node.id === 'GSI1-StatusPriority'
-        ) as dynamodb.GlobalSecondaryIndex | undefined;
-
-        if (gsi1) {
-          const gsi1ReadScaling = gsi1.autoScaleReadCapacity({
-            minCapacity: 1,
-            maxCapacity: Math.ceil(this.getReadCapacity() * 2.5),
-          });
-
-          gsi1ReadScaling.scaleOnUtilization({
-            targetUtilizationPercent: 70,
-            scaleInCooldown: cdk.Duration.minutes(5),
-            scaleOutCooldown: cdk.Duration.minutes(2),
-          });
-        }
-      }
+      // GSI 자동 스케일링 주석 처리 (배포 테스트용)
+      // if (environment === 'production') {
+      //   // GSI1 스케일링 로직 생략
+      // }
     }
   }
 
