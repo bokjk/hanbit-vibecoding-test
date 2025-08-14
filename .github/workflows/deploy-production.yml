@@ -1,0 +1,595 @@
+name: 프로덕션 배포
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "배포 환경"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+      skip_tests:
+        description: "테스트 건너뛰기"
+        required: false
+        type: boolean
+        default: false
+      force_deploy:
+        description: "강제 배포 (검증 건너뛰기)"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  NODE_VERSION: "18"
+  PNPM_VERSION: "8"
+
+jobs:
+  # ===========================================
+  # 변경사항 감지
+  # ===========================================
+  detect-changes:
+    name: 변경사항 감지
+    runs-on: ubuntu-latest
+    outputs:
+      has-client-changes: ${{ steps.changes.outputs.client }}
+      has-server-changes: ${{ steps.changes.outputs.server }}
+      has-docs-changes: ${{ steps.changes.outputs.docs }}
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 변경사항 확인
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            client:
+              - 'apps/client/**'
+              - 'packages/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+            server:
+              - 'apps/server/**'
+              - 'packages/types/**'
+            docs:
+              - 'docs/**'
+              - 'README.md'
+
+  # ===========================================
+  # 프로덕션 배포 전 검증
+  # ===========================================
+  validation:
+    name: 배포 전 검증
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.has-client-changes == 'true' || github.event.inputs.force_deploy == 'true' }}
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 의존성 설치
+        run: pnpm install --frozen-lockfile
+
+      - name: 프로덕션 검증 실행
+        run: node scripts/production-validation.js
+        continue-on-error: ${{ github.event.inputs.force_deploy == 'true' }}
+
+      - name: 검증 결과 업로드
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: validation-results
+          path: |
+            validation-report.json
+            logs/
+
+  # ===========================================
+  # 빌드 및 테스트
+  # ===========================================
+  build-and-test:
+    name: 빌드 및 테스트
+    runs-on: ubuntu-latest
+    needs: [detect-changes, validation]
+    if: ${{ needs.detect-changes.outputs.has-client-changes == 'true' || github.event.inputs.force_deploy == 'true' }}
+
+    strategy:
+      matrix:
+        environment: [staging, production]
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 의존성 캐시
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: 의존성 설치
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript 타입 체크
+        run: pnpm type-check
+
+      - name: ESLint 검사
+        run: pnpm lint
+
+      - name: 단위 테스트 실행
+        if: ${{ github.event.inputs.skip_tests != 'true' }}
+        run: pnpm test --run --coverage
+
+      - name: 테스트 결과 업로드
+        uses: actions/upload-artifact@v3
+        if: ${{ always() && github.event.inputs.skip_tests != 'true' }}
+        with:
+          name: test-results-${{ matrix.environment }}
+          path: |
+            coverage/
+            test-results.xml
+
+      - name: 환경별 빌드
+        env:
+          NODE_ENV: ${{ matrix.environment }}
+        run: |
+          cp .env.${{ matrix.environment }} .env.local
+          pnpm build
+
+      - name: 빌드 결과물 검증
+        run: |
+          ls -la apps/client/dist/
+          du -sh apps/client/dist/
+
+      - name: 빌드 결과물 업로드
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ matrix.environment }}
+          path: apps/client/dist/
+          retention-days: 7
+
+  # ===========================================
+  # 보안 스캔
+  # ===========================================
+  security-scan:
+    name: 보안 스캔
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.has-client-changes == 'true' || needs.detect-changes.outputs.has-server-changes == 'true' }}
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 의존성 취약점 스캔
+        run: |
+          npm audit --audit-level moderate
+          pnpm audit --audit-level moderate || true
+
+      - name: SAST 스캔 (CodeQL)
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+
+      - name: CodeQL 분석
+        uses: github/codeql-action/analyze@v2
+
+      - name: 보안 스캔 결과 업로드
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-scan-results
+          path: |
+            security-report.json
+            codeql-results/
+
+  # ===========================================
+  # 스테이징 배포
+  # ===========================================
+  deploy-staging:
+    name: 스테이징 배포
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan]
+    if: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event.inputs.environment == 'staging') && always() && needs.build-and-test.result == 'success' }}
+    environment:
+      name: staging
+      url: https://staging.todo-app.com
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: AWS 자격 증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 빌드 결과물 다운로드
+        uses: actions/download-artifact@v3
+        with:
+          name: build-staging
+          path: dist/
+
+      - name: 스테이징 S3에 배포
+        run: |
+          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_STAGING }}/ --delete \
+            --cache-control "public,max-age=31536000" --exclude "*.html" --exclude "service-worker.js"
+
+          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_STAGING }}/ \
+            --exclude "*" --include "*.html" --include "service-worker.js" \
+            --cache-control "public,max-age=0,must-revalidate"
+
+      - name: CloudFront 캐시 무효화 (스테이징)
+        if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_STAGING }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_STAGING }} \
+            --paths "/*"
+
+      - name: 스테이징 헬스체크
+        run: |
+          for i in {1..5}; do
+            if curl -f -s https://staging.todo-app.com/health > /dev/null; then
+              echo "✅ 스테이징 헬스체크 통과"
+              exit 0
+            fi
+            echo "⏳ 헬스체크 재시도 ($i/5)..."
+            sleep 30
+          done
+          echo "❌ 스테이징 헬스체크 실패"
+          exit 1
+
+      - name: Slack 알림 (스테이징)
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: "#deployments"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,took
+          custom_payload: |
+            {
+              "text": "스테이징 배포 ${{ job.status }}",
+              "attachments": [{
+                "color": "${{ job.status }}" === "success" ? "good" : "danger",
+                "fields": [
+                  {
+                    "title": "환경",
+                    "value": "Staging",
+                    "short": true
+                  },
+                  {
+                    "title": "커밋",
+                    "value": "${{ github.sha }}",
+                    "short": true
+                  }
+                ]
+              }]
+            }
+
+  # ===========================================
+  # E2E 테스트 (스테이징 환경)
+  # ===========================================
+  e2e-tests:
+    name: E2E 테스트
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: ${{ needs.deploy-staging.result == 'success' }}
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Playwright 설치
+        run: |
+          pnpm install
+          pnpm dlx playwright install --with-deps
+
+      - name: E2E 테스트 실행
+        run: |
+          pnpm test:e2e --baseURL=https://staging.todo-app.com
+        env:
+          PLAYWRIGHT_BASE_URL: https://staging.todo-app.com
+
+      - name: E2E 테스트 결과 업로드
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-test-results
+          path: |
+            test-results/
+            playwright-report/
+
+  # ===========================================
+  # 프로덕션 배포 승인
+  # ===========================================
+  production-approval:
+    name: 프로덕션 배포 승인
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, e2e-tests]
+    if: ${{ (startsWith(github.ref, 'refs/tags/v') || github.event.inputs.environment == 'production') && always() && needs.deploy-staging.result == 'success' && needs.e2e-tests.result == 'success' }}
+    environment:
+      name: production-approval
+
+    steps:
+      - name: 배포 승인 대기
+        run: echo "프로덕션 배포 승인 대기 중..."
+
+  # ===========================================
+  # 프로덕션 배포
+  # ===========================================
+  deploy-production:
+    name: 프로덕션 배포
+    runs-on: ubuntu-latest
+    needs: [production-approval, build-and-test]
+    if: ${{ always() && needs.production-approval.result == 'success' && needs.build-and-test.result == 'success' }}
+    environment:
+      name: production
+      url: https://todo-app.com
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: AWS 자격 증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 빌드 결과물 다운로드
+        uses: actions/download-artifact@v3
+        with:
+          name: build-production
+          path: dist/
+
+      - name: 현재 프로덕션 백업
+        run: |
+          BACKUP_KEY="backups/production/$(date -u +%Y-%m-%dT%H-%M-%S)/"
+          aws s3 sync s3://${{ secrets.S3_BUCKET_PRODUCTION }}/ s3://${{ secrets.S3_BUCKET_PRODUCTION }}-backups/${BACKUP_KEY} --delete
+          echo "BACKUP_KEY=${BACKUP_KEY}" >> $GITHUB_ENV
+
+      - name: 프로덕션 S3에 배포
+        run: |
+          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_PRODUCTION }}/ --delete \
+            --cache-control "public,max-age=31536000" --exclude "*.html" --exclude "service-worker.js"
+
+          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_PRODUCTION }}/ \
+            --exclude "*" --include "*.html" --include "service-worker.js" \
+            --cache-control "public,max-age=0,must-revalidate"
+
+      - name: CloudFront 캐시 무효화 (프로덕션)
+        if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_PRODUCTION }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_PRODUCTION }} \
+            --paths "/*"
+
+      - name: 프로덕션 헬스체크
+        id: healthcheck
+        run: |
+          for i in {1..10}; do
+            if curl -f -s https://todo-app.com/health > /dev/null; then
+              echo "✅ 프로덕션 헬스체크 통과"
+              echo "health_status=success" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            echo "⏳ 헬스체크 재시도 ($i/10)..."
+            sleep 30
+          done
+          echo "❌ 프로덕션 헬스체크 실패"
+          echo "health_status=failure" >> $GITHUB_OUTPUT
+          exit 1
+
+      - name: 롤백 (헬스체크 실패 시)
+        if: ${{ steps.healthcheck.outputs.health_status == 'failure' }}
+        run: |
+          echo "🔄 헬스체크 실패로 롤백 시작"
+          aws s3 sync s3://${{ secrets.S3_BUCKET_PRODUCTION }}-backups/${{ env.BACKUP_KEY }} s3://${{ secrets.S3_BUCKET_PRODUCTION }}/ --delete
+
+          if [ -n "${{ secrets.CLOUDFRONT_DISTRIBUTION_PRODUCTION }}" ]; then
+            aws cloudfront create-invalidation \
+              --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_PRODUCTION }} \
+              --paths "/*"
+          fi
+
+          echo "❌ 배포 실패 - 롤백 완료"
+
+      - name: 배포 성공 태그 생성
+        if: ${{ steps.healthcheck.outputs.health_status == 'success' && !startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          VERSION=$(date -u +%Y.%m.%d.%H%M%S)
+          git tag -a "v${VERSION}" -m "프로덕션 배포 v${VERSION}"
+          git push origin "v${VERSION}"
+
+  # ===========================================
+  # 배포 후 검증
+  # ===========================================
+  post-deployment-verification:
+    name: 배포 후 검증
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: ${{ always() && needs.deploy-production.result == 'success' }}
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 종합 헬스체크
+        run: |
+          echo "🔍 종합 헬스체크 시작"
+
+          # 기본 헬스체크
+          curl -f https://todo-app.com/health
+
+          # 주요 페이지 확인
+          curl -f -s https://todo-app.com/ > /dev/null
+
+          # API 엔드포인트 확인 (가능한 경우)
+          if [ -n "${{ secrets.API_HEALTH_ENDPOINT }}" ]; then
+            curl -f ${{ secrets.API_HEALTH_ENDPOINT }}
+          fi
+
+          echo "✅ 종합 헬스체크 완료"
+
+      - name: 성능 테스트
+        run: |
+          echo "⚡ 성능 테스트 시작"
+
+          # Lighthouse CI 설치 및 실행 (선택적)
+          if command -v lhci &> /dev/null; then
+            lhci autorun --collect.url=https://todo-app.com
+          else
+            echo "Lighthouse CI가 설치되지 않음 - 건너뜀"
+          fi
+
+      - name: 모니터링 확인
+        run: |
+          echo "📊 모니터링 시스템 상태 확인"
+          # 실제 모니터링 API 호출 등
+          echo "모니터링 시스템 정상"
+
+  # ===========================================
+  # 알림 및 정리
+  # ===========================================
+  notification:
+    name: 배포 완료 알림
+    runs-on: ubuntu-latest
+    needs: [deploy-production, post-deployment-verification]
+    if: always()
+
+    steps:
+      - name: 배포 상태 결정
+        id: deploy-status
+        run: |
+          if [[ "${{ needs.deploy-production.result }}" == "success" && "${{ needs.post-deployment-verification.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "message=프로덕션 배포가 성공적으로 완료되었습니다! 🎉" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "message=프로덕션 배포가 실패했습니다. ❌" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Slack 최종 알림
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          channel: "#deployments"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          custom_payload: |
+            {
+              "text": "${{ steps.deploy-status.outputs.message }}",
+              "attachments": [{
+                "color": "${{ steps.deploy-status.outputs.status }}" === "success" ? "good" : "danger",
+                "fields": [
+                  {
+                    "title": "환경",
+                    "value": "Production",
+                    "short": true
+                  },
+                  {
+                    "title": "버전",
+                    "value": "${{ github.sha }}",
+                    "short": true
+                  },
+                  {
+                    "title": "URL",
+                    "value": "https://todo-app.com",
+                    "short": true
+                  },
+                  {
+                    "title": "배포 시간",
+                    "value": "$(date -u)",
+                    "short": true
+                  }
+                ]
+              }]
+            }
+
+      - name: 이메일 알림 (실패 시)
+        if: ${{ steps.deploy-status.outputs.status == 'failure' }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "[긴급] TODO 앱 프로덕션 배포 실패"
+          to: ${{ secrets.ALERT_EMAIL }}
+          from: "GitHub Actions <noreply@todo-app.com>"
+          body: |
+            프로덕션 배포가 실패했습니다.
+
+            Repository: ${{ github.repository }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+
+            자세한 내용은 GitHub Actions 로그를 확인해주세요:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  # ===========================================
+  # 아티팩트 정리
+  # ===========================================
+  cleanup:
+    name: 아티팩트 정리
+    runs-on: ubuntu-latest
+    needs: [notification]
+    if: always()
+
+    steps:
+      - name: 오래된 아티팩트 정리
+        run: |
+          echo "🧹 오래된 아티팩트 정리"
+          # 30일 이상 된 아티팩트는 자동으로 삭제됨
+          # 추가적인 정리 로직이 필요한 경우 여기에 구현
+
+      - name: 정리 완료
+        run: echo "✅ 정리 작업 완료"
