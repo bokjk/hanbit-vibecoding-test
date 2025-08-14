@@ -108,6 +108,12 @@ class SyncManagerService {
    * 동기화 매니저 초기화
    */
   private initializeSync(): void {
+    // API 모드가 비활성화되면 동기화 초기화 건너뛰기
+    if (!appConfig.features.apiMode) {
+      console.log("🔄 Sync disabled - API mode is off");
+      return;
+    }
+
     // 네트워크 상태 이벤트 리스너 등록
     window.addEventListener("online", this.handleOnlineStatusChange.bind(this));
     window.addEventListener(
@@ -198,6 +204,12 @@ class SyncManagerService {
    * 연결 상태 확인 (실제 서버 접근 테스트)
    */
   private async checkConnectivity(): Promise<boolean> {
+    // API 모드가 비활성화되면 항상 false 반환
+    if (!appConfig.features.apiMode) {
+      console.log("🔄 Connectivity check skipped - API mode is off");
+      return false;
+    }
+
     if (!navigator.onLine) {
       return false;
     }
@@ -219,7 +231,7 @@ class SyncManagerService {
       clearTimeout(timeoutId);
       return true;
     } catch (error) {
-      console.warn("Connectivity check failed:", error);
+      console.warn("🔄 Connectivity check failed:", error);
       return false;
     }
   }
@@ -272,8 +284,21 @@ class SyncManagerService {
    * 메인 동기화 수행
    */
   async performSync(): Promise<SyncResult> {
+    // API 모드가 비활성화되면 즉시 성공 반환 (로컬 모드)
+    if (!appConfig.features.apiMode) {
+      console.log("🔄 Sync skipped - API mode is off, using local storage");
+      return {
+        success: true,
+        message: "Using local storage mode - no sync needed",
+        syncedOperations: 0,
+        failedOperations: 0,
+        conflicts: [],
+        lastSyncAt: new Date(),
+      };
+    }
+
     if (this.isSyncing) {
-      console.warn("Sync already in progress, skipping...");
+      console.warn("🔄 Sync already in progress, skipping...");
       return {
         success: false,
         message: "Sync already in progress",
@@ -297,6 +322,8 @@ class SyncManagerService {
     };
 
     try {
+      console.log("🔄 Starting sync process...");
+
       // 1. 연결 상태 확인
       const isConnected = await this.checkConnectivity();
       if (!isConnected) {
@@ -322,6 +349,7 @@ class SyncManagerService {
       syncResult.message = `Successfully synced ${syncResult.syncedOperations} operations`;
 
       this.emitEvent("sync_success", syncResult);
+      console.log("🔄 Sync completed successfully", syncResult);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown sync error";
@@ -329,10 +357,18 @@ class SyncManagerService {
       syncResult.message = errorMessage;
 
       // 실패 기록
-      offlineStorage.recordSyncFailure();
+      try {
+        offlineStorage.recordSyncFailure();
+      } catch (storageError) {
+        console.error("🔄 Failed to record sync failure:", storageError);
+      }
 
       this.emitEvent("sync_error", { error: errorMessage, syncResult });
-      console.error("Sync failed:", error);
+      console.error("🔄 Sync failed:", {
+        error: errorMessage,
+        originalError: error,
+        syncResult
+      });
     } finally {
       this.isSyncing = false;
       syncResult.lastSyncAt = new Date();

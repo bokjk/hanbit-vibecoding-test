@@ -90,6 +90,36 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
   // 초기화 관련 메서드
   // ================================
 
+  const requestGuestAccess = useCallback(async () => {
+    try {
+      const guestResponse = await authService.requestGuestToken();
+
+      dispatch({
+        type: "AUTH_INIT_GUEST",
+        payload: {
+          guestToken: guestResponse.guestToken,
+          expiresIn: guestResponse.expiresIn,
+          permissions: {
+            ...guestResponse.permissions,
+            ...initOptions?.customPermissions,
+          },
+        },
+      });
+
+      emitEvent("login", { isGuest: true });
+    } catch (guestError) {
+      const errorMessage =
+        guestError instanceof Error
+          ? guestError.message
+          : "Failed to get guest token";
+      dispatch({
+        type: "AUTH_INIT_FAILURE",
+        payload: errorMessage,
+      });
+      throw new Error(errorMessage);
+    }
+  }, [initOptions, emitEvent]);
+
   const initialize = useCallback(async () => {
     if (isInitializing.current || state.isInitialized) {
       return;
@@ -174,36 +204,6 @@ export function AuthProvider({ children, initOptions }: AuthProviderProps) {
       isInitializing.current = false;
     }
   }, [state.isInitialized, initOptions, emitEvent, requestGuestAccess]);
-
-  const requestGuestAccess = useCallback(async () => {
-    try {
-      const guestResponse = await authService.requestGuestToken();
-
-      dispatch({
-        type: "AUTH_INIT_GUEST",
-        payload: {
-          guestToken: guestResponse.guestToken,
-          expiresIn: guestResponse.expiresIn,
-          permissions: {
-            ...guestResponse.permissions,
-            ...initOptions?.customPermissions,
-          },
-        },
-      });
-
-      emitEvent("login", { isGuest: true });
-    } catch (guestError) {
-      const errorMessage =
-        guestError instanceof Error
-          ? guestError.message
-          : "Failed to get guest token";
-      dispatch({
-        type: "AUTH_INIT_FAILURE",
-        payload: errorMessage,
-      });
-      throw new Error(errorMessage);
-    }
-  }, [initOptions, emitEvent]);
 
   // ================================
   // 인증 관련 메서드들

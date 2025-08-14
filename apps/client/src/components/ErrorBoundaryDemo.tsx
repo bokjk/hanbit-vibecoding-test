@@ -158,7 +158,7 @@ export function ErrorBoundaryDemo() {
         <CardHeader>
           <CardTitle>Error Boundary 데모</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="text-sm text-gray-600">
             이 페이지는 Error Boundary의 다양한 기능을 테스트할 수 있습니다.
             개발 환경에서만 사용하세요.
@@ -180,7 +180,7 @@ export function ErrorBoundaryDemo() {
         <CardHeader>
           <CardTitle>1. 기본 렌더링 에러 (Error Boundary로 포착)</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Button
             onClick={() => toggleState("renderError")}
             variant={testStates.renderError ? "destructive" : "default"}
@@ -199,7 +199,7 @@ export function ErrorBoundaryDemo() {
         <CardHeader>
           <CardTitle>2. 커스텀 Error UI</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Button
             onClick={() => toggleState("asyncError")}
             variant={testStates.asyncError ? "destructive" : "default"}
@@ -218,7 +218,7 @@ export function ErrorBoundaryDemo() {
         <CardHeader>
           <CardTitle>3. 비동기 에러 (전역 핸들러가 처리)</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="text-sm text-yellow-600">
             ⚠️ 비동기 에러는 Error Boundary로 잡히지 않고 전역 에러 핸들러가
             처리합니다.
@@ -232,7 +232,7 @@ export function ErrorBoundaryDemo() {
         <CardHeader>
           <CardTitle>4. useEffect 에러 (전역 핸들러가 처리)</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Button
             onClick={() => toggleState("effectError")}
             variant={testStates.effectError ? "destructive" : "default"}
@@ -255,7 +255,7 @@ export function ErrorBoundaryDemo() {
         <CardHeader>
           <CardTitle>5. HOC로 감싸진 컴포넌트</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Button
             onClick={() => toggleState("hocError")}
             variant={testStates.hocError ? "destructive" : "default"}

@@ -269,7 +269,13 @@ export function MonitoringDemo() {
             <CardHeader>
               <CardTitle className="text-base">성능 메트릭</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              fontSize: '0.875rem',
+              lineHeight: '1.25rem'
+            }}>
               <div className="flex justify-between">
                 <span>Web Vitals:</span>
                 <span className="font-medium">
@@ -333,7 +339,13 @@ export function MonitoringDemo() {
             <CardHeader>
               <CardTitle className="text-base">에러 리포팅</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              fontSize: '0.875rem',
+              lineHeight: '1.25rem'
+            }}>
               <div className="flex justify-between">
                 <span>세션 ID:</span>
                 <span className="font-mono text-xs">
@@ -362,7 +374,13 @@ export function MonitoringDemo() {
             <CardHeader>
               <CardTitle className="text-base">Analytics</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              fontSize: '0.875rem',
+              lineHeight: '1.25rem'
+            }}>
               <div className="flex justify-between">
                 <span>세션 ID:</span>
                 <span className="font-mono text-xs">

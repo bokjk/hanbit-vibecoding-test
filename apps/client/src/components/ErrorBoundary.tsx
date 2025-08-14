@@ -236,7 +236,7 @@ function DefaultErrorUI({
           <div className="flex flex-wrap gap-2 pt-4 border-t">
             <Button onClick={onRetry} className="flex-1 sm:flex-none">
               <svg
-                className="w-4 h-4 mr-2"
+                style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -257,7 +257,7 @@ function DefaultErrorUI({
               className="flex-1 sm:flex-none"
             >
               <svg
-                className="w-4 h-4 mr-2"
+                style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

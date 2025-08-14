@@ -1,47 +1,27 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../lib/utils";
 
 /**
  * Linear Design System Input 컴포넌트
  * 다양한 상태와 스타일을 지원하는 입력 컴포넌트
  */
 
-const linearInputVariants = cva(
-  "flex w-full rounded-lg border px-4 py-3 text-sm transition-all duration-150 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-white/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        default: 
-          "bg-white/[0.05] border-white/[0.1] text-[#f7f8f8] focus:border-[#e6e6e6] focus:bg-white/[0.1] focus:ring-[3px] focus:ring-[#e6e6e6]/10",
-        ghost: 
-          "bg-transparent border-white/[0.05] text-[#f7f8f8] focus:border-white/[0.2] focus:bg-white/[0.02]",
-        solid:
-          "bg-[#252830] border-white/[0.1] text-[#f7f8f8] focus:border-[#e6e6e6] focus:ring-[3px] focus:ring-[#e6e6e6]/10",
-      },
-      state: {
-        default: "",
-        error: "border-[#ef4444] focus:border-[#ef4444] focus:ring-[#ef4444]/20",
-        success: "border-[#10b981] focus:border-[#10b981] focus:ring-[#10b981]/20",
-        warning: "border-[#f59e0b] focus:border-[#f59e0b] focus:ring-[#f59e0b]/20",
-      },
-      size: {
-        sm: "h-8 px-3 text-xs",
-        default: "h-10 px-4 text-sm",
-        lg: "h-12 px-4 text-base",
-      }
-    },
-    defaultVariants: {
-      variant: "default",
-      state: "default",
-      size: "default",
-    },
-  }
-);
+type LinearInputVariant = "default" | "ghost" | "solid";
+type LinearInputState = "default" | "error" | "success" | "warning";
+type LinearInputSize = "sm" | "default" | "lg";
 
-export interface LinearInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
-    VariantProps<typeof linearInputVariants> {
+export interface LinearInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+  /**
+   * 입력 필드 변형
+   */
+  variant?: LinearInputVariant;
+  /**
+   * 입력 필드 상태
+   */
+  state?: LinearInputState;
+  /**
+   * 입력 필드 크기
+   */
+  size?: LinearInputSize;
   /**
    * 입력 필드 라벨
    */
@@ -64,62 +44,187 @@ export interface LinearInputProps
   endIcon?: React.ReactNode;
 }
 
+const getInputStyles = (
+  variant: LinearInputVariant = "default",
+  state: LinearInputState = "default",
+  size: LinearInputSize = "default",
+  hasStartIcon: boolean = false,
+  hasEndIcon: boolean = false
+): React.CSSProperties => {
+  const baseStyles: React.CSSProperties = {
+    display: 'flex',
+    width: '100%',
+    borderRadius: '0.5rem',
+    border: '1px solid',
+    fontSize: '0.875rem',
+    lineHeight: '1.25rem',
+    transition: 'all 150ms ease',
+    outline: 'none',
+    ...(hasStartIcon && { paddingLeft: '2.5rem' }),
+    ...(hasEndIcon && { paddingRight: '2.5rem' })
+  };
+
+  // Variant styles
+  const variantStyles: Record<LinearInputVariant, React.CSSProperties> = {
+    default: {
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      color: '#f7f8f8'
+    },
+    ghost: {
+      backgroundColor: 'transparent',
+      borderColor: 'rgba(255, 255, 255, 0.05)',
+      color: '#f7f8f8'
+    },
+    solid: {
+      backgroundColor: '#252830',
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      color: '#f7f8f8'
+    }
+  };
+
+  // State styles
+  const stateStyles: Record<LinearInputState, React.CSSProperties> = {
+    default: {},
+    error: {
+      borderColor: '#ef4444'
+    },
+    success: {
+      borderColor: '#10b981'
+    },
+    warning: {
+      borderColor: '#f59e0b'
+    }
+  };
+
+  // Size styles
+  const sizeStyles: Record<LinearInputSize, React.CSSProperties> = {
+    sm: { height: '2rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', fontSize: '0.75rem', lineHeight: '1rem' },
+    default: { height: '2.5rem', paddingLeft: '1rem', paddingRight: '1rem', fontSize: '0.875rem', lineHeight: '1.25rem' },
+    lg: { height: '3rem', paddingLeft: '1rem', paddingRight: '1rem', fontSize: '1rem', lineHeight: '1.5rem' }
+  };
+
+  return {
+    ...baseStyles,
+    ...variantStyles[variant],
+    ...stateStyles[state],
+    ...sizeStyles[size]
+  };
+};
+
 const LinearInput = React.forwardRef<HTMLInputElement, LinearInputProps>(
   ({ 
-    className, 
-    variant, 
-    state, 
-    size: inputSize,
+    variant = "default",
+    state = "default",
+    size = "default",
     label,
     helperText,
     errorMessage,
     startIcon,
     endIcon,
+    style,
+    onFocus,
+    onBlur,
     ...props 
   }, ref) => {
     // 에러가 있으면 state를 error로 설정
     const inputState = errorMessage ? "error" : state;
 
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      const focusStyles: Record<LinearInputVariant, Partial<React.CSSProperties>> = {
+        default: { 
+          borderColor: '#e6e6e6', 
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 0 0 3px rgba(230, 230, 230, 0.1)'
+        },
+        ghost: { 
+          borderColor: 'rgba(255, 255, 255, 0.2)', 
+          backgroundColor: 'rgba(255, 255, 255, 0.02)'
+        },
+        solid: { 
+          borderColor: '#e6e6e6',
+          boxShadow: '0 0 0 3px rgba(230, 230, 230, 0.1)'
+        }
+      };
+
+      const stateFocusStyles: Record<LinearInputState, Partial<React.CSSProperties>> = {
+        default: {},
+        error: { borderColor: '#ef4444', boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)' },
+        success: { borderColor: '#10b981', boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.2)' },
+        warning: { borderColor: '#f59e0b', boxShadow: '0 0 0 3px rgba(245, 158, 11, 0.2)' }
+      };
+
+      Object.assign(e.currentTarget.style, focusStyles[variant], stateFocusStyles[inputState]);
+      onFocus?.(e);
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      const originalStyles = getInputStyles(variant, inputState, size, !!startIcon, !!endIcon);
+      Object.assign(e.currentTarget.style, originalStyles);
+      onBlur?.(e);
+    };
+
     return (
-      <div className="space-y-2">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {label && (
-          <label className="block text-sm font-medium text-[#f7f8f8]">
+          <label style={{ 
+            display: 'block', 
+            fontSize: '0.875rem', 
+            lineHeight: '1.25rem', 
+            fontWeight: '500', 
+            color: '#f7f8f8' 
+          }}>
             {label}
           </label>
         )}
         
-        <div className="relative">
+        <div style={{ position: 'relative' }}>
           {startIcon && (
-            <div className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50">
+            <div style={{
+              position: 'absolute',
+              left: '0.75rem',
+              top: '50%',
+              height: '1rem',
+              width: '1rem',
+              transform: 'translateY(-50%)',
+              color: 'rgba(255, 255, 255, 0.5)'
+            }}>
               {startIcon}
             </div>
           )}
           
           <input
-            className={cn(
-              linearInputVariants({ variant, state: inputState, size: inputSize }),
-              startIcon && "pl-10",
-              endIcon && "pr-10",
-              className
-            )}
             ref={ref}
+            style={{
+              ...getInputStyles(variant, inputState, size, !!startIcon, !!endIcon),
+              ...style
+            }}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             {...props}
           />
           
           {endIcon && (
-            <div className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50">
+            <div style={{
+              position: 'absolute',
+              right: '0.75rem',
+              top: '50%',
+              height: '1rem',
+              width: '1rem',
+              transform: 'translateY(-50%)',
+              color: 'rgba(255, 255, 255, 0.5)'
+            }}>
               {endIcon}
             </div>
           )}
         </div>
         
         {(helperText || errorMessage) && (
-          <p className={cn(
-            "text-xs",
-            errorMessage 
-              ? "text-[#ef4444]" 
-              : "text-white/50"
-          )}>
+          <p style={{
+            fontSize: '0.75rem',
+            lineHeight: '1rem',
+            color: errorMessage ? '#ef4444' : 'rgba(255, 255, 255, 0.5)'
+          }}>
             {errorMessage || helperText}
           </p>
         )}
@@ -130,4 +235,4 @@ const LinearInput = React.forwardRef<HTMLInputElement, LinearInputProps>(
 
 LinearInput.displayName = "LinearInput";
 
-export { LinearInput, linearInputVariants };
+export { LinearInput };

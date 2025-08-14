@@ -4,9 +4,17 @@
       "Bash(npm run type-check:*)",
       "Bash(npx eslint:*)",
       "Bash(chmod:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(sudo rm:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "context7"
+  ]
 }

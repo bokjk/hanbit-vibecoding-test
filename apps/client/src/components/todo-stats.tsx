@@ -1,3 +1,4 @@
+import React from "react";
 import { Card, CardContent } from "@vive/ui";
 import type { TodoStats } from "@vive/types";
 
@@ -8,25 +9,38 @@ interface TodoStatsProps {
 
 export function TodoStatsComponent({ stats, className = "" }: TodoStatsProps) {
   return (
-    <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${className}`}>
+    <div style={{ 
+      display: 'grid', 
+      gridTemplateColumns: 'repeat(2, 1fr)', 
+      gap: '1rem'
+    }}>
       {/* 전체 할 일 */}
-      <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-200">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+      <Card style={{
+        background: 'linear-gradient(to bottom right, rgb(239 246 255), rgb(219 234 254))',
+        borderColor: 'rgb(191 219 254)',
+        transition: 'all 200ms ease',
+        cursor: 'pointer'
+      }} onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+      }} onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = '';
+      }}>
+        <CardContent style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="text-sm font-medium text-blue-600 mb-1">
+              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'rgb(37 99 235)', marginBottom: '0.25rem' }}>
                 전체 할 일
               </p>
               <p
                 data-testid="stats-total"
-                className="text-3xl font-bold text-blue-700"
+                style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'rgb(29 78 216)' }}
               >
                 {stats.total}
               </p>
             </div>
-            <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+            <div style={{ width: '3rem', height: '3rem', backgroundColor: 'rgb(59 130 246)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg
-                className="h-6 w-6 text-white"
+                style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -44,23 +58,32 @@ export function TodoStatsComponent({ stats, className = "" }: TodoStatsProps) {
       </Card>
 
       {/* 진행 중 */}
-      <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-all duration-200">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+      <Card style={{
+        background: 'linear-gradient(to bottom right, rgb(255 247 237), rgb(254 215 170))',
+        borderColor: 'rgb(253 186 116)',
+        transition: 'all 200ms ease',
+        cursor: 'pointer'
+      }} onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+      }} onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = '';
+      }}>
+        <CardContent style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="text-sm font-medium text-orange-600 mb-1">
+              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'rgb(234 88 12)', marginBottom: '0.25rem' }}>
                 진행 중
               </p>
               <p
                 data-testid="stats-active"
-                className="text-3xl font-bold text-orange-700"
+                style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'rgb(194 65 12)' }}
               >
                 {stats.active}
               </p>
             </div>
-            <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
+            <div style={{ width: '3rem', height: '3rem', backgroundColor: 'rgb(249 115 22)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg
-                className="h-6 w-6 text-white"
+                style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -78,21 +101,30 @@ export function TodoStatsComponent({ stats, className = "" }: TodoStatsProps) {
       </Card>
 
       {/* 완료됨 */}
-      <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-all duration-200">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+      <Card style={{
+        background: 'linear-gradient(to bottom right, rgb(240 253 244), rgb(187 247 208))',
+        borderColor: 'rgb(134 239 172)',
+        transition: 'all 200ms ease',
+        cursor: 'pointer'
+      }} onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+      }} onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = '';
+      }}>
+        <CardContent style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="text-sm font-medium text-green-600 mb-1">완료됨</p>
+              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'rgb(22 163 74)', marginBottom: '0.25rem' }}>완료됨</p>
               <p
                 data-testid="stats-completed"
-                className="text-3xl font-bold text-green-700"
+                style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'rgb(21 128 61)' }}
               >
                 {stats.completed}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+            <div style={{ width: '3rem', height: '3rem', backgroundColor: 'rgb(34 197 94)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg
-                className="h-6 w-6 text-white"
+                style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -110,21 +142,30 @@ export function TodoStatsComponent({ stats, className = "" }: TodoStatsProps) {
       </Card>
 
       {/* 완료율 */}
-      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-all duration-200">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+      <Card style={{
+        background: 'linear-gradient(to bottom right, rgb(250 245 255), rgb(221 214 254))',
+        borderColor: 'rgb(196 181 253)',
+        transition: 'all 200ms ease',
+        cursor: 'pointer'
+      }} onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+      }} onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = '';
+      }}>
+        <CardContent style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="text-sm font-medium text-purple-600 mb-1">완료율</p>
+              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'rgb(147 51 234)', marginBottom: '0.25rem' }}>완료율</p>
               <p
                 data-testid="stats-completion-rate"
-                className="text-3xl font-bold text-purple-700"
+                style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'rgb(126 34 206)' }}
               >
                 {stats.completionRate}%
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+            <div style={{ width: '3rem', height: '3rem', backgroundColor: 'rgb(168 85 247)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg
-                className="h-6 w-6 text-white"
+                style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -147,35 +188,44 @@ export function TodoStatsComponent({ stats, className = "" }: TodoStatsProps) {
 /* 프로그레스 바 컴포넌트 */
 export function TodoProgressBar({ stats, className = "" }: TodoStatsProps) {
   return (
-    <Card className={`bg-gradient-to-r from-gray-50 to-gray-100 ${className}`}>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-800">
+    <Card style={{ 
+      background: 'linear-gradient(to right, rgb(249 250 251), rgb(243 244 246))',
+      // className prop removed
+    }}>
+      <CardContent style={{ padding: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: 'rgb(31 41 55)' }}>
             전체 진행 상황
           </h3>
-          <span className="text-2xl font-bold text-gray-700">
+          <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'rgb(55 65 81)' }}>
             {stats.completionRate}%
           </span>
         </div>
 
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {/* 메인 프로그레스 바 */}
-          <div className="relative w-full h-6 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+          <div style={{ position: 'relative', width: '100%', height: '1.5rem', backgroundColor: 'rgb(229 231 235)', borderRadius: '9999px', overflow: 'hidden', boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)' }}>
             <div
-              className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
-              style={{ width: `${stats.completionRate}%` }}
+              style={{ 
+                height: '100%', 
+                background: 'linear-gradient(to right, rgb(59 130 246), rgb(168 85 247), rgb(34 197 94))', 
+                borderRadius: '9999px', 
+                transition: 'all 1000ms ease-out', 
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                width: `${stats.completionRate}%`
+              }}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full"></div>
+            <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent)', borderRadius: '9999px' }}></div>
           </div>
 
           {/* 상세 진행률 표시 */}
-          <div className="flex justify-between text-sm text-gray-600">
-            <span className="flex items-center">
-              <div className="w-3 h-3 bg-orange-400 rounded-full mr-2"></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'rgb(75 85 99)' }}>
+            <span style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: 'rgb(251 146 60)', borderRadius: '50%', marginRight: '0.5rem' }}></div>
               진행중 {stats.active}개
             </span>
-            <span className="flex items-center">
-              <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
+            <span style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: 'rgb(74 222 128)', borderRadius: '50%', marginRight: '0.5rem' }}></div>
               완료 {stats.completed}개
             </span>
           </div>
@@ -188,42 +238,56 @@ export function TodoProgressBar({ stats, className = "" }: TodoStatsProps) {
 /* 모바일용 간단한 통계 */
 export function TodoStatsCard({ stats, className = "" }: TodoStatsProps) {
   return (
-    <Card className={`md:hidden ${className}`}>
-      <CardContent className="p-4">
-        <div className="flex justify-between items-center text-sm">
-          <div className="text-center">
-            <div className="text-lg font-bold text-blue-600">{stats.total}</div>
-            <div className="text-gray-600">전체</div>
+    <Card style={{ display: 'none' }}>
+      <style>
+        {`
+          @media (min-width: 768px) {
+            .mobile-stats { display: none !important; }
+          }
+        `}
+      </style>
+      <div className="mobile-stats">
+      <CardContent style={{ padding: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.875rem' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'rgb(37 99 235)' }}>{stats.total}</div>
+            <div style={{ color: 'rgb(75 85 99)' }}>전체</div>
           </div>
-          <div className="text-center">
-            <div className="text-lg font-bold text-orange-600">
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'rgb(234 88 12)' }}>
               {stats.active}
             </div>
-            <div className="text-gray-600">진행중</div>
+            <div style={{ color: 'rgb(75 85 99)' }}>진행중</div>
           </div>
-          <div className="text-center">
-            <div className="text-lg font-bold text-green-600">
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'rgb(22 163 74)' }}>
               {stats.completed}
             </div>
-            <div className="text-gray-600">완료</div>
+            <div style={{ color: 'rgb(75 85 99)' }}>완료</div>
           </div>
-          <div className="text-center">
-            <div className="text-lg font-bold text-purple-600">
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'rgb(147 51 234)' }}>
               {stats.completionRate}%
             </div>
-            <div className="text-gray-600">완료율</div>
+            <div style={{ color: 'rgb(75 85 99)' }}>완료율</div>
           </div>
         </div>
 
-        <div className="mt-4">
-          <div className="w-full bg-gray-200 rounded-full h-2">
+        <div style={{ marginTop: '1rem' }}>
+          <div style={{ width: '100%', backgroundColor: 'rgb(229 231 235)', borderRadius: '9999px', height: '0.5rem' }}>
             <div
-              className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${stats.completionRate}%` }}
+              style={{ 
+                background: 'linear-gradient(to right, rgb(59 130 246), rgb(34 197 94))', 
+                height: '0.5rem', 
+                borderRadius: '9999px', 
+                transition: 'all 500ms ease',
+                width: `${stats.completionRate}%`
+              }}
             />
           </div>
         </div>
       </CardContent>
+      </div>
     </Card>
   );
 }

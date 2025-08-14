@@ -66,25 +66,50 @@ function TodoContainerContent() {
     : filteredTodos;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(to bottom right, #f9fafb, rgba(219, 234, 254, 0.3), rgba(237, 233, 254, 0.3))'
+    }}>
       {/* 헤더 */}
       <TodoHeader onSearch={handleSearch} />
 
       {/* 메인 대시보드 */}
-      <main className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <main style={{
+        paddingLeft: '1rem',
+        paddingRight: '1rem',
+        paddingTop: '2rem',
+        paddingBottom: '2rem'
+      }}>
+        <style>
+          {`
+            /* Main container padding handled by inline styles */
+          `}
+        </style>
+        <div style={{
+          maxWidth: '80rem',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2rem'
+        }}>
           {/* 마이그레이션 상태 표시 */}
           <section>
-            <MigrationStatus className="mb-4" />
+            <MigrationStatus style={{ marginBottom: '1rem' }} />
           </section>
 
           {/* 상단 통계 대시보드 */}
           <section data-testid="todo-dashboard">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                lineHeight: '2rem',
+                fontWeight: 'bold',
+                color: '#111827',
+                marginBottom: '0.5rem'
+              }}>
                 대시보드 개요
               </h2>
-              <p className="text-gray-600">
+              <p style={{ color: '#4b5563' }}>
                 현재 진행 상황을 한눈에 확인하세요
               </p>
             </div>
@@ -97,80 +122,184 @@ function TodoContainerContent() {
           </section>
 
           {/* 빠른 작업 및 필터 패널 */}
-          <section className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* 왼쪽: 할 일 입력 */}
-            <div className="lg:col-span-3">
-              <Card className="bg-white/70 backdrop-blur-sm border-white/50 shadow-xl">
-                <CardContent className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      새로운 할 일 추가
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      목표를 설정하고 우선순위를 정해보세요
-                    </p>
-                  </div>
-                  <TodoInput />
-                </CardContent>
-              </Card>
-            </div>
+          <section style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            gap: '1.5rem'
+          }}>
+            <style>
+              {`
+                @media (min-width: 1024px) {
+                  .section-grid { grid-template-columns: repeat(4, 1fr) !important; }
+                  .input-section { grid-column: span 3 / span 3 !important; }
+                  .filter-section { grid-column: span 1 / span 1 !important; }
+                }
+              `}
+            </style>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr',
+              gap: '1.5rem'
+            }}>
+              {/* 왼쪽: 할 일 입력 */}
+              <div>
+                <style>
+                  {`
+                    @media (min-width: 1024px) {
+                      .input-section { grid-column: span 3 / span 3 !important; }
+                    }
+                  `}
+                </style>
+                <div className="input-section" style={{ gridColumn: 'span 1 / span 1' }}>
+                <Card style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(8px)',
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+                }}>
+                  <CardContent style={{ padding: '1.5rem' }}>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <h3 style={{
+                        fontSize: '1.125rem',
+                        lineHeight: '1.75rem',
+                        fontWeight: '600',
+                        color: '#111827',
+                        marginBottom: '0.5rem'
+                      }}>
+                        새로운 할 일 추가
+                      </h3>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        lineHeight: '1.25rem',
+                        color: '#4b5563'
+                      }}>
+                        목표를 설정하고 우선순위를 정해보세요
+                      </p>
+                    </div>
+                    <TodoInput />
+                  </CardContent>
+                </Card>
+                </div>
+              </div>
 
-            {/* 오른쪽: 필터 패널 */}
-            <div className="lg:col-span-1">
-              <Card className="bg-white/70 backdrop-blur-sm border-white/50 shadow-xl">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      필터 & 정렬
-                    </h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={toggleFilterPanel}
-                      className="lg:hidden"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+              {/* 오른쪽: 필터 패널 */}
+              <div>
+                <style>
+                  {`
+                    @media (min-width: 1024px) {
+                      .filter-section { grid-column: span 1 / span 1 !important; }
+                    }
+                  `}
+                </style>
+                <div className="filter-section" style={{ gridColumn: 'span 1 / span 1' }}>
+                <Card style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(8px)',
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+                }}>
+                  <CardContent style={{ padding: '1.5rem' }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '1rem'
+                    }}>
+                      <h3 style={{
+                        fontSize: '1.125rem',
+                        lineHeight: '1.75rem',
+                        fontWeight: '600',
+                        color: '#111827'
+                      }}>
+                        필터 & 정렬
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={toggleFilterPanel}
+                        style={{ display: 'none' }}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </Button>
-                  </div>
+                        <style>
+                          {`
+                            @media (max-width: 1023px) {
+                              .filter-toggle { display: inline-flex !important; }
+                            }
+                          `}
+                        </style>
+                        <div className="filter-toggle" style={{ display: 'none' }}>
+                          <svg
+                            style={{ height: '1rem', width: '1rem' }}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </div>
+                      </Button>
+                    </div>
 
-                  <div
-                    className={`${showFilterPanel ? "block" : "hidden"} lg:block`}
-                  >
-                    <TodoFilters
-                      filter={filterHelpers}
-                      onFilterChange={filterHelpers}
-                      syncHelpers={syncHelpers}
-                      metadata={metadata}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                    <div style={{
+                      display: showFilterPanel ? 'block' : 'none'
+                    }}>
+                      <style>
+                        {`
+                          @media (min-width: 1024px) {
+                            .filter-content { display: block !important; }
+                          }
+                        `}
+                      </style>
+                      <div className="filter-content" style={{
+                        display: showFilterPanel ? 'block' : 'none'
+                      }}>
+                        <TodoFilters
+                          filter={filterHelpers}
+                          onFilterChange={filterHelpers}
+                          syncHelpers={syncHelpers}
+                          metadata={metadata}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                </div>
+              </div>
             </div>
           </section>
 
           {/* 할 일 목록 섹션 */}
           <section>
-            <div className="flex items-center justify-between mb-6">
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1.5rem'
+            }}>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">할 일 목록</h2>
-                <p className="text-gray-600 mt-1">
+                <h2 style={{
+                  fontSize: '1.5rem',
+                  lineHeight: '2rem',
+                  fontWeight: 'bold',
+                  color: '#111827'
+                }}>할 일 목록</h2>
+                <p style={{
+                  color: '#4b5563',
+                  marginTop: '0.25rem'
+                }}>
                   {searchFilteredTodos.length > 0
                     ? `총 ${searchFilteredTodos.length}개의 할 일이 있습니다`
                     : "등록된 할 일이 없습니다"}
                   {searchQuery && (
-                    <span className="ml-2 text-blue-600 font-medium">
+                    <span style={{
+                      marginLeft: '0.5rem',
+                      color: '#2563eb',
+                      fontWeight: '500'
+                    }}>
                       "{searchQuery}" 검색 결과
                     </span>
                   )}
@@ -178,52 +307,99 @@ function TodoContainerContent() {
               </div>
 
               {/* 뷰 모드 선택 */}
-              <div className="hidden md:flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 bg-blue-100 text-blue-600"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+              <div style={{
+                display: 'none',
+                alignItems: 'center',
+                gap: '0.5rem',
+                backgroundColor: 'white',
+                borderRadius: '0.5rem',
+                padding: '0.25rem',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+              }}>
+                <style>
+                  {`
+                    @media (min-width: 768px) {
+                      .view-mode-selector { display: flex !important; }
+                    }
+                  `}
+                </style>
+                <div className="view-mode-selector" style={{
+                  display: 'none',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  backgroundColor: 'white',
+                  borderRadius: '0.5rem',
+                  padding: '0.25rem',
+                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    style={{
+                      height: '2rem',
+                      width: '2rem',
+                      padding: 0,
+                      backgroundColor: '#dbeafe',
+                      color: '#2563eb'
+                    }}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                    />
-                  </svg>
-                </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                    />
-                  </svg>
-                </Button>
+                    <svg
+                      style={{ height: '1rem', width: '1rem' }}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                      />
+                    </svg>
+                  </Button>
+                  <Button variant="ghost" size="sm" style={{ height: '2rem', width: '2rem', padding: 0 }}>
+                    <svg
+                      style={{ height: '1rem', width: '1rem' }}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                      />
+                    </svg>
+                  </Button>
+                </div>
               </div>
             </div>
 
             {/* 할 일 목록 */}
             {searchFilteredTodos.length === 0 ? (
-              <Card className="bg-white/50 backdrop-blur-sm border-dashed border-2 border-gray-300">
-                <CardContent className="p-12">
-                  <div className="text-center">
-                    <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+              <Card style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(8px)',
+                borderStyle: 'dashed',
+                borderWidth: '2px',
+                borderColor: '#d1d5db'
+              }}>
+                <CardContent style={{ padding: '3rem' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{
+                      width: '5rem',
+                      height: '5rem',
+                      margin: '0 auto',
+                      marginBottom: '1rem',
+                      background: 'linear-gradient(to bottom right, #dbeafe, #e9d5ff)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
                       <svg
-                        className="h-10 w-10 text-gray-400"
+                        style={{ height: '2.5rem', width: '2.5rem', color: '#9ca3af' }}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -236,12 +412,22 @@ function TodoContainerContent() {
                         />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    <h3 style={{
+                      fontSize: '1.25rem',
+                      lineHeight: '1.75rem',
+                      fontWeight: '600',
+                      color: '#111827',
+                      marginBottom: '0.5rem'
+                    }}>
                       {searchQuery
                         ? "검색 결과가 없습니다"
                         : "할 일이 없습니다"}
                     </h3>
-                    <p className="text-gray-600 max-w-md mx-auto">
+                    <p style={{
+                      color: '#4b5563',
+                      maxWidth: '28rem',
+                      margin: '0 auto'
+                    }}>
                       {searchQuery
                         ? `"${searchQuery}"와 일치하는 할 일을 찾을 수 없습니다. 다른 키워드로 검색해보세요.`
                         : "새로운 할 일을 추가해서 생산성을 높여보세요!"}
@@ -250,7 +436,7 @@ function TodoContainerContent() {
                       <Button
                         variant="outline"
                         onClick={() => setSearchQuery("")}
-                        className="mt-4"
+                        style={{ marginTop: '1rem' }}
                       >
                         검색 초기화
                       </Button>
@@ -259,13 +445,33 @@ function TodoContainerContent() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                <TodoList
-                  todos={searchFilteredTodos}
-                  onToggleTodo={handleToggleTodo}
-                  onDeleteTodo={handleDeleteTodo}
-                  onEditTodo={handleEditTodo}
-                />
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr',
+                gap: '1.5rem'
+              }}>
+                <style>
+                  {`
+                    @media (min-width: 768px) {
+                      .todo-grid { grid-template-columns: repeat(2, 1fr) !important; }
+                    }
+                    @media (min-width: 1280px) {
+                      .todo-grid { grid-template-columns: repeat(3, 1fr) !important; }
+                    }
+                  `}
+                </style>
+                <div className="todo-grid" style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '1.5rem'
+                }}>
+                  <TodoList
+                    todos={searchFilteredTodos}
+                    onToggleTodo={handleToggleTodo}
+                    onDeleteTodo={handleDeleteTodo}
+                    onEditTodo={handleEditTodo}
+                  />
+                </div>
               </div>
             )}
           </section>

@@ -34,10 +34,10 @@ const AuthPromptBanner = lazy(() =>
  */
 function LoadingFallback({ message = "로딩 중..." }: { message?: string }) {
   return (
-    <div className="flex items-center justify-center p-8">
-      <div className="flex flex-col items-center gap-3">
-        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-        <p className="text-sm text-gray-600">{message}</p>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+        <Loader2 style={{ width: '1.5rem', height: '1.5rem', color: '#3b82f6', animation: 'spin 1s linear infinite' }} />
+        <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: '#4b5563' }}>{message}</p>
       </div>
     </div>
   );
@@ -123,21 +123,21 @@ function AppContent() {
   // 앱 초기화 중 로딩 표시
   if (isInitializing) {
     return (
-      <main className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          <p className="text-sm text-gray-600">앱을 초기화하고 있습니다...</p>
+      <main style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <Loader2 style={{ width: '2rem', height: '2rem', color: '#3b82f6', animation: 'spin 1s linear infinite' }} />
+          <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: '#4b5563' }}>앱을 초기화하고 있습니다...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       {/* 인증 유도 배너 - 독립적으로 로딩 */}
       {showAuthBanner && (
         <Suspense fallback={<LoadingFallback message="배너를 로딩 중..." />}>
-          <div className="sticky top-0 z-10 p-4">
+          <div style={{ position: 'sticky', top: 0, zIndex: 10, padding: '1rem' }}>
             <AuthPromptBanner
               onPromptOpen={() => {
                 // TODO: AuthPrompt 다이얼로그 열기 (향후 구현)
@@ -150,7 +150,7 @@ function AppContent() {
       )}
 
       {/* 메인 컨텐츠 - 독립적으로 로딩 */}
-      <div className={showAuthBanner ? "pt-4" : ""}>
+      <div style={{ paddingTop: showAuthBanner ? '1rem' : '0' }}>
         <Suspense fallback={<LoadingFallback message="TODO 앱을 로딩 중..." />}>
           <TodoContainer />
         </Suspense>

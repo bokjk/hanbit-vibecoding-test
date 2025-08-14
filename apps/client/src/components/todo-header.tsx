@@ -1,5 +1,5 @@
+import React, { useState } from "react";
 import { Button, Input } from "@vive/ui";
-import { useState } from "react";
 
 interface TodoHeaderProps {
   onSearch?: (query: string) => void;
@@ -17,16 +17,40 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
   return (
     <header
       data-testid="todo-header"
-      className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white shadow-xl"
+      style={{
+        background: 'linear-gradient(to right, rgb(147 51 234), rgb(37 99 235), rgb(67 56 202))',
+        color: 'white',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+      }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+      <div style={{
+        maxWidth: '80rem',
+        margin: '0 auto',
+        padding: '0 1rem'
+      }}>
+        <style>
+          {`
+            @media (min-width: 640px) {
+              .header-main { padding-left: 1.5rem; padding-right: 1.5rem; }
+            }
+            @media (min-width: 1024px) {
+              .header-main { padding-left: 2rem; padding-right: 2rem; }
+            }
+          `}
+        </style>
+        <div className="header-main" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '5rem', paddingLeft: '1rem', paddingRight: '1rem' }}>
           {/* 왼쪽: 로고와 제목 */}
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
-              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl shadow-lg">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(4px)',
+                padding: '0.75rem',
+                borderRadius: '0.75rem',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+              }}>
                 <svg
-                  className="h-6 w-6 text-white"
+                  style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -40,10 +64,24 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
                 </svg>
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                <h1 style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  background: 'linear-gradient(to right, white, rgb(219 234 254))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
                   TaskFlow
                 </h1>
-                <p className="text-sm text-blue-100 hidden sm:block">
+                <p style={{
+                  fontSize: '0.875rem',
+                  color: 'rgb(219 234 254)',
+                  display: 'none',
+                  '@media (min-width: 640px)': {
+                    display: 'block'
+                  }
+                }}>
                   생산성을 위한 스마트 할 일 관리
                 </p>
               </div>
@@ -51,11 +89,33 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
           </div>
 
           {/* 가운데: 검색 */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <div style={{
+            display: 'none',
+            flex: '1',
+            maxWidth: '28rem',
+            margin: '0 2rem'
+          }} style={{ display: 'none', flex: '1', maxWidth: '28rem', margin: '0 2rem' }}>
+            <style>
+              {`
+                @media (min-width: 768px) {
+                  .search-container { display: flex !important; }
+                }
+              `}
+            </style>
+            <div className="search-container">
+            <div style={{ position: 'relative', width: '100%' }}>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                paddingLeft: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                pointerEvents: 'none'
+              }}>
                 <svg
-                  className="h-5 w-5 text-blue-200"
+                  style={{ height: '1.25rem', width: '1.25rem', color: 'rgb(191 219 254)' }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -74,21 +134,34 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
                 placeholder="할 일 검색..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder-blue-200 focus:bg-white/20 focus:border-white/40"
+                style={{
+                  paddingLeft: '2.5rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white'
+                }}
               />
+            </div>
             </div>
           </div>
 
           {/* 오른쪽: 액션 버튼들과 프로필 */}
-          <div className="flex items-center space-x-4">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {/* 테마 토글 */}
             <Button
               variant="ghost"
               size="sm"
-              className="text-white hover:bg-white/10 p-2 rounded-lg"
+              style={{
+                color: 'white',
+                padding: '0.5rem',
+                borderRadius: '0.5rem',
+                transition: 'background-color 200ms ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
             >
               <svg
-                className="h-5 w-5"
+                style={{ height: '1.25rem', width: '1.25rem' }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -106,10 +179,18 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="text-white hover:bg-white/10 p-2 rounded-lg relative"
+              style={{
+                color: 'white',
+                padding: '0.5rem',
+                borderRadius: '0.5rem',
+                position: 'relative',
+                transition: 'background-color 200ms ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
             >
               <svg
-                className="h-5 w-5"
+                style={{ height: '1.25rem', width: '1.25rem' }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -121,20 +202,57 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
                   d="M15 17h5l-5 5v-5zM11 19H6a2 2 0 01-2-2V7a2 2 0 012-2h5m-1 11a4 4 0 01-4-4V7a4 4 0 014-4h5a4 4 0 014 4v1"
                 />
               </svg>
-              <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-400 rounded-full"></div>
+              <div style={{
+                position: 'absolute',
+                top: '-0.25rem',
+                right: '-0.25rem',
+                height: '0.75rem',
+                width: '0.75rem',
+                backgroundColor: 'rgb(248 113 113)',
+                borderRadius: '50%'
+              }}></div>
             </Button>
 
             {/* 프로필 드롭다운 */}
-            <div className="flex items-center space-x-3 bg-white/10 rounded-lg px-3 py-2 hover:bg-white/20 transition-colors cursor-pointer">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '0.5rem',
+              padding: '0.5rem 0.75rem',
+              cursor: 'pointer',
+              transition: 'background-color 200ms ease'
+            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}>
+              <div style={{
+                width: '2rem',
+                height: '2rem',
+                background: 'linear-gradient(to right, rgb(244 114 182), rgb(168 85 247))',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.875rem',
+                fontWeight: 'bold',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+              }}>
                 K
               </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium">김사용자</p>
-                <p className="text-xs text-blue-200">관리자</p>
+              <div style={{ display: 'none', textAlign: 'left' }}>
+                <style>
+                  {`
+                    @media (min-width: 640px) {
+                      .profile-info { display: block !important; }
+                    }
+                  `}
+                </style>
+                <div className="profile-info">
+                <p style={{ fontSize: '0.875rem', fontWeight: '500' }}>김사용자</p>
+                <p style={{ fontSize: '0.75rem', color: 'rgb(191 219 254)' }}>관리자</p>
+                </div>
               </div>
               <svg
-                className="h-4 w-4 text-blue-200"
+                style={{ height: '1rem', width: '1rem', color: 'rgb(191 219 254)' }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

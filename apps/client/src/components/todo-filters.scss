@@ -1,0 +1,292 @@
+@use '../index.scss' as *;
+
+.todo-filters {
+  // 기본 스타일
+  &.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  // 필터 섹션
+  .filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: spacing(3);
+
+    .section-title {
+      font-size: font-size(sm);
+      font-weight: 600;
+      color: color(gray-700);
+      display: flex;
+      align-items: center;
+
+      .icon {
+        width: spacing(4);
+        height: spacing(4);
+        margin-right: spacing(2);
+      }
+    }
+
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: spacing(2);
+    }
+  }
+
+  // 필터 칩 스타일
+  .filter-chip {
+    height: spacing(10);
+    padding: 0 spacing(4);
+    transition: all 200ms ease;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    &.active {
+      background: linear-gradient(to right, color(blue-500), color(purple-600));
+      color: color(white);
+      box-shadow: shadow(lg);
+      border: none;
+    }
+
+    &.inactive {
+      background-color: color(white);
+      border-color: color(gray-200);
+      color: color(foreground);
+
+      &:hover {
+        background-color: color(gray-50);
+        border-color: color(gray-300);
+      }
+    }
+
+    .chip-content {
+      display: flex;
+      align-items: center;
+      gap: spacing(2);
+
+      .icon {
+        width: spacing(4);
+        height: spacing(4);
+      }
+
+      .count {
+        font-size: font-size(xs);
+        padding: spacing(1) spacing(2);
+        border-radius: 9999px;
+
+        &.active {
+          background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        &.inactive {
+          background-color: color(gray-100);
+        }
+      }
+    }
+  }
+
+  // 우선순위 필터
+  .priority-filters {
+    .priority-icon {
+      width: spacing(3);
+      height: spacing(3);
+      border-radius: 50%;
+
+      &.high {
+        background-color: color(red-500);
+      }
+
+      &.medium {
+        background-color: color(orange-500);
+      }
+
+      &.low {
+        background-color: color(green-500);
+      }
+    }
+  }
+
+  // 정렬 옵션
+  .sort-section {
+    .sort-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: spacing(3);
+    }
+
+    .select-trigger {
+      height: spacing(10);
+      background-color: color(white);
+      border: 1px solid color(gray-200);
+      transition: border-color 200ms ease;
+
+      &:hover {
+        border-color: color(gray-300);
+      }
+
+      &:focus {
+        border-color: color(blue-500);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+      }
+    }
+
+    .select-item {
+      display: flex;
+      align-items: center;
+
+      .item-content {
+        display: flex;
+        align-items: center;
+
+        .icon {
+          width: spacing(4);
+          height: spacing(4);
+          margin-right: spacing(2);
+        }
+      }
+    }
+  }
+
+  // 동기화 상태 섹션
+  .sync-section {
+    padding-top: spacing(4);
+    border-top: 1px solid color(gray-200);
+
+    .sync-status {
+      display: flex;
+      flex-direction: column;
+      gap: spacing(2);
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: font-size(xs);
+
+        .label {
+          color: color(gray-600);
+        }
+
+        .value {
+          padding: spacing(1) spacing(2);
+          border-radius: 9999px;
+
+          &.online {
+            background-color: color(green-100);
+            color: color(green-700);
+          }
+
+          &.offline {
+            background-color: color(red-100);
+            color: color(red-700);
+          }
+
+          &.syncing {
+            background-color: color(blue-100);
+            color: color(blue-700);
+          }
+
+          &.error {
+            background-color: color(red-100);
+            color: color(red-700);
+          }
+
+          &.idle {
+            background-color: color(gray-100);
+            color: color(gray-700);
+          }
+
+          &.pending {
+            background-color: color(orange-100);
+            color: color(orange-700);
+          }
+        }
+      }
+    }
+
+    .sync-actions {
+      display: flex;
+      flex-direction: column;
+      gap: spacing(2);
+
+      .sync-button {
+        width: 100%;
+        height: spacing(8);
+        font-size: font-size(xs);
+        border: 1px solid color(gray-200);
+        background-color: color(white);
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: all 200ms ease;
+
+        &:hover:not(:disabled) {
+          background-color: color(gray-50);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        &.primary {
+          background-color: color(primary);
+          color: color(primary-foreground);
+          border-color: color(primary);
+
+          &:hover:not(:disabled) {
+            background-color: color(primary);
+            opacity: 0.9;
+          }
+        }
+
+        &.destructive {
+          background-color: color(destructive);
+          color: color(destructive-foreground);
+          border-color: color(destructive);
+
+          &:hover:not(:disabled) {
+            background-color: color(destructive);
+            opacity: 0.9;
+          }
+        }
+
+        .button-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .icon {
+            width: spacing(3);
+            height: spacing(3);
+            margin-right: spacing(2);
+
+            &.spinning {
+              animation: spin 1s linear infinite;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// 애니메이션
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

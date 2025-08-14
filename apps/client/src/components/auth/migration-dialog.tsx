@@ -111,18 +111,18 @@ export function MigrationDialog({
    */
   const renderStageIcon = () => {
     if (migration.migration.error) {
-      return <AlertCircle className="w-6 h-6 text-red-500" />;
+      return <AlertCircle style={{ width: '1.5rem', height: '1.5rem', color: '#ef4444' }} />;
     }
 
     if (migration.migration.isComplete) {
-      return <CheckCircle className="w-6 h-6 text-green-500" />;
+      return <CheckCircle style={{ width: '1.5rem', height: '1.5rem', color: '#22c55e' }} />;
     }
 
     if (migration.migration.isInProgress) {
-      return <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />;
+      return <Loader2 style={{ width: '1.5rem', height: '1.5rem', color: '#3b82f6', animation: 'spin 1s linear infinite' }} />;
     }
 
-    return <Database className="w-6 h-6 text-gray-400" />;
+    return <Database style={{ width: '1.5rem', height: '1.5rem', color: '#9ca3af' }} />;
   };
 
   /**
@@ -170,9 +170,9 @@ export function MigrationDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent style={{ maxWidth: '28rem' }}>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
+          <DialogTitle style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {renderStageIcon()}
             <span>데이터 마이그레이션</span>
           </DialogTitle>
@@ -180,41 +180,59 @@ export function MigrationDialog({
             로컬 데이터를 클라우드 계정으로 이동합니다
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* 마이그레이션 플로우 시각화 */}
-          <div className="flex items-center justify-between py-4">
-            <div className="flex flex-col items-center gap-2">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem', paddingBottom: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
               <Database
-                className={`w-8 h-8 ${migration.migration.stage === "checking" || migration.migration.stage === "preparing" ? "text-blue-500" : "text-gray-300"}`}
+                style={{
+                  width: '2rem',
+                  height: '2rem',
+                  color: migration.migration.stage === "checking" || migration.migration.stage === "preparing" ? '#3b82f6' : '#d1d5db'
+                }}
               />
-              <span className="text-xs text-gray-500">로컬 데이터</span>
+              <span style={{ fontSize: '0.75rem', lineHeight: '1rem', color: '#6b7280' }}>로컬 데이터</span>
             </div>
             <ArrowRight
-              className={`w-6 h-6 ${migration.migration.isInProgress ? "text-blue-500 animate-pulse" : "text-gray-300"}`}
+              style={{
+                width: '1.5rem',
+                height: '1.5rem',
+                color: migration.migration.isInProgress ? '#3b82f6' : '#d1d5db',
+                animation: migration.migration.isInProgress ? 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none'
+              }}
             />
-            <div className="flex flex-col items-center gap-2">
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
               <Cloud
-                className={`w-8 h-8 ${migration.migration.isComplete ? "text-green-500" : migration.migration.isInProgress ? "text-blue-500" : "text-gray-300"}`}
+                style={{
+                  width: '2rem',
+                  height: '2rem',
+                  color: migration.migration.isComplete ? '#22c55e' : migration.migration.isInProgress ? '#3b82f6' : '#d1d5db'
+                }}
               />
-              <span className="text-xs text-gray-500">클라우드</span>
+              <span style={{ fontSize: '0.75rem', lineHeight: '1rem', color: '#6b7280' }}>클라우드</span>
             </div>
           </div>
 
           {/* 진행률 표시 */}
           {migration.migration.totalItems > 0 && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', lineHeight: '1.25rem' }}>
                 <span>진행률</span>
                 <span>{Math.round(progress.progress * 100)}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div style={{ width: '100%', backgroundColor: '#e5e7eb', borderRadius: '9999px', height: '0.5rem' }}>
                 <div
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progress.progress * 100}%` }}
+                  style={{
+                    backgroundColor: '#3b82f6',
+                    height: '0.5rem',
+                    borderRadius: '9999px',
+                    transition: 'all 300ms ease',
+                    width: `${progress.progress * 100}%`
+                  }}
                 />
               </div>
               {progress.eta && (
-                <p className="text-xs text-gray-500 text-center">
+                <p style={{ fontSize: '0.75rem', lineHeight: '1rem', color: '#6b7280', textAlign: 'center' }}>
                   예상 완료 시간: {formatETA(progress.eta)}
                 </p>
               )}
@@ -222,14 +240,14 @@ export function MigrationDialog({
           )}
 
           {/* 상태 메시지 */}
-          <div className="text-center py-4">
-            <p className="text-sm text-gray-600">{renderStageDescription()}</p>
+          <div style={{ textAlign: 'center', paddingTop: '1rem', paddingBottom: '1rem' }}>
+            <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: '#4b5563' }}>{renderStageDescription()}</p>
           </div>
 
           {/* 오류 메시지 */}
           {migration.migration.error && (
             <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle style={{ height: '1rem', width: '1rem' }} />
               <AlertDescription>{migration.migration.error}</AlertDescription>
             </Alert>
           )}
@@ -237,7 +255,7 @@ export function MigrationDialog({
           {/* 완료 메시지 */}
           {migration.migration.isComplete && !migration.migration.error && (
             <Alert>
-              <CheckCircle className="h-4 w-4" />
+              <CheckCircle style={{ height: '1rem', width: '1rem' }} />
               <AlertDescription>
                 {migration.migration.migratedItems}개의 할 일이 성공적으로
                 마이그레이션되었습니다.
@@ -247,32 +265,42 @@ export function MigrationDialog({
 
           {/* 세부 정보 토글 */}
           {migration.migration.totalItems > 0 && (
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowDetails(!showDetails)}
-                className="w-full"
+                style={{ width: '100%' }}
               >
                 {showDetails ? "세부 정보 숨기기" : "세부 정보 보기"}
               </Button>
 
               {showDetails && (
-                <div className="text-xs text-gray-500 space-y-1 p-3 bg-gray-50 rounded-md">
-                  <div className="flex justify-between">
+                <div style={{
+                  fontSize: '0.75rem',
+                  lineHeight: '1rem',
+                  color: '#6b7280',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem',
+                  padding: '0.75rem',
+                  backgroundColor: '#f9fafb',
+                  borderRadius: '0.375rem'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>총 항목:</span>
                     <span>{migration.migration.totalItems}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>완료된 항목:</span>
                     <span>{migration.migration.migratedItems}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>현재 단계:</span>
                     <span>{migration.migration.stage}</span>
                   </div>
                   {migration.history.timestamp && (
-                    <div className="flex justify-between">
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>시작 시간:</span>
                       <span>
                         {new Date(
@@ -288,18 +316,18 @@ export function MigrationDialog({
         </div>
 
         {/* 액션 버튼 */}
-        <div className="flex gap-3 mt-6">
+        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
           {!migration.migration.isInProgress &&
             !migration.migration.isComplete && (
               <>
                 <Button
                   onClick={handleStartMigration}
                   disabled={!migration.canStart}
-                  className="flex-1"
+                  style={{ flex: 1 }}
                 >
                   마이그레이션 시작
                 </Button>
-                <Button variant="outline" onClick={onClose} className="flex-1">
+                <Button variant="outline" onClick={onClose} style={{ flex: 1 }}>
                   나중에 하기
                 </Button>
               </>
@@ -310,7 +338,7 @@ export function MigrationDialog({
               <Button
                 variant="destructive"
                 onClick={handleCancelMigration}
-                className="flex-1"
+                style={{ flex: 1 }}
               >
                 취소
               </Button>
@@ -318,16 +346,26 @@ export function MigrationDialog({
           )}
 
           {(migration.migration.isComplete || migration.migration.error) && (
-            <Button onClick={onClose} className="w-full">
+            <Button onClick={onClose} style={{ width: '100%' }}>
               {migration.migration.error ? "닫기" : "완료"}
             </Button>
           )}
         </div>
 
         {/* 도움말 링크 */}
-        <div className="text-center mt-4">
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
           <button
-            className="text-xs text-blue-500 hover:underline"
+            style={{
+              fontSize: '0.75rem',
+              lineHeight: '1rem',
+              color: '#3b82f6',
+              cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
             onClick={() => window.open("/help/migration", "_blank")}
           >
             마이그레이션에 대해 더 알아보기
@@ -351,24 +389,29 @@ export function MigrationStatus({ className = "" }: MigrationStatusProps) {
   if (!isRequired) return null;
 
   const getStatusColor = () => {
-    if (migration.error) return "text-red-500";
-    if (migration.isComplete) return "text-green-500";
-    if (migration.isInProgress) return "text-blue-500";
-    return "text-gray-500";
+    if (migration.error) return "#ef4444";
+    if (migration.isComplete) return "#22c55e";
+    if (migration.isInProgress) return "#3b82f6";
+    return "#6b7280";
   };
 
   const getStatusIcon = () => {
-    if (migration.error) return <AlertCircle className="w-4 h-4" />;
-    if (migration.isComplete) return <CheckCircle className="w-4 h-4" />;
+    if (migration.error) return <AlertCircle style={{ width: '1rem', height: '1rem' }} />;
+    if (migration.isComplete) return <CheckCircle style={{ width: '1rem', height: '1rem' }} />;
     if (migration.isInProgress)
-      return <Loader2 className="w-4 h-4 animate-spin" />;
-    return <Database className="w-4 h-4" />;
+      return <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />;
+    return <Database style={{ width: '1rem', height: '1rem' }} />;
   };
 
   return (
-    <div className={`flex items-center gap-2 ${getStatusColor()} ${className}`}>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      color: getStatusColor()
+    }}>
       {getStatusIcon()}
-      <span className="text-sm">
+      <span style={{ fontSize: '0.875rem', lineHeight: '1.25rem' }}>
         {migration.isInProgress
           ? `마이그레이션 중... ${Math.round(progress * 100)}%`
           : migration.isComplete

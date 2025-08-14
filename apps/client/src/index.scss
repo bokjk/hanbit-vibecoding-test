@@ -1,0 +1,348 @@
+// SCSS 기본 스타일 및 변수
+// ================================
+
+// 색상 변수
+$colors: (
+  // 기본 색상
+  background: hsl(0, 0%, 100%),
+  foreground: hsl(222.2, 84%, 4.9%),
+  card: hsl(0, 0%, 100%),
+  card-foreground: hsl(222.2, 84%, 4.9%),
+  popover: hsl(0, 0%, 100%),
+  popover-foreground: hsl(222.2, 84%, 4.9%),
+  primary: hsl(222.2, 47.4%, 11.2%),
+  primary-foreground: hsl(210, 40%, 98%),
+  secondary: hsl(210, 40%, 96.1%),
+  secondary-foreground: hsl(222.2, 47.4%, 11.2%),
+  muted: hsl(210, 40%, 96.1%),
+  muted-foreground: hsl(215.4, 16.3%, 46.9%),
+  accent: hsl(210, 40%, 96.1%),
+  accent-foreground: hsl(222.2, 47.4%, 11.2%),
+  destructive: hsl(0, 84.2%, 60.2%),
+  destructive-foreground: hsl(210, 40%, 98%),
+  border: hsl(214.3, 31.8%, 91.4%),
+  input: hsl(214.3, 31.8%, 91.4%),
+  ring: hsl(222.2, 84%, 4.9%),
+  ring-offset-background: hsl(0, 0%, 100%),
+  
+  // Gray 색상 팔레트
+  gray-50: hsl(210, 40%, 98%),
+  gray-100: hsl(210, 40%, 96.1%),
+  gray-200: hsl(214.3, 31.8%, 91.4%),
+  gray-300: hsl(213, 27%, 84%),
+  gray-400: hsl(215, 20.2%, 65.1%),
+  gray-500: hsl(215.4, 16.3%, 46.9%),
+  gray-600: hsl(215.3, 19.3%, 34.5%),
+  gray-700: hsl(215.3, 25%, 26.7%),
+  gray-800: hsl(217.9, 19.1%, 17%),
+  gray-900: hsl(222.2, 47.4%, 11.2%),
+  
+  // Blue 색상 팔레트
+  blue-50: hsl(214, 100%, 97%),
+  blue-100: hsl(214, 95%, 93%),
+  blue-200: hsl(213, 97%, 87%),
+  blue-300: hsl(212, 96%, 78%),
+  blue-400: hsl(213, 94%, 68%),
+  blue-500: hsl(217, 91%, 60%),
+  blue-600: hsl(221, 83%, 53%),
+  blue-700: hsl(224, 76%, 48%),
+  blue-800: hsl(226, 71%, 40%),
+  blue-900: hsl(224, 64%, 33%),
+  
+  // 추가 색상
+  red-500: hsl(0, 84%, 60%),
+  red-100: hsl(0, 93%, 94%),
+  red-700: hsl(0, 74%, 42%),
+  green-500: hsl(142, 71%, 45%),
+  green-100: hsl(142, 76%, 73%),
+  green-700: hsl(142, 69%, 58%),
+  orange-500: hsl(25, 95%, 53%),
+  orange-100: hsl(34, 100%, 92%),
+  purple-600: hsl(262, 83%, 58%),
+  white: hsl(0, 0%, 100%),
+  black: hsl(0, 0%, 0%),
+  transparent: transparent
+);
+
+// 간격 변수
+$spacing: (
+  0: 0,
+  1: 0.25rem,  // 4px
+  2: 0.5rem,   // 8px
+  3: 0.75rem,  // 12px
+  4: 1rem,     // 16px
+  5: 1.25rem,  // 20px
+  6: 1.5rem,   // 24px
+  8: 2rem,     // 32px
+  10: 2.5rem,  // 40px
+  12: 3rem,    // 48px
+  16: 4rem,    // 64px
+  20: 5rem,    // 80px
+  24: 6rem,    // 96px
+  32: 8rem,    // 128px
+  40: 10rem,   // 160px
+  48: 12rem,   // 192px
+  56: 14rem,   // 224px
+  64: 16rem    // 256px
+);
+
+// 폰트 크기
+$font-sizes: (
+  xs: 0.75rem,    // 12px
+  sm: 0.875rem,   // 14px
+  base: 1rem,     // 16px
+  lg: 1.125rem,   // 18px
+  xl: 1.25rem,    // 20px
+  2xl: 1.5rem,    // 24px
+  3xl: 1.875rem,  // 30px
+  4xl: 2.25rem,   // 36px
+  5xl: 3rem,      // 48px
+  6xl: 3.75rem,   // 60px
+  7xl: 4.5rem,    // 72px
+  8xl: 6rem,      // 96px
+  9xl: 8rem       // 128px
+);
+
+// 브레이크포인트
+$breakpoints: (
+  sm: 640px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1280px,
+  2xl: 1536px
+);
+
+// 기본 스타일
+* {
+  border-color: map-get($colors, border);
+  box-sizing: border-box;
+}
+
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+}
+
+body {
+  margin: 0;
+  line-height: inherit;
+  background-color: map-get($colors, background);
+  color: map-get($colors, foreground);
+}
+
+// 유틸리티 함수
+@function color($name) {
+  @return map-get($colors, $name);
+}
+
+@function spacing($size) {
+  @return map-get($spacing, $size);
+}
+
+@function font-size($size) {
+  @return map-get($font-sizes, $size);
+}
+
+// 반응형 믹스인
+@mixin responsive($breakpoint) {
+  @media (min-width: map-get($breakpoints, $breakpoint)) {
+    @content;
+  }
+}
+
+// 그림자
+$shadows: (
+  sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+  base: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+  md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+  lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+  xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+  2xl: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+  none: none
+);
+
+@function shadow($size) {
+  @return map-get($shadows, $size);
+}
+
+// 기본 글로벌 스타일
+hr {
+  height: 0;
+  color: inherit;
+  border-top-width: 1px;
+}
+
+abbr:where([title]) {
+  text-decoration: underline dotted;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+b, strong {
+  font-weight: bolder;
+}
+
+code, kbd, samp, pre {
+  font-family: ui-monospace, SFMono-Regular, "Roboto Mono", "Courier New", monospace;
+  font-size: 1em;
+}
+
+small {
+  font-size: 80%;
+}
+
+sub, sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+table {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+
+button, input, optgroup, select, textarea {
+  font-family: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+button, select {
+  text-transform: none;
+}
+
+button, [type='button'], [type='reset'], [type='submit'] {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+
+:-moz-focusring {
+  outline: auto;
+}
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+progress {
+  vertical-align: baseline;
+}
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+[type='search'] {
+  -webkit-appearance: textfield;
+  outline-offset: -2px;
+}
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
+}
+
+summary {
+  display: list-item;
+}
+
+blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol, ul, menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1;
+  color: map-get($colors, muted-foreground);
+}
+
+button, [role="button"] {
+  cursor: pointer;
+}
+
+:disabled {
+  cursor: default;
+}
+
+img, svg, video, canvas, audio, iframe, embed, object {
+  display: block;
+  vertical-align: middle;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+[hidden] {
+  display: none;
+}
+
+// 애니메이션
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

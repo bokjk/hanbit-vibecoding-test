@@ -10,46 +10,62 @@ interface TodoItemProps {
   onEditTodo: (id: string, title: string) => void;
 }
 
-function getPriorityColor(priority: Priority): string {
+function getPriorityColor(priority: Priority): React.CSSProperties {
   switch (priority) {
     case "high":
-      return "border-l-red-500 bg-gradient-to-r from-red-50 to-white";
+      return {
+        borderLeftWidth: '4px',
+        borderLeftColor: '#ef4444',
+        background: 'linear-gradient(to right, #fef2f2, white)'
+      };
     case "medium":
-      return "border-l-orange-500 bg-gradient-to-r from-orange-50 to-white";
+      return {
+        borderLeftWidth: '4px',
+        borderLeftColor: '#f97316',
+        background: 'linear-gradient(to right, #fff7ed, white)'
+      };
     case "low":
-      return "border-l-green-500 bg-gradient-to-r from-green-50 to-white";
+      return {
+        borderLeftWidth: '4px',
+        borderLeftColor: '#22c55e',
+        background: 'linear-gradient(to right, #f0fdf4, white)'
+      };
     default:
-      return "border-l-gray-500 bg-gradient-to-r from-gray-50 to-white";
+      return {
+        borderLeftWidth: '4px',
+        borderLeftColor: '#6b7280',
+        background: 'linear-gradient(to right, #f9fafb, white)'
+      };
   }
 }
 
 function getPriorityBadge(priority: Priority): {
-  color: string;
+  color: React.CSSProperties;
   label: string;
   icon: string;
 } {
   switch (priority) {
     case "high":
       return {
-        color: "bg-red-500 text-white",
+        color: { backgroundColor: '#ef4444', color: 'white' },
         label: "긴급",
         icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z",
       };
     case "medium":
       return {
-        color: "bg-orange-500 text-white",
+        color: { backgroundColor: '#f97316', color: 'white' },
         label: "보통",
         icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
       };
     case "low":
       return {
-        color: "bg-green-500 text-white",
+        color: { backgroundColor: '#22c55e', color: 'white' },
         label: "낮음",
         icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
       };
     default:
       return {
-        color: "bg-gray-500 text-white",
+        color: { backgroundColor: '#6b7280', color: 'white' },
         label: "보통",
         icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
       };
@@ -105,22 +121,34 @@ export function TodoItem({
   return (
     <Card
       data-testid="todo-item"
-      className={`border-l-4 ${getPriorityColor(todo.priority)} transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
-        todo.completed ? "opacity-75 saturate-50" : ""
-      }`}
+      style={{
+        ...getPriorityColor(todo.priority),
+        transition: 'all 300ms ease',
+        cursor: 'pointer',
+        opacity: todo.completed ? 0.75 : 1,
+        filter: todo.completed ? 'saturate(0.5)' : 'none'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+        e.currentTarget.style.transform = 'scale(1.02)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = '';
+        e.currentTarget.style.transform = 'scale(1)';
+      }}
     >
-      <CardContent className="p-6">
-        <div className="space-y-4">
+      <CardContent style={{ padding: '1.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {/* 상단: 체크박스와 제목 */}
-          <div className="flex items-start space-x-4">
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
             <Checkbox
               data-testid="todo-checkbox"
               checked={todo.completed}
               onCheckedChange={() => onToggleTodo(todo.id)}
-              className="mt-1 scale-125"
+              style={{ marginTop: '0.25rem', transform: 'scale(1.25)' }}
             />
 
-            <div className="flex-1 min-w-0">
+            <div style={{ flex: 1, minWidth: 0 }}>
               {isEditing ? (
                 <Input
                   data-testid="edit-input"
@@ -129,26 +157,29 @@ export function TodoItem({
                   onKeyDown={handleKeyDown}
                   onBlur={handleBlur}
                   autoFocus
-                  className="text-lg font-medium"
+                  style={{ fontSize: '1.125rem', lineHeight: '1.75rem', fontWeight: '500' }}
                 />
               ) : (
-                <div className="space-y-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <h3
                     data-testid="todo-title"
-                    className={`text-lg font-semibold leading-tight ${
-                      todo.completed
-                        ? "line-through text-gray-500"
-                        : "text-gray-900"
-                    }`}
+                    style={{
+                      fontSize: '1.125rem',
+                      lineHeight: '1.75rem',
+                      fontWeight: '600',
+                      lineHeight: '1.25',
+                      textDecoration: todo.completed ? 'line-through' : 'none',
+                      color: todo.completed ? '#6b7280' : '#111827'
+                    }}
                   >
                     {todo.title}
                   </h3>
 
                   {/* 메타데이터 */}
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <span className="flex items-center">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem', lineHeight: '1.25rem', color: '#6b7280' }}>
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
                       <svg
-                        className="h-4 w-4 mr-1"
+                        style={{ height: '1rem', width: '1rem', marginRight: '0.25rem' }}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -163,9 +194,9 @@ export function TodoItem({
                       {formattedDate}
                     </span>
                     {todo.completed && (
-                      <span className="flex items-center text-green-600">
+                      <span style={{ display: 'flex', alignItems: 'center', color: '#16a34a' }}>
                         <svg
-                          className="h-4 w-4 mr-1"
+                          style={{ height: '1rem', width: '1rem', marginRight: '0.25rem' }}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -187,14 +218,26 @@ export function TodoItem({
           </div>
 
           {/* 하단: 우선순위와 액션 버튼들 */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               {/* 우선순위 배지 */}
               <div
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${priorityBadge.color}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  paddingLeft: '0.75rem',
+                  paddingRight: '0.75rem',
+                  paddingTop: '0.25rem',
+                  paddingBottom: '0.25rem',
+                  borderRadius: '9999px',
+                  fontSize: '0.75rem',
+                  lineHeight: '1rem',
+                  fontWeight: '600',
+                  ...priorityBadge.color
+                }}
               >
                 <svg
-                  className="h-3 w-3 mr-1"
+                  style={{ height: '0.75rem', width: '0.75rem', marginRight: '0.25rem' }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -211,8 +254,15 @@ export function TodoItem({
 
               {/* 진행 상태 표시 */}
               {!todo.completed && (
-                <div className="flex items-center text-xs text-gray-500">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full mr-2 animate-pulse"></div>
+                <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.75rem', lineHeight: '1rem', color: '#6b7280' }}>
+                  <div style={{
+                    width: '0.5rem',
+                    height: '0.5rem',
+                    backgroundColor: '#fb923c',
+                    borderRadius: '50%',
+                    marginRight: '0.5rem',
+                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                  }}></div>
                   진행 중
                 </div>
               )}
@@ -220,16 +270,31 @@ export function TodoItem({
 
             {/* 액션 버튼들 */}
             {!isEditing && (
-              <div className="flex items-center space-x-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Button
                   data-testid="edit-button"
                   variant="ghost"
                   size="sm"
                   onClick={handleEdit}
-                  className="h-9 w-9 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                  style={{
+                    height: '2.25rem',
+                    width: '2.25rem',
+                    padding: 0,
+                    color: '#9ca3af',
+                    borderRadius: '50%',
+                    transition: 'colors 200ms ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#2563eb';
+                    e.currentTarget.style.backgroundColor = '#eff6ff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#9ca3af';
+                    e.currentTarget.style.backgroundColor = '';
+                  }}
                 >
                   <svg
-                    className="h-4 w-4"
+                    style={{ height: '1rem', width: '1rem' }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -247,10 +312,25 @@ export function TodoItem({
                   variant="ghost"
                   size="sm"
                   onClick={() => onDeleteTodo(todo.id)}
-                  className="h-9 w-9 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                  style={{
+                    height: '2.25rem',
+                    width: '2.25rem',
+                    padding: 0,
+                    color: '#9ca3af',
+                    borderRadius: '50%',
+                    transition: 'colors 200ms ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#dc2626';
+                    e.currentTarget.style.backgroundColor = '#fef2f2';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#9ca3af';
+                    e.currentTarget.style.backgroundColor = '';
+                  }}
                 >
                   <svg
-                    className="h-4 w-4"
+                    style={{ height: '1rem', width: '1rem' }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -266,10 +346,25 @@ export function TodoItem({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-9 w-9 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-full transition-colors"
+                  style={{
+                    height: '2.25rem',
+                    width: '2.25rem',
+                    padding: 0,
+                    color: '#9ca3af',
+                    borderRadius: '50%',
+                    transition: 'colors 200ms ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#4b5563';
+                    e.currentTarget.style.backgroundColor = '#f9fafb';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#9ca3af';
+                    e.currentTarget.style.backgroundColor = '';
+                  }}
                 >
                   <svg
-                    className="h-4 w-4"
+                    style={{ height: '1rem', width: '1rem' }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

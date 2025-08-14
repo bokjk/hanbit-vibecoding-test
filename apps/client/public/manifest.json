@@ -13,102 +13,18 @@
 
   "icons": [
     {
-      "src": "/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icon-192x192.png",
+      "src": "/vite.svg",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "maskable any"
     }
   ],
 
   "categories": ["productivity", "utilities", "lifestyle"],
 
-  "screenshots": [
-    {
-      "src": "/screenshot-mobile-1.png",
-      "sizes": "375x667",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "모바일 할일 목록 화면"
-    },
-    {
-      "src": "/screenshot-desktop-1.png",
-      "sizes": "1280x800",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "데스크톱 할일 관리 화면"
-    }
-  ],
+  "screenshots": [],
 
-  "shortcuts": [
-    {
-      "name": "새 할일 추가",
-      "short_name": "새 할일",
-      "description": "빠르게 새로운 할일을 추가합니다",
-      "url": "/?action=new-todo",
-      "icons": [
-        {
-          "src": "/shortcut-new-todo.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "완료된 할일",
-      "short_name": "완료된 할일",
-      "description": "완료된 할일 목록을 확인합니다",
-      "url": "/?filter=completed",
-      "icons": [
-        {
-          "src": "/shortcut-completed.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
+  "shortcuts": [],
 
   "related_applications": [],
   "prefer_related_applications": false,
@@ -118,6 +34,7 @@
   "share_target": {
     "action": "/?action=share",
     "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
     "params": {
       "title": "title",
       "text": "text",

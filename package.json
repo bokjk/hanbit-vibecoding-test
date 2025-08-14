@@ -106,13 +106,13 @@
   "license": "ISC",
   "packageManager": "pnpm@10.13.1",
   "devDependencies": {
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "prettier": "^3.6.2",
     "axe-core": "^4.8.3",
     "chrome-launcher": "^1.1.0",
+    "husky": "^9.1.7",
     "lighthouse": "^11.4.0",
-    "playwright": "^1.40.1"
+    "lint-staged": "^16.1.2",
+    "playwright": "^1.40.1",
+    "prettier": "^3.6.2"
   },
   "lint-staged": {
     "apps/client/**/*.{ts,tsx,js,jsx}": [
@@ -126,5 +126,11 @@
     "**/*.{json,md,yml,yaml}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }

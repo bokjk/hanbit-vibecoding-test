@@ -175,14 +175,14 @@ export function TodoProvider({
       initializeTodoContext();
       isInitialized.current = true;
     }
-  }, [initializeTodoContext]);
+  }, []);
 
   useEffect(() => {
     // 인증 상태 변경시 TODO 데이터 다시 로드
     if (authState.isInitialized && authState.isAuthenticated) {
       loadTodos();
     }
-  }, [authState.isInitialized, authState.isAuthenticated, loadTodos]);
+  }, [authState.isInitialized, authState.isAuthenticated]);
 
   // 동기화 관리자 이벤트 리스너 등록
   useEffect(() => {
@@ -262,7 +262,7 @@ export function TodoProvider({
     } finally {
       dispatch({ type: "SET_LOADING", payload: false });
     }
-  }, [enableAutoSync, loadTodos]);
+  }, [enableAutoSync]);
 
   // ================================
   // 계산된 값들
@@ -485,11 +485,11 @@ export function TodoProvider({
         error instanceof Error ? error.message : "Sync failed";
       dispatch({ type: "ADD_SYNC_ERROR", payload: errorMessage });
     }
-  }, [loadTodos]);
+  }, []);
 
   const retryFailedOperations = useCallback(async () => {
     await syncData();
-  }, [syncData]);
+  }, []);
 
   const clearSyncErrors = useCallback(() => {
     dispatch({ type: "CLEAR_SYNC_ERRORS" });
@@ -535,7 +535,7 @@ export function TodoProvider({
         dispatch({ type: "SET_ERROR", payload: errorMessage });
       }
     },
-    [state.conflictedTodos, loadTodos],
+    [state.conflictedTodos],
   );
 
   // ================================

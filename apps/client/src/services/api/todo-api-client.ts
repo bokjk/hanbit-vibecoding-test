@@ -1,4 +1,4 @@
-import { appConfig } from "../../config/app-config";
+import { appConfig } from "../../config/environment";
 import { AuthService, authService } from "../auth.service";
 import { APIError } from "../../errors/api-error";
 import type {
@@ -44,9 +44,9 @@ export class TodoAPIClient {
     config: RequestConfig = {},
   ): Promise<APIResponse<T>> {
     const {
-      timeout = appConfig.api.timeout,
-      retries = appConfig.api.retryAttempts,
-      retryDelay = appConfig.api.retryDelay,
+      timeout = appConfig.performance.apiTimeoutMs,
+      retries = appConfig.performance.retryCount,
+      retryDelay = 1000, // 기본값 설정
       ...fetchOptions
     } = config;
 
@@ -141,7 +141,7 @@ export class TodoAPIClient {
         const delay = config.retryDelay * Math.pow(2, attempt);
         await this.sleep(delay);
 
-        if (appConfig.features.debugMode) {
+        if (appConfig.debugMode) {
           console.log(
             `🔄 Retrying request (${attempt + 1}/${config.retries}) after ${delay}ms`,
           );

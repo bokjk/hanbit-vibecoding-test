@@ -87,44 +87,17 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* 데스크톱 레이아웃 */}
-      <div className="hidden md:flex w-full items-center space-x-3">
-        <Input
-          data-testid="todo-input"
-          type="text"
-          placeholder="새로운 할 일을 입력하세요..."
-          value={title}
-          onChange={handleTitleChange}
-          onKeyDown={handleKeyDown}
-          className="flex-1"
-        />
-        <Select
-          value={priority}
-          onValueChange={(value: Priority) => setPriority(value)}
-        >
-          <SelectTrigger data-testid="priority-select" className="w-[140px]">
-            <SelectValue placeholder="우선순위" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="high">높음</SelectItem>
-            <SelectItem value="medium">보통</SelectItem>
-            <SelectItem value="low">낮음</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button
-          data-testid="add-todo-button"
-          onClick={handleAddClick}
-          className="px-6"
-          disabled={!canCreate || isSubmitting || loading || !title.trim()}
-        >
-          {isSubmitting || loading ? "추가 중..." : "할 일 추가"}
-        </Button>
-      </div>
-
-      {/* 모바일 레이아웃 */}
-      <div className="md:hidden space-y-3">
-        <div className="flex items-center space-x-2">
+      <div style={{ display: 'none', '@media (min-width: 768px)': { display: 'flex' }, width: '100%', alignItems: 'center', gap: '0.75rem' }}>
+        <style>
+          {`
+            @media (min-width: 768px) {
+              .desktop-layout { display: flex !important; }
+            }
+          `}
+        </style>
+        <div className="desktop-layout" style={{ display: 'none', width: '100%', alignItems: 'center', gap: '0.75rem' }}>
           <Input
             data-testid="todo-input"
             type="text"
@@ -132,14 +105,14 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
             value={title}
             onChange={handleTitleChange}
             onKeyDown={handleKeyDown}
-            className="flex-1"
+            style={{ flex: 1 }}
           />
           <Select
             value={priority}
             onValueChange={(value: Priority) => setPriority(value)}
           >
-            <SelectTrigger className="w-20">
-              <SelectValue />
+            <SelectTrigger data-testid="priority-select" style={{ width: '8.75rem' }}>
+              <SelectValue placeholder="우선순위" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="high">높음</SelectItem>
@@ -147,15 +120,60 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
               <SelectItem value="low">낮음</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            data-testid="add-todo-button"
+            onClick={handleAddClick}
+            style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}
+            disabled={!canCreate || isSubmitting || loading || !title.trim()}
+          >
+            {isSubmitting || loading ? "추가 중..." : "할 일 추가"}
+          </Button>
         </div>
-        <Button
-          data-testid="add-todo-button"
-          onClick={handleAddClick}
-          className="w-full"
-          disabled={!canCreate || isSubmitting || loading || !title.trim()}
-        >
-          {isSubmitting || loading ? "추가 중..." : "추가"}
-        </Button>
+      </div>
+
+      {/* 모바일 레이아웃 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', '@media (min-width: 768px)': { display: 'none' } }}>
+        <style>
+          {`
+            @media (min-width: 768px) {
+              .mobile-layout { display: none !important; }
+            }
+          `}
+        </style>
+        <div className="mobile-layout" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Input
+              data-testid="todo-input"
+              type="text"
+              placeholder="새로운 할 일을 입력하세요..."
+              value={title}
+              onChange={handleTitleChange}
+              onKeyDown={handleKeyDown}
+              style={{ flex: 1 }}
+            />
+            <Select
+              value={priority}
+              onValueChange={(value: Priority) => setPriority(value)}
+            >
+              <SelectTrigger style={{ width: '5rem' }}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="high">높음</SelectItem>
+                <SelectItem value="medium">보통</SelectItem>
+                <SelectItem value="low">낮음</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            data-testid="add-todo-button"
+            onClick={handleAddClick}
+            style={{ width: '100%' }}
+            disabled={!canCreate || isSubmitting || loading || !title.trim()}
+          >
+            {isSubmitting || loading ? "추가 중..." : "추가"}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -141,10 +141,19 @@ export function LoginForm({
   };
 
   return (
-    <Card className={`w-full max-w-md ${className}`}>
-      <CardHeader className="text-center">
-        <CardTitle className="flex items-center justify-center gap-2">
-          <Mail className="w-5 h-5 text-blue-500" />
+    <>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+      <Card style={{ width: '100%', maxWidth: '28rem' }}>
+      <CardHeader style={{ textAlign: 'center' }}>
+        <CardTitle style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+          <Mail style={{ width: '1.25rem', height: '1.25rem', color: 'rgb(59 130 246)' }} />
           로그인
         </CardTitle>
         <CardDescription>
@@ -153,11 +162,11 @@ export function LoginForm({
       </CardHeader>
 
       <CardContent>
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {/* 개발 중 안내 */}
           <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription className="text-sm">
+            <Info style={{ height: '1rem', width: '1rem' }} />
+            <AlertDescription style={{ fontSize: '0.875rem', lineHeight: '1.25rem' }}>
               로그인 기능은 현재 개발 중입니다. 게스트 계정으로 모든 기능을
               체험해보세요.
             </AlertDescription>
@@ -166,73 +175,75 @@ export function LoginForm({
           {/* 전역 에러 메시지 */}
           {error && (
             <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle style={{ height: '1rem', width: '1rem' }} />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {/* 이메일 필드 */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="email" style={{ fontSize: '0.875rem', lineHeight: '1.25rem', fontWeight: '500' }}>
               이메일
             </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div style={{ position: 'relative' }}>
+              <Mail style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '1rem', height: '1rem', color: 'rgb(156 163 175)' }} />
               <Input
                 id="email"
                 type="email"
                 placeholder="your@email.com"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                className={`pl-10 ${validationErrors.email ? "border-red-500" : ""}`}
+style={{ paddingLeft: '2.5rem', ...(validationErrors.email && { borderColor: 'rgb(239 68 68)' }) }}
                 disabled={isLoading}
                 autoComplete="email"
               />
             </div>
             {validationErrors.email && (
-              <p className="text-sm text-red-500">{validationErrors.email}</p>
+              <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(239 68 68)' }}>{validationErrors.email}</p>
             )}
           </div>
 
           {/* 비밀번호 필드 */}
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="password" style={{ fontSize: '0.875rem', lineHeight: '1.25rem', fontWeight: '500' }}>
               비밀번호
             </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div style={{ position: 'relative' }}>
+              <Lock style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '1rem', height: '1rem', color: 'rgb(156 163 175)' }} />
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="비밀번호를 입력하세요"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
-                className={`pl-10 pr-10 ${validationErrors.password ? "border-red-500" : ""}`}
+style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem', ...(validationErrors.password && { borderColor: 'rgb(239 68 68)' }) }}
                 disabled={isLoading}
                 autoComplete="current-password"
               />
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'rgb(156 163 175)', border: 'none', background: 'none', cursor: 'pointer' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(75 85 99)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(156 163 175)'}
                 disabled={isLoading}
               >
                 {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
+                  <EyeOff style={{ width: '1rem', height: '1rem' }} />
                 ) : (
-                  <Eye className="w-4 h-4" />
+                  <Eye style={{ width: '1rem', height: '1rem' }} />
                 )}
               </button>
             </div>
             {validationErrors.password && (
-              <p className="text-sm text-red-500">
+              <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(239 68 68)' }}>
                 {validationErrors.password}
               </p>
             )}
           </div>
 
           {/* 기억하기 체크박스 */}
-          <div className="flex items-center space-x-2">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <input
               id="rememberMe"
               type="checkbox"
@@ -240,19 +251,19 @@ export function LoginForm({
               onChange={(e) =>
                 handleInputChange("rememberMe", e.target.checked)
               }
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+style={{ width: '1rem', height: '1rem', accentColor: 'rgb(37 99 235)', border: '1px solid rgb(209 213 219)', borderRadius: '0.25rem' }}
               disabled={isLoading}
             />
-            <label htmlFor="rememberMe" className="text-sm text-gray-700">
+            <label htmlFor="rememberMe" style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(55 65 81)' }}>
               로그인 상태 유지
             </label>
           </div>
 
           {/* 제출 버튼 */}
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" style={{ width: '100%' }} disabled={isLoading}>
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 style={{ marginRight: '0.5rem', height: '1rem', width: '1rem', animation: 'spin 1s linear infinite' }} />
                 로그인 중...
               </>
             ) : (
@@ -261,11 +272,13 @@ export function LoginForm({
           </Button>
 
           {/* 비밀번호 찾기 */}
-          <div className="text-center">
+          <div style={{ textAlign: 'center' }}>
             <button
               type="button"
               onClick={onForgotPassword}
-              className="text-sm text-blue-500 hover:text-blue-700 underline"
+style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(59 130 246)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(29 78 216)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(59 130 246)'}
               disabled={isLoading}
             >
               비밀번호를 잊으셨나요?
@@ -273,13 +286,15 @@ export function LoginForm({
           </div>
 
           {/* 회원가입 링크 */}
-          <div className="text-center pt-4 border-t">
-            <p className="text-sm text-gray-600">
+          <div style={{ textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid rgb(229 231 235)' }}>
+            <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(75 85 99)' }}>
               계정이 없으신가요?{" "}
               <button
                 type="button"
                 onClick={onSwitchToRegister}
-                className="text-blue-500 hover:text-blue-700 underline font-medium"
+style={{ color: 'rgb(59 130 246)', textDecoration: 'underline', fontWeight: '500', background: 'none', border: 'none', cursor: 'pointer' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(29 78 216)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(59 130 246)'}
                 disabled={isLoading}
               >
                 회원가입
@@ -289,6 +304,7 @@ export function LoginForm({
         </form>
       </CardContent>
     </Card>
+    </>
   );
 }
 
@@ -316,9 +332,9 @@ export function LoginButton({
       variant={variant}
       size={size}
       disabled={disabled}
-      className={`flex items-center gap-2 ${className}`}
+style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
     >
-      <Mail className="w-4 h-4" />
+      <Mail style={{ width: '1rem', height: '1rem' }} />
       로그인
     </Button>
   );

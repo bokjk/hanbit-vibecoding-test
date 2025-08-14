@@ -1,7 +1,7 @@
-import { StrictMode } from "react";
+import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./reset.css";
-import "./index.css";
+import "./index.scss";
 import App from "./App.tsx";
 
 // 모니터링 시스템 조기 초기화

@@ -1,24 +1,52 @@
-import * as React from "react"
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
-import { Check } from "lucide-react"
-import { cn } from "../../lib/utils"
+import * as React from "react";
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import { Check } from "lucide-react";
+import { cn } from "../../lib/utils";
 
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
->(({ className, ...props }, ref) => (
+>(({ className, style, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
-    className={cn(
-      "peer h-5 w-5 shrink-0 rounded border-2 border-gray-500 bg-white shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 hover:border-gray-600 hover:shadow-md data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 data-[state=checked]:text-white transition-all duration-200",
-      className
-    )}
+    style={{
+      height: '1.25rem',
+      width: '1.25rem',
+      flexShrink: 0,
+      borderRadius: '0.25rem',
+      border: '2px solid #6b7280',
+      backgroundColor: 'white',
+      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+      outline: 'none',
+      cursor: props.disabled ? 'not-allowed' : 'pointer',
+      opacity: props.disabled ? 0.5 : 1,
+      transition: 'all 200ms ease',
+      ...style
+    }}
+    className={className}
+    onMouseEnter={(e) => {
+      if (!props.disabled) {
+        e.currentTarget.style.borderColor = '#4b5563';
+        e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (!props.disabled) {
+        e.currentTarget.style.borderColor = '#6b7280';
+        e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+      }
+    }}
     {...props}
   >
     <CheckboxPrimitive.Indicator
-      className={cn("flex items-center justify-center text-current")}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'currentColor'
+      }}
     >
-      <Check className="h-4 w-4 stroke-[3]" />
+      <Check style={{ height: '1rem', width: '1rem', strokeWidth: 3 }} />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ))

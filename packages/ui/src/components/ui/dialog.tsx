@@ -1,8 +1,8 @@
-import * as React from "react"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { XIcon } from "lucide-react"
+import * as React from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { XIcon } from "lucide-react";
 
-import { cn } from "../../lib/utils"
+import { cn } from "../../lib/utils";
 
 function Dialog({
   ...props
@@ -30,15 +30,20 @@ function DialogClose({
 
 function DialogOverlay({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
-      className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
-        className
-      )}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 50,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        ...style
+      }}
+      className={className}
       {...props}
     />
   )
@@ -48,6 +53,7 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  style,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
@@ -57,20 +63,63 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
-        className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
-          className
-        )}
+        style={{
+          backgroundColor: 'var(--background)',
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          zIndex: 50,
+          display: 'grid',
+          width: '100%',
+          maxWidth: 'calc(100% - 2rem)',
+          transform: 'translate(-50%, -50%)',
+          gap: '1rem',
+          borderRadius: '0.5rem',
+          border: '1px solid var(--border)',
+          padding: '1.5rem',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+          transitionDuration: '200ms',
+          ...style,
+          '@media (min-width: 640px)': {
+            maxWidth: '32rem'
+          }
+        }}
+        className={className}
         {...props}
       >
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            style={{
+              position: 'absolute',
+              top: '1rem',
+              right: '1rem',
+              borderRadius: '0.125rem',
+              opacity: 0.7,
+              transition: 'opacity 150ms ease',
+              cursor: 'pointer',
+              outline: 'none',
+              border: 'none',
+              background: 'transparent',
+              padding: '0.25rem',
+              color: 'var(--muted-foreground)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
           >
-            <XIcon />
-            <span className="sr-only">Close</span>
+            <XIcon style={{ width: '1rem', height: '1rem' }} />
+            <span style={{ 
+              position: 'absolute',
+              width: '1px',
+              height: '1px',
+              padding: 0,
+              margin: '-1px',
+              overflow: 'hidden',
+              clip: 'rect(0, 0, 0, 0)',
+              whiteSpace: 'nowrap',
+              border: 0
+            }}>Close</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -78,24 +127,41 @@ function DialogContent({
   )
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+function DialogHeader({ className, style, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.5rem',
+        textAlign: 'center',
+        ...style,
+        '@media (min-width: 640px)': {
+          textAlign: 'left'
+        }
+      }}
+      className={className}
       {...props}
     />
   )
 }
 
-function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+function DialogFooter({ className, style, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
-      )}
+      style={{
+        display: 'flex',
+        flexDirection: 'column-reverse',
+        gap: '0.5rem',
+        ...style,
+        '@media (min-width: 640px)': {
+          flexDirection: 'row',
+          justifyContent: 'flex-end'
+        }
+      }}
+      className={className}
       {...props}
     />
   )
@@ -103,12 +169,19 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 function DialogTitle({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      style={{
+        fontSize: '1.125rem',
+        lineHeight: '1',
+        fontWeight: '600',
+        ...style
+      }}
+      className={className}
       {...props}
     />
   )
@@ -116,12 +189,19 @@ function DialogTitle({
 
 function DialogDescription({
   className,
+  style,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      style={{
+        color: 'var(--muted-foreground)',
+        fontSize: '0.875rem',
+        lineHeight: '1.25rem',
+        ...style
+      }}
+      className={className}
       {...props}
     />
   )

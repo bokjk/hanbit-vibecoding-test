@@ -130,7 +130,7 @@ function AppContent() {
           // });
         }}
       >
-        <div className={showAuthBanner ? "pt-4" : ""}>
+        <div style={{ paddingTop: showAuthBanner ? '1rem' : '0' }}>
           <TodoContainer />
         </div>
       </ErrorBoundary>

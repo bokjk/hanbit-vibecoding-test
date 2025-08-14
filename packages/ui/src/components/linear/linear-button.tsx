@@ -1,54 +1,26 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../lib/utils";
 
 /**
  * Linear Design System Button 컴포넌트
  * 재사용 가능하고 일관된 스타일을 제공하는 버튼 컴포넌트
  */
 
-const linearButtonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-150 ease-smooth disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-  {
-    variants: {
-      variant: {
-        primary: 
-          "bg-[#e6e6e6] text-[#08090a] border border-[#e6e6e6] hover:bg-[#d4d4d4] hover:-translate-y-px focus-visible:ring-[#e6e6e6]/20",
-        secondary: 
-          "bg-transparent text-[#8a8f98] border border-white/10 hover:bg-white/5 hover:text-[#f7f8f8] focus-visible:ring-white/20",
-        ghost: 
-          "bg-transparent text-[#8a8f98] border-none hover:bg-white/5 hover:text-[#f7f8f8] focus-visible:ring-white/20",
-        success:
-          "bg-[#10b981] text-white border border-[#10b981] hover:bg-[#059669] focus-visible:ring-[#10b981]/20",
-        error:
-          "bg-[#ef4444] text-white border border-[#ef4444] hover:bg-[#dc2626] focus-visible:ring-[#ef4444]/20",
-        warning:
-          "bg-[#f59e0b] text-white border border-[#f59e0b] hover:bg-[#d97706] focus-visible:ring-[#f59e0b]/20",
-        info:
-          "bg-[#3b82f6] text-white border border-[#3b82f6] hover:bg-[#2563eb] focus-visible:ring-[#3b82f6]/20",
-      },
-      size: {
-        sm: "h-8 px-3 text-xs",
-        default: "h-9 px-4 text-sm",
-        lg: "h-11 px-6 text-base",
-        icon: "h-9 w-9",
-      },
-      fullWidth: {
-        true: "w-full",
-        false: "",
-      }
-    },
-    defaultVariants: {
-      variant: "primary",
-      size: "default",
-      fullWidth: false,
-    },
-  }
-);
+type LinearButtonVariant = "primary" | "secondary" | "ghost" | "success" | "error" | "warning" | "info";
+type LinearButtonSize = "sm" | "default" | "lg" | "icon";
 
-export interface LinearButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof linearButtonVariants> {
+export interface LinearButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /**
+   * 버튼 스타일 변형
+   */
+  variant?: LinearButtonVariant;
+  /**
+   * 버튼 크기
+   */
+  size?: LinearButtonSize;
+  /**
+   * 전체 너비 사용 여부
+   */
+  fullWidth?: boolean;
   /**
    * 로딩 상태 표시
    */
@@ -63,37 +35,158 @@ export interface LinearButtonProps
   iconPosition?: "left" | "right";
 }
 
+const getButtonStyles = (
+  variant: LinearButtonVariant = "primary",
+  size: LinearButtonSize = "default",
+  fullWidth: boolean = false,
+  disabled: boolean = false,
+  loading: boolean = false
+): React.CSSProperties => {
+  const baseStyles: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    whiteSpace: 'nowrap',
+    borderRadius: '0.5rem',
+    fontSize: '0.875rem',
+    lineHeight: '1.25rem',
+    fontWeight: '500',
+    transition: 'all 150ms ease',
+    outline: 'none',
+    border: '1px solid transparent',
+    cursor: disabled || loading ? 'not-allowed' : 'pointer',
+    opacity: disabled || loading ? 0.5 : 1,
+    ...(fullWidth && { width: '100%' })
+  };
+
+  // Variant styles
+  const variantStyles: Record<LinearButtonVariant, React.CSSProperties> = {
+    primary: {
+      backgroundColor: '#e6e6e6',
+      color: '#08090a',
+      borderColor: '#e6e6e6'
+    },
+    secondary: {
+      backgroundColor: 'transparent',
+      color: '#8a8f98',
+      borderColor: 'rgba(255, 255, 255, 0.1)'
+    },
+    ghost: {
+      backgroundColor: 'transparent',
+      color: '#8a8f98',
+      borderColor: 'transparent'
+    },
+    success: {
+      backgroundColor: '#10b981',
+      color: 'white',
+      borderColor: '#10b981'
+    },
+    error: {
+      backgroundColor: '#ef4444',
+      color: 'white',
+      borderColor: '#ef4444'
+    },
+    warning: {
+      backgroundColor: '#f59e0b',
+      color: 'white',
+      borderColor: '#f59e0b'
+    },
+    info: {
+      backgroundColor: '#3b82f6',
+      color: 'white',
+      borderColor: '#3b82f6'
+    }
+  };
+
+  // Size styles
+  const sizeStyles: Record<LinearButtonSize, React.CSSProperties> = {
+    sm: { height: '2rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', fontSize: '0.75rem', lineHeight: '1rem' },
+    default: { height: '2.25rem', paddingLeft: '1rem', paddingRight: '1rem', fontSize: '0.875rem', lineHeight: '1.25rem' },
+    lg: { height: '2.75rem', paddingLeft: '1.5rem', paddingRight: '1.5rem', fontSize: '1rem', lineHeight: '1.5rem' },
+    icon: { height: '2.25rem', width: '2.25rem', padding: 0 }
+  };
+
+  return {
+    ...baseStyles,
+    ...variantStyles[variant],
+    ...sizeStyles[size]
+  };
+};
+
 const LinearButton = React.forwardRef<HTMLButtonElement, LinearButtonProps>(
   ({ 
-    className, 
-    variant, 
-    size, 
-    fullWidth,
+    variant = "primary",
+    size = "default",
+    fullWidth = false,
     loading = false,
     icon,
     iconPosition = "left",
     children, 
-    disabled,
+    disabled = false,
+    style,
+    onMouseEnter,
+    onMouseLeave,
     ...props 
   }, ref) => {
     const isDisabled = disabled || loading;
 
+    const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!isDisabled) {
+        const hoverStyles: Record<LinearButtonVariant, Partial<React.CSSProperties>> = {
+          primary: { backgroundColor: '#d4d4d4', transform: 'translateY(-1px)' },
+          secondary: { backgroundColor: 'rgba(255, 255, 255, 0.05)', color: '#f7f8f8' },
+          ghost: { backgroundColor: 'rgba(255, 255, 255, 0.05)', color: '#f7f8f8' },
+          success: { backgroundColor: '#059669' },
+          error: { backgroundColor: '#dc2626' },
+          warning: { backgroundColor: '#d97706' },
+          info: { backgroundColor: '#2563eb' }
+        };
+        Object.assign(e.currentTarget.style, hoverStyles[variant]);
+      }
+      onMouseEnter?.(e);
+    };
+
+    const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!isDisabled) {
+        const originalStyles = getButtonStyles(variant, size, fullWidth, disabled, loading);
+        Object.assign(e.currentTarget.style, originalStyles);
+      }
+      onMouseLeave?.(e);
+    };
+
     return (
       <button
-        className={cn(linearButtonVariants({ variant, size, fullWidth, className }))}
         ref={ref}
         disabled={isDisabled}
+        style={{
+          ...getButtonStyles(variant, size, fullWidth, disabled, loading),
+          ...style
+        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         {...props}
       >
         {loading && (
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          <div style={{
+            height: '1rem',
+            width: '1rem',
+            borderRadius: '50%',
+            border: '2px solid currentColor',
+            borderTopColor: 'transparent',
+            animation: 'spin 1s linear infinite'
+          }} />
         )}
         {!loading && icon && iconPosition === "left" && (
-          <span className="h-4 w-4 flex items-center justify-center">{icon}</span>
+          <span style={{ height: '1rem', width: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {icon}
+          </span>
         )}
         {children}
         {!loading && icon && iconPosition === "right" && (
-          <span className="h-4 w-4 flex items-center justify-center">{icon}</span>
+          <span style={{ height: '1rem', width: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {icon}
+          </span>
         )}
       </button>
     );
@@ -102,4 +195,4 @@ const LinearButton = React.forwardRef<HTMLButtonElement, LinearButtonProps>(
 
 LinearButton.displayName = "LinearButton";
 
-export { LinearButton, linearButtonVariants };
+export { LinearButton };
