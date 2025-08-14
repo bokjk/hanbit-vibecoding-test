@@ -3,8 +3,10 @@ export { Alert, AlertTitle, AlertDescription } from './components/ui/alert';
 export { Button } from './components/ui/button';
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './components/ui/card';
 export { Checkbox } from './components/ui/checkbox';
+export { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './components/ui/dialog';
 export { Input } from './components/ui/input';
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip';
 
 // Export Linear components
 export { LinearButton } from './components/linear/linear-button';
