@@ -37,10 +37,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build client app
-        run: |
-          cd apps/client
-          npm run build
+      - name: Build all packages and apps
+        run: pnpm build:all
         env:
           NODE_ENV: production
           CI: true

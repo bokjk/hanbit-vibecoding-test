@@ -24,6 +24,15 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tsconfigPaths()],
     base,
+    resolve: {
+      alias: {
+        "@": new URL("./src", import.meta.url).pathname,
+      },
+    },
+    // workspace 패키지 최적화를 위한 설정
+    optimizeDeps: {
+      include: ["@vive/ui", "@vive/types"],
+    },
     build: {
       outDir: "dist",
       assetsDir: "assets",
