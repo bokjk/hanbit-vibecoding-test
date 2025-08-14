@@ -211,7 +211,7 @@ class SyncManagerService {
       );
 
       await fetch(createApiUrl("/health"), {
-        method: "HEAD",
+        method: "GET",
         signal: controller.signal,
         cache: "no-cache",
       });
