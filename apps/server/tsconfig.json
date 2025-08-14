@@ -36,5 +36,13 @@
     }
   },
   "include": ["lambda/**/*.ts"],
-  "exclude": ["node_modules", "**/*.test.ts", "**/*.spec.ts", "dist", "infrastructure/node_modules"]
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "dist",
+    "infrastructure/node_modules",
+    "lambda/__tests__/**",
+    "**/__tests__/**"
+  ]
 }

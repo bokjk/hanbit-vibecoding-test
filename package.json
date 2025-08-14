@@ -11,6 +11,7 @@
     "// === 빌드 ===": "",
     "build": "pnpm build:all",
     "build:all": "pnpm build:packages && pnpm build:client && pnpm build:server",
+    "build:for-deploy": "pnpm build:packages && pnpm build:client",
     "build:packages": "pnpm --filter @vive/ui build",
     "build:client": "pnpm --filter @vive/client build",
     "build:server": "pnpm --filter @vive/server build",

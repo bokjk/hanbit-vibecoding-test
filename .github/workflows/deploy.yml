@@ -37,8 +37,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build all packages and apps
-        run: pnpm build:all
+      - name: Build packages and client for deployment
+        run: pnpm build:for-deploy
         env:
           NODE_ENV: production
           CI: true

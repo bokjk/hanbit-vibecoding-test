@@ -5,7 +5,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p lambda/tsconfig.json",
     "build:lambda": "tsc -p lambda/tsconfig.json",
     "build:infrastructure": "cd infrastructure && tsc",
     "test": "vitest",
