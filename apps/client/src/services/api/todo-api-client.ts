@@ -1,5 +1,5 @@
 import { appConfig } from "../../config/app-config";
-import { AuthService } from "../auth.service";
+import { AuthService, authService } from "../auth.service";
 import { APIError } from "../../errors/api-error";
 import type {
   APIResponse,
@@ -354,4 +354,7 @@ export class TodoAPIClient {
 /**
  * TODO API 클라이언트 인스턴스
  */
-export const todoApiService = new TodoAPIClient();
+export const todoApiService = new TodoAPIClient(
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api",
+  authService,
+);

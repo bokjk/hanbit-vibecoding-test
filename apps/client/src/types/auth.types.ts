@@ -10,9 +10,11 @@ export interface User {
   id: string;
   email?: string;
   username?: string;
+  name?: string;
   isGuest: boolean;
   createdAt: string;
   lastLoginAt?: string;
+  permissions?: UserPermissions;
 }
 
 /**

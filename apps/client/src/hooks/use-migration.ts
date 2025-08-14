@@ -74,7 +74,7 @@ export function useMigration(): UseMigrationReturn {
   const [migrationState, setMigrationState] = useState<MigrationState>(
     dataMigrationService.getState(),
   );
-  // const [_lastResult, setLastResult] = useState<MigrationResult | null>(null);
+  const [, setLastResult] = useState<MigrationResult | null>(null);
   const eventListenersRef = useRef<Map<MigrationEvent, MigrationEventListener>>(
     new Map(),
   );
@@ -373,15 +373,20 @@ export function useQuickMigrationCheck(): {
   });
 
   useEffect(() => {
-    const isRequired = migrationUtils.quickCheck();
-    const history = migrationUtils.getMigrationHistory();
-    const hasLocalData = localStorageService.getTodos().length > 0;
+    const checkMigration = async () => {
+      const isRequired = await migrationUtils.quickCheck();
+      const history = migrationUtils.getMigrationHistory();
+      const localTodos = await localStorageService.getTodos();
+      const hasLocalData = localTodos.length > 0;
 
-    setState({
-      isRequired,
-      hasLocalData,
-      isCompleted: history.completed,
-    });
+      setState({
+        isRequired,
+        hasLocalData,
+        isCompleted: history.completed,
+      });
+    };
+
+    checkMigration();
   }, []);
 
   return state;

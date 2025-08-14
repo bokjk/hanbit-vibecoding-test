@@ -2,10 +2,10 @@
  * React Testing Library 유틸리티 확장
  */
 /* eslint-disable react-refresh/only-export-components */
-import React, { ReactElement } from "react";
-import { render, RenderOptions } from "@testing-library/react";
+import React, { type ReactElement } from "react";
+import { render, type RenderOptions } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { TodoProvider } from "@/contexts/TodoContext";
+import { TodoProvider } from "../../contexts/todo.context";
 
 // Provider로 감싸는 커스텀 렌더 함수
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
@@ -113,8 +113,8 @@ export const measurePerformance = async (fn: () => Promise<void> | void) => {
 
 // 접근성 테스트 헬퍼
 export const checkA11y = async (container: Element) => {
-  const { axe } = await import("@axe-core/react");
-  const results = await axe(container);
+  const axeCore = await import("@axe-core/react");
+  const results = await axeCore.axe(container);
   expect(results).toHaveNoViolations();
 };
 

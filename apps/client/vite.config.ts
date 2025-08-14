@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
             // 유틸리티 라이브러리 청크
             utils: ["uuid", "date-fns"],
             // UI 컴포넌트 청크
-            ui: ["@hanbit/ui"],
+            ui: ["@vive/ui"],
             // 타입 라이브러리 청크 (타입만이므로 런타임에 포함되지 않음)
             // types: ['@hanbit/types'], // 타입만이므로 제거
           },
@@ -118,7 +118,7 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: "jsdom",
       globals: true,
-      setupFiles: [],
+      setupFiles: ["./src/__tests__/setup.ts"],
     },
   };
 });

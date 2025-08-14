@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TodoFilters } from "../../components/todo-filters";
-import type { TodoFilter } from "types/index";
+import type { TodoFilter } from "@vive/types";
 import type {
   FilterHelpers,
   SyncHelpers,
@@ -21,6 +21,7 @@ describe("TodoFilters Component", () => {
 
   // 모킹된 FilterHelpers
   const mockFilterHelpers: FilterHelpers = {
+    type: "all",
     showAll: vi.fn(),
     showActive: vi.fn(),
     showCompleted: vi.fn(),

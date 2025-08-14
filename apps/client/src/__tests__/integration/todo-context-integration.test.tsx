@@ -5,7 +5,7 @@ import { TodoProvider } from "../../contexts/todo.context";
 import { AuthProvider } from "../../contexts/auth.context";
 import { useTodo } from "../../hooks/use-todo";
 import { useAuth } from "../../hooks/use-auth";
-import { Priority } from "@vive/types";
+import { type Priority } from "@vive/types";
 
 /**
  * 테스트용 Todo 관리 컴포넌트
@@ -44,7 +44,7 @@ function TestTodoManager() {
           if (e.key === "Enter") {
             const target = e.target as HTMLInputElement;
             if (target.value.trim()) {
-              addTodo(target.value, "medium");
+              addTodo(target.value, { priority: "medium" as Priority });
               target.value = "";
             }
           }

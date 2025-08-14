@@ -8,7 +8,7 @@
  * - 재시도 로직
  */
 
-import type { Todo } from "types/index";
+import type { Todo } from "@vive/types";
 import type {
   PendingOperation,
   ConnectionStatus,
@@ -345,7 +345,7 @@ class SyncManagerService {
    */
   private async fetchRemoteTodos(): Promise<Todo[]> {
     try {
-      const response = await todoApiService.getAll();
+      const response = await todoApiService.getTodos();
       return response.data.todos || [];
     } catch (error) {
       console.error("Failed to fetch remote todos:", error);
@@ -434,14 +434,10 @@ class SyncManagerService {
       Todo,
       "id" | "createdAt" | "updatedAt"
     >;
-    await todoApiService.create({
+    await todoApiService.createTodo({
       title: todoData.title,
-      completed: todoData.completed || false,
       description: todoData.description,
-      priority: todoData.priority,
-      dueDate: todoData.dueDate,
-      tags: todoData.tags,
-      userId: todoData.userId,
+      priority: todoData.priority || "medium",
     });
   }
 
@@ -456,7 +452,7 @@ class SyncManagerService {
     }
 
     const updateData = operation.data as Partial<Todo>;
-    await todoApiService.update(operation.todoId, updateData);
+    await todoApiService.updateTodo(operation.todoId, updateData);
   }
 
   /**
@@ -465,7 +461,7 @@ class SyncManagerService {
   private async processDeleteOperation(
     operation: PendingOperation,
   ): Promise<void> {
-    await todoApiService.delete(operation.todoId);
+    await todoApiService.deleteTodo(operation.todoId);
   }
 
   /**
@@ -588,7 +584,7 @@ class SyncManagerService {
     try {
       if (resolution === "local") {
         // 로컬 버전을 서버에 업데이트
-        await todoApiService.update(todoId, conflictData.localTodo);
+        await todoApiService.updateTodo(todoId, conflictData.localTodo);
         return true;
       } else {
         // 원격 버전을 로컬에 적용
@@ -749,7 +745,7 @@ export const syncUtils = {
 
     return {
       total: operations.length,
-      byType: { create: 0, update: 0, delete: 0, ...byType },
+      byType: { ...byType },
       avgRetries,
       oldestOperation,
     };

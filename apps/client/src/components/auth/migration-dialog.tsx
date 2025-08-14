@@ -52,6 +52,18 @@ export function MigrationDialog({
   // const [_result, setResult] = useState<MigrationResult | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
+  /**
+   * 마이그레이션 시작
+   */
+  const handleStartMigration = useCallback(async () => {
+    try {
+      await migration.startMigration();
+      // setResult(migrationResult);
+    } catch (error) {
+      console.error("Migration failed:", error);
+    }
+  }, [migration]);
+
   // 자동 시작 처리
   useEffect(() => {
     if (isOpen && autoStart && migration.canStart) {
@@ -83,18 +95,6 @@ export function MigrationDialog({
     onComplete,
     onError,
   ]);
-
-  /**
-   * 마이그레이션 시작
-   */
-  const handleStartMigration = useCallback(async () => {
-    try {
-      await migration.startMigration();
-      // setResult(migrationResult);
-    } catch (error) {
-      console.error("Migration failed:", error);
-    }
-  }, [migration]);
 
   /**
    * 마이그레이션 취소

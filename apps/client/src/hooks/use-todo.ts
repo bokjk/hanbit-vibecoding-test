@@ -10,7 +10,7 @@ import type {
   CreateTodoRequest,
   UpdateTodoRequest,
   Priority,
-} from "types/index";
+} from "@vive/types";
 import { useTodoContext } from "../contexts/todo.context";
 import { useAuthContext } from "../contexts/auth.context";
 
@@ -40,6 +40,7 @@ export interface UpdateTodoOptions {
  * 필터링 관련 편의 메서드들
  */
 export interface FilterHelpers {
+  type: "all" | "active" | "completed";
   showAll: () => void;
   showActive: () => void;
   showCompleted: () => void;
@@ -94,6 +95,7 @@ export interface UseTodoReturn {
 
   // 필터링 헬퍼
   filter: FilterHelpers;
+  setFilter: (filter: { type: "all" | "active" | "completed" }) => void;
 
   // 동기화 헬퍼
   sync: SyncHelpers;

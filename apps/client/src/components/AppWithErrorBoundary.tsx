@@ -8,6 +8,7 @@ import { AuthProvider } from "../contexts/auth.context";
 import { MigrationDialog } from "./auth/migration-dialog";
 import { AuthPromptBanner } from "./auth/auth-prompt";
 import { useMigration } from "../hooks/use-migration";
+import type { MigrationResult } from "../services/data-migration.service";
 import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { initializeGlobalErrorHandler } from "../utils/global-error-handler";
@@ -48,13 +49,23 @@ function AppContent() {
     }
   }, [migration.migration.isInProgress, migration]);
 
+  // 타입 가드 함수
+  const isMigrationResult = (result: unknown): result is MigrationResult => {
+    return (
+      typeof result === "object" &&
+      result !== null &&
+      "success" in result &&
+      typeof (result as MigrationResult).success === "boolean"
+    );
+  };
+
   // 마이그레이션 완료 처리
   const handleMigrationComplete = (result: unknown) => {
     console.log("Migration completed:", result);
     setShowMigrationDialog(false);
 
     // 성공 시 배너 숨김, 실패 시 배너 표시
-    if (result.success) {
+    if (isMigrationResult(result) && result.success) {
       setShowAuthBanner(false);
     } else {
       setShowAuthBanner(true);
