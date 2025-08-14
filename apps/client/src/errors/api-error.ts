@@ -183,6 +183,22 @@ export class APIError extends Error {
   }
 
   /**
+   * 리소스를 찾을 수 없음 에러 생성 팩토리 메서드
+   */
+  static createNotFoundError(message: string = "요청한 데이터를 찾을 수 없습니다."): APIError {
+    const errorResponse: APIErrorResponse = {
+      success: false,
+      error: {
+        code: "NOT_FOUND",
+        message,
+        timestamp: new Date().toISOString(),
+        requestId: crypto.randomUUID(),
+      },
+    };
+    return new APIError(errorResponse, 404);
+  }
+
+  /**
    * HTTP 응답으로부터 APIError 생성
    */
   static async fromResponse(response: Response): Promise<APIError> {

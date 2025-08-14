@@ -198,11 +198,22 @@ export class TodoAPIClient {
 
   /**
    * 특정 TODO 조회
+   * @deprecated getTodos()를 사용해서 전체 목록에서 필터링하세요
    */
   async getTodo(id: string): Promise<APIResponse<GetTodoResponse>> {
-    return this.request<GetTodoResponse>(`/todos/${id}`, {
-      method: "GET",
-    });
+    // 백엔드에 개별 조회 API가 없으므로 전체 목록에서 찾기
+    const response = await this.getTodos();
+    const todo = response.data.todos.find(t => t.id === id);
+    
+    if (!todo) {
+      throw APIError.createNotFoundError(`Todo with id ${id} not found`);
+    }
+    
+    return {
+      data: { todo },
+      success: true,
+      message: "Todo retrieved successfully"
+    } as APIResponse<GetTodoResponse>;
   }
 
   /**
@@ -228,89 +239,72 @@ export class TodoAPIClient {
   }
 
   // ================================
-  // 데이터 관리 API 메서드들
+  // 데이터 관리 API 메서드들 (현재 백엔드에 미구현)
   // ================================
 
   /**
    * 데이터 내보내기
+   * @deprecated 백엔드에 구현되지 않음 - localStorage 서비스 사용
    */
   async exportData(
     format: "json" | "csv" = "json",
   ): Promise<APIResponse<ExportDataResponse>> {
-    return this.request<ExportDataResponse>(`/export?format=${format}`, {
-      method: "GET",
-    });
+    throw new Error("Export API is not implemented in backend. Use localStorage service instead.");
   }
 
   /**
    * 데이터 가져오기
+   * @deprecated 백엔드에 구현되지 않음 - localStorage 서비스 사용
    */
   async importData(
     file: File,
     options: ImportOptions,
   ): Promise<APIResponse<ImportDataResponse>> {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("options", JSON.stringify(options));
-
-    // FormData 사용 시 Content-Type을 자동으로 설정하도록 함
-    return this.request<ImportDataResponse>("/import", {
-      method: "POST",
-      body: formData,
-      headers: {}, // Content-Type 헤더 제거하여 브라우저가 자동 설정하도록 함
-    });
+    throw new Error("Import API is not implemented in backend. Use localStorage service instead.");
   }
 
   /**
    * localStorage 데이터 마이그레이션
+   * @deprecated 백엔드에 구현되지 않음 - 클라이언트 사이드에서 처리
    */
   async migrateFromLocalStorage(
     request: MigrateDataRequest,
   ): Promise<APIResponse<MigrateDataResponse>> {
-    return this.request<MigrateDataResponse>("/migrate", {
-      method: "POST",
-      body: JSON.stringify(request),
-    });
+    throw new Error("Migration API is not implemented in backend. Handle on client-side.");
   }
 
   // ================================
-  // 배치 처리 API 메서드들
+  // 배치 처리 API 메서드들 (현재 백엔드에 미구현)
   // ================================
 
   /**
    * 여러 TODO를 한 번에 생성
+   * @deprecated 백엔드에 구현되지 않음 - 개별 API 호출 사용
    */
   async createMultipleTodos(
     todos: CreateTodoRequest[],
   ): Promise<APIResponse<CreateTodoResponse[]>> {
-    return this.request<CreateTodoResponse[]>("/todos/batch", {
-      method: "POST",
-      body: JSON.stringify({ todos }),
-    });
+    throw new Error("Batch create API is not implemented in backend. Use individual API calls.");
   }
 
   /**
    * 여러 TODO를 한 번에 업데이트
+   * @deprecated 백엔드에 구현되지 않음 - 개별 API 호출 사용
    */
   async updateMultipleTodos(
     updates: Array<{ id: string; data: UpdateTodoRequest }>,
   ): Promise<APIResponse<UpdateTodoResponse[]>> {
-    return this.request<UpdateTodoResponse[]>("/todos/batch", {
-      method: "PUT",
-      body: JSON.stringify({ updates }),
-    });
+    throw new Error("Batch update API is not implemented in backend. Use individual API calls.");
   }
 
   /**
    * 여러 TODO를 한 번에 삭제
+   * @deprecated 백엔드에 구현되지 않음 - 개별 API 호출 사용
    */
   async deleteMultipleTodos(
     ids: string[],
   ): Promise<APIResponse<DeleteTodoResponse[]>> {
-    return this.request<DeleteTodoResponse[]>("/todos/batch", {
-      method: "DELETE",
-      body: JSON.stringify({ ids }),
-    });
+    throw new Error("Batch delete API is not implemented in backend. Use individual API calls.");
   }
 
   // ================================
@@ -319,14 +313,13 @@ export class TodoAPIClient {
 
   /**
    * API 헬스 체크
+   * @deprecated 백엔드에 구현되지 않음 - getTodos() 호출로 대체
    */
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseURL}/health`, {
-        method: "GET",
-        signal: AbortSignal.timeout(5000), // 5초 타임아웃
-      });
-      return response.ok;
+      // getTodos 호출로 API 상태 확인
+      await this.getTodos();
+      return true;
     } catch {
       return false;
     }
@@ -334,20 +327,22 @@ export class TodoAPIClient {
 
   /**
    * 현재 사용자의 할당량 정보 조회
+   * @deprecated 백엔드에 구현되지 않음 - 클라이언트 사이드에서 계산
    */
   async getQuotaInfo(): Promise<
     APIResponse<{ maxItems: number; currentCount: number; isGuest: boolean }>
   > {
-    return this.request("/quota", { method: "GET" });
+    throw new Error("Quota API is not implemented in backend. Calculate on client-side.");
   }
 
   /**
-   * API 버전 정보 조회
+   * API 버전 정보 조회  
+   * @deprecated 백엔드에 구현되지 않음 - 클라이언트 버전 사용
    */
   async getVersionInfo(): Promise<
     APIResponse<{ version: string; buildDate: string }>
   > {
-    return this.request("/version", { method: "GET" });
+    throw new Error("Version API is not implemented in backend. Use client version instead.");
   }
 }
 

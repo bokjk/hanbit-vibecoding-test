@@ -61,18 +61,18 @@ export class APIStorageService extends AbstractStorageService {
         return cachedTodo;
       }
 
-      const response = await this.apiClient.getTodo(id);
-      const todo = response.data.todo;
+      // getTodos()를 사용해서 전체 목록에서 해당 ID 찾기
+      const response = await this.apiClient.getTodos();
+      const todos = response.data.todos;
+      const todo = todos.find(t => t.id === id) || null;
 
-      // 캐시에 저장
-      this.cache.set(id, todo);
+      if (todo) {
+        // 캐시에 저장
+        this.cache.set(id, todo);
+      }
 
       return todo;
     } catch (error) {
-      if (error instanceof APIError && error.isNotFoundError()) {
-        return null;
-      }
-
       if (error instanceof APIError && error.isNetworkError()) {
         // 네트워크 오류 시 캐시에서 반환
         return this.cache.get(id) || null;
