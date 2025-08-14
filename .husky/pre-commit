@@ -1,1 +1,4 @@
-pnpm lint-staged
+echo "Running pre-commit checks..."
+pnpm lint:all
+pnpm format:all
+echo "Pre-commit checks completed!"

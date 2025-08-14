@@ -125,7 +125,7 @@ export class LambdaConstruct extends Construct {
         functionName: 'hanbit-auth-guest',
         code: lambda.Code.fromAsset(lambdaCodePath),
         handler: 'auth/guest-auth.handler',
-        description: '게스트 사용자 인증 처리',
+        description: 'Guest user authentication handler',
         timeout: cdk.Duration.seconds(15), // 게스트 인증은 더 빠르게
         memorySize: 256, // 메모리 사용량 최적화
       }),
