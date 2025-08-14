@@ -5,22 +5,17 @@
  */
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@vive/ui";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+} from "@vive/ui";
+// Dialog 컴포넌트는 현재 UI 패키지에 없으므로 간단한 모달로 대체
 // import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@vive/ui";
 import {
   User,
   UserPlus,
@@ -185,185 +180,186 @@ export function AuthPrompt({
     }
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3 text-xl">
+  return isOpen ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <Card className="sm:max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-xl">
             <User className="w-6 h-6 text-blue-500" />
             {triggerInfo.title}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {/* 트리거 메시지 */}
-          <Alert className={getUrgencyStyle()}>
-            <Info className="h-4 w-4" />
-            <AlertDescription className="text-sm">
-              {triggerInfo.description}
-            </AlertDescription>
-          </Alert>
-
-          {/* 마이그레이션 관련 정보 */}
-          {trigger === "migration" && migrationCheck.hasLocalData && (
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="pt-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Cloud className="w-5 h-5 text-blue-500" />
-                  <span className="font-medium text-blue-700">
-                    데이터 마이그레이션
-                  </span>
-                </div>
-                <p className="text-sm text-blue-600">
-                  현재 로컬에 저장된 할 일들을 클라우드 계정으로 안전하게 이동할
-                  수 있습니다. 계정을 만들면 데이터 손실 없이 모든 기기에서 접근
-                  가능합니다.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* 혜택/제한사항 탭 */}
-          {showBenefits && (
-            <div className="space-y-4">
-              <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setCurrentTab("benefits")}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                    currentTab === "benefits"
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  계정의 혜택
-                </button>
-                <button
-                  onClick={() => setCurrentTab("limitations")}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                    currentTab === "limitations"
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  게스트 제한사항
-                </button>
-              </div>
-
-              {/* 혜택 탭 */}
-              {currentTab === "benefits" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {AUTH_BENEFITS.map((benefit, index) => (
-                    <Card key={index} className="relative">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          {benefit.icon}
-                          <div>
-                            <h4 className="font-medium text-sm mb-1">
-                              {benefit.title}
-                            </h4>
-                            <p className="text-xs text-gray-600">
-                              {benefit.description}
-                            </p>
-                          </div>
-                        </div>
-                        {!benefit.guestSupport && (
-                          <span className="absolute top-2 right-2 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-md">
-                            계정 필요
-                          </span>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-
-              {/* 제한사항 탭 */}
-              {currentTab === "limitations" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <X className="w-4 h-4 text-red-500" />
-                      게스트 계정 제한사항
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      게스트로 계속 사용하면 다음과 같은 제한이 있습니다
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {GUEST_LIMITATIONS.map((limitation, index) => (
-                        <li
-                          key={index}
-                          className="flex items-start gap-2 text-sm text-gray-600"
-                        >
-                          <X className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                          <span>{limitation}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-
-          {/* 현재 상태 표시 */}
-          {authState.isGuest && (
-            <Alert>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* 트리거 메시지 */}
+            <Alert className={getUrgencyStyle()}>
               <Info className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                현재 게스트 계정으로 사용 중입니다.
-                {authState.user?.permissions && (
-                  <span className="ml-1">
-                    할 일{" "}
-                    {authState.user.permissions.maxTodos -
-                      (authState.user.permissions.currentTodos || 0)}
-                    개를 더 만들 수 있습니다.
-                  </span>
-                )}
+                {triggerInfo.description}
               </AlertDescription>
             </Alert>
-          )}
-        </div>
 
-        {/* 액션 버튼 */}
-        <div className="flex flex-col sm:flex-row gap-3 mt-6">
-          <Button
-            onClick={handleRegister}
-            className="flex-1 flex items-center gap-2"
-          >
-            <UserPlus className="w-4 h-4" />
-            계정 만들기
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleLogin}
-            className="flex-1 flex items-center gap-2"
-          >
-            <User className="w-4 h-4" />
-            로그인
-          </Button>
-        </div>
+            {/* 마이그레이션 관련 정보 */}
+            {trigger === "migration" && migrationCheck.hasLocalData && (
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Cloud className="w-5 h-5 text-blue-500" />
+                    <span className="font-medium text-blue-700">
+                      데이터 마이그레이션
+                    </span>
+                  </div>
+                  <p className="text-sm text-blue-600">
+                    현재 로컬에 저장된 할 일들을 클라우드 계정으로 안전하게
+                    이동할 수 있습니다. 계정을 만들면 데이터 손실 없이 모든
+                    기기에서 접근 가능합니다.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
-        {/* 게스트 계속 사용 옵션 */}
-        <div className="text-center">
-          <button
-            onClick={handleContinueAsGuest}
-            className="text-sm text-gray-500 hover:text-gray-700 underline"
-          >
-            게스트로 계속 사용하기
-          </button>
-        </div>
+            {/* 혜택/제한사항 탭 */}
+            {showBenefits && (
+              <div className="space-y-4">
+                <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setCurrentTab("benefits")}
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                      currentTab === "benefits"
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    계정의 혜택
+                  </button>
+                  <button
+                    onClick={() => setCurrentTab("limitations")}
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                      currentTab === "limitations"
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    게스트 제한사항
+                  </button>
+                </div>
 
-        {/* 미래 기능 안내 */}
-        <div className="text-center">
-          <p className="text-xs text-gray-400">
-            * 로그인/회원가입 기능은 곧 출시 예정입니다
-          </p>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+                {/* 혜택 탭 */}
+                {currentTab === "benefits" && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {AUTH_BENEFITS.map((benefit, index) => (
+                      <Card key={index} className="relative">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            {benefit.icon}
+                            <div>
+                              <h4 className="font-medium text-sm mb-1">
+                                {benefit.title}
+                              </h4>
+                              <p className="text-xs text-gray-600">
+                                {benefit.description}
+                              </p>
+                            </div>
+                          </div>
+                          {!benefit.guestSupport && (
+                            <span className="absolute top-2 right-2 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-md">
+                              계정 필요
+                            </span>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
+                {/* 제한사항 탭 */}
+                {currentTab === "limitations" && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <X className="w-4 h-4 text-red-500" />
+                        게스트 계정 제한사항
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        게스트로 계속 사용하면 다음과 같은 제한이 있습니다
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {GUEST_LIMITATIONS.map((limitation, index) => (
+                          <li
+                            key={index}
+                            className="flex items-start gap-2 text-sm text-gray-600"
+                          >
+                            <X className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                            <span>{limitation}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
+            {/* 현재 상태 표시 */}
+            {authState.isGuest && (
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  현재 게스트 계정으로 사용 중입니다.
+                  {authState.user?.permissions && (
+                    <span className="ml-1">
+                      할 일{" "}
+                      {authState.user.permissions.maxTodos -
+                        (authState.user.permissions.currentTodos || 0)}
+                      개를 더 만들 수 있습니다.
+                    </span>
+                  )}
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+
+          {/* 액션 버튼 */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <Button
+              onClick={handleRegister}
+              className="flex-1 flex items-center gap-2"
+            >
+              <UserPlus className="w-4 h-4" />
+              계정 만들기
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleLogin}
+              className="flex-1 flex items-center gap-2"
+            >
+              <User className="w-4 h-4" />
+              로그인
+            </Button>
+          </div>
+
+          {/* 게스트 계속 사용 옵션 */}
+          <div className="text-center">
+            <button
+              onClick={handleContinueAsGuest}
+              className="text-sm text-gray-500 hover:text-gray-700 underline"
+            >
+              게스트로 계속 사용하기
+            </button>
+          </div>
+
+          {/* 미래 기능 안내 */}
+          <div className="text-center">
+            <p className="text-xs text-gray-400">
+              * 로그인/회원가입 기능은 곧 출시 예정입니다
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  ) : null;
 }
 
 /**

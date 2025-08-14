@@ -6,8 +6,8 @@ import { TodoFilters } from "./todo-filters";
 import { TodoStatsComponent, TodoProgressBar } from "./todo-stats";
 import { TodoHeader } from "./todo-header";
 import { MigrationStatus } from "./auth/migration-dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@vive/ui";
+import { Card, CardContent } from "@vive/ui";
 import { useTodo, useTodoSync } from "../hooks/use-todo";
 // Priority import 제거 - 사용하지 않음
 

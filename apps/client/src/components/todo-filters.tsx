@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@vive/ui";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@vive/ui";
 import type { TodoFilter, FilterType, SortBy, SortOrder } from "@vive/types";
 import type {
   FilterHelpers,

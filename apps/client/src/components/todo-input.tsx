@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@vive/ui";
 import {
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@vive/ui";
 import type { Priority } from "@vive/types";
 import { useTodoForm } from "../hooks/use-todo";
 import { useSafeInput, logSecurityWarning } from "../utils/client-security";

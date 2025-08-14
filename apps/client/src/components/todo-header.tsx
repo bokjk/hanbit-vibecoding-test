@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input } from "@vive/ui";
 import { useState } from "react";
 
 interface TodoHeaderProps {

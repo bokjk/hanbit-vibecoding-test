@@ -5,14 +5,8 @@
  */
 
 import { useEffect, useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Button } from "@vive/ui";
+// Dialog 컴포넌트는 현재 UI 패키지에 없으므로 간단한 모달로 대체
 // import { Progress } from '@/components/ui/progress';
 import {
   AlertCircle,
@@ -22,7 +16,14 @@ import {
   Cloud,
   ArrowRight,
 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Alert,
+  AlertDescription,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@vive/ui";
 import { useMigration, useMigrationProgress } from "../../hooks/use-migration";
 import type { MigrationResult } from "../../services/data-migration.service";
 
@@ -167,175 +168,182 @@ export function MigrationDialog({
     return `약 ${minutes}분`;
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
+  return isOpen ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <Card className="sm:max-w-md w-full mx-4">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3">
             {renderStageIcon()}
             <span>데이터 마이그레이션</span>
-          </DialogTitle>
-          <DialogDescription>
+          </CardTitle>
+          <p className="text-sm text-gray-600">
             로컬 데이터를 클라우드 계정으로 이동합니다
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {/* 마이그레이션 플로우 시각화 */}
-          <div className="flex items-center justify-between py-4">
-            <div className="flex flex-col items-center gap-2">
-              <Database
-                className={`w-8 h-8 ${migration.migration.stage === "checking" || migration.migration.stage === "preparing" ? "text-blue-500" : "text-gray-300"}`}
-              />
-              <span className="text-xs text-gray-500">로컬 데이터</span>
-            </div>
-            <ArrowRight
-              className={`w-6 h-6 ${migration.migration.isInProgress ? "text-blue-500 animate-pulse" : "text-gray-300"}`}
-            />
-            <div className="flex flex-col items-center gap-2">
-              <Cloud
-                className={`w-8 h-8 ${migration.migration.isComplete ? "text-green-500" : migration.migration.isInProgress ? "text-blue-500" : "text-gray-300"}`}
-              />
-              <span className="text-xs text-gray-500">클라우드</span>
-            </div>
-          </div>
-
-          {/* 진행률 표시 */}
-          {migration.migration.totalItems > 0 && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>진행률</span>
-                <span>{Math.round(progress.progress * 100)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progress.progress * 100}%` }}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* 마이그레이션 플로우 시각화 */}
+            <div className="flex items-center justify-between py-4">
+              <div className="flex flex-col items-center gap-2">
+                <Database
+                  className={`w-8 h-8 ${migration.migration.stage === "checking" || migration.migration.stage === "preparing" ? "text-blue-500" : "text-gray-300"}`}
                 />
+                <span className="text-xs text-gray-500">로컬 데이터</span>
               </div>
-              {progress.eta && (
-                <p className="text-xs text-gray-500 text-center">
-                  예상 완료 시간: {formatETA(progress.eta)}
-                </p>
-              )}
+              <ArrowRight
+                className={`w-6 h-6 ${migration.migration.isInProgress ? "text-blue-500 animate-pulse" : "text-gray-300"}`}
+              />
+              <div className="flex flex-col items-center gap-2">
+                <Cloud
+                  className={`w-8 h-8 ${migration.migration.isComplete ? "text-green-500" : migration.migration.isInProgress ? "text-blue-500" : "text-gray-300"}`}
+                />
+                <span className="text-xs text-gray-500">클라우드</span>
+              </div>
             </div>
-          )}
 
-          {/* 상태 메시지 */}
-          <div className="text-center py-4">
-            <p className="text-sm text-gray-600">{renderStageDescription()}</p>
+            {/* 진행률 표시 */}
+            {migration.migration.totalItems > 0 && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>진행률</span>
+                  <span>{Math.round(progress.progress * 100)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${progress.progress * 100}%` }}
+                  />
+                </div>
+                {progress.eta && (
+                  <p className="text-xs text-gray-500 text-center">
+                    예상 완료 시간: {formatETA(progress.eta)}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* 상태 메시지 */}
+            <div className="text-center py-4">
+              <p className="text-sm text-gray-600">
+                {renderStageDescription()}
+              </p>
+            </div>
+
+            {/* 오류 메시지 */}
+            {migration.migration.error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{migration.migration.error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* 완료 메시지 */}
+            {migration.migration.isComplete && !migration.migration.error && (
+              <Alert>
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {migration.migration.migratedItems}개의 할 일이 성공적으로
+                  마이그레이션되었습니다.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* 세부 정보 토글 */}
+            {migration.migration.totalItems > 0 && (
+              <div className="space-y-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDetails(!showDetails)}
+                  className="w-full"
+                >
+                  {showDetails ? "세부 정보 숨기기" : "세부 정보 보기"}
+                </Button>
+
+                {showDetails && (
+                  <div className="text-xs text-gray-500 space-y-1 p-3 bg-gray-50 rounded-md">
+                    <div className="flex justify-between">
+                      <span>총 항목:</span>
+                      <span>{migration.migration.totalItems}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>완료된 항목:</span>
+                      <span>{migration.migration.migratedItems}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>현재 단계:</span>
+                      <span>{migration.migration.stage}</span>
+                    </div>
+                    {migration.history.timestamp && (
+                      <div className="flex justify-between">
+                        <span>시작 시간:</span>
+                        <span>
+                          {new Date(
+                            migration.history.timestamp,
+                          ).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* 오류 메시지 */}
-          {migration.migration.error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{migration.migration.error}</AlertDescription>
-            </Alert>
-          )}
-
-          {/* 완료 메시지 */}
-          {migration.migration.isComplete && !migration.migration.error && (
-            <Alert>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                {migration.migration.migratedItems}개의 할 일이 성공적으로
-                마이그레이션되었습니다.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* 세부 정보 토글 */}
-          {migration.migration.totalItems > 0 && (
-            <div className="space-y-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowDetails(!showDetails)}
-                className="w-full"
-              >
-                {showDetails ? "세부 정보 숨기기" : "세부 정보 보기"}
-              </Button>
-
-              {showDetails && (
-                <div className="text-xs text-gray-500 space-y-1 p-3 bg-gray-50 rounded-md">
-                  <div className="flex justify-between">
-                    <span>총 항목:</span>
-                    <span>{migration.migration.totalItems}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>완료된 항목:</span>
-                    <span>{migration.migration.migratedItems}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>현재 단계:</span>
-                    <span>{migration.migration.stage}</span>
-                  </div>
-                  {migration.history.timestamp && (
-                    <div className="flex justify-between">
-                      <span>시작 시간:</span>
-                      <span>
-                        {new Date(
-                          migration.history.timestamp,
-                        ).toLocaleTimeString()}
-                      </span>
-                    </div>
-                  )}
-                </div>
+          {/* 액션 버튼 */}
+          <div className="flex gap-3 mt-6">
+            {!migration.migration.isInProgress &&
+              !migration.migration.isComplete && (
+                <>
+                  <Button
+                    onClick={handleStartMigration}
+                    disabled={!migration.canStart}
+                    className="flex-1"
+                  >
+                    마이그레이션 시작
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={onClose}
+                    className="flex-1"
+                  >
+                    나중에 하기
+                  </Button>
+                </>
               )}
-            </div>
-          )}
-        </div>
 
-        {/* 액션 버튼 */}
-        <div className="flex gap-3 mt-6">
-          {!migration.migration.isInProgress &&
-            !migration.migration.isComplete && (
+            {migration.migration.isInProgress && (
               <>
                 <Button
-                  onClick={handleStartMigration}
-                  disabled={!migration.canStart}
+                  variant="destructive"
+                  onClick={handleCancelMigration}
                   className="flex-1"
                 >
-                  마이그레이션 시작
-                </Button>
-                <Button variant="outline" onClick={onClose} className="flex-1">
-                  나중에 하기
+                  취소
                 </Button>
               </>
             )}
 
-          {migration.migration.isInProgress && (
-            <>
-              <Button
-                variant="destructive"
-                onClick={handleCancelMigration}
-                className="flex-1"
-              >
-                취소
+            {(migration.migration.isComplete || migration.migration.error) && (
+              <Button onClick={onClose} className="w-full">
+                {migration.migration.error ? "닫기" : "완료"}
               </Button>
-            </>
-          )}
+            )}
+          </div>
 
-          {(migration.migration.isComplete || migration.migration.error) && (
-            <Button onClick={onClose} className="w-full">
-              {migration.migration.error ? "닫기" : "완료"}
-            </Button>
-          )}
-        </div>
-
-        {/* 도움말 링크 */}
-        <div className="text-center mt-4">
-          <button
-            className="text-xs text-blue-500 hover:underline"
-            onClick={() => window.open("/help/migration", "_blank")}
-          >
-            마이그레이션에 대해 더 알아보기
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+          {/* 도움말 링크 */}
+          <div className="text-center mt-4">
+            <button
+              className="text-xs text-blue-500 hover:underline"
+              onClick={() => window.open("/help/migration", "_blank")}
+            >
+              마이그레이션에 대해 더 알아보기
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  ) : null;
 }
 
 /**

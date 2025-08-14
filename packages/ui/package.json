@@ -2,14 +2,15 @@
   "name": "@vive/ui",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./src/index.ts",
   "exports": {
     ".": {
+      "types": "./src/index.ts",
       "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js",
-      "types": "./src/index.ts"
+      "require": "./dist/index.cjs.js"
     },
     "./components/ui/*": {
       "types": "./src/components/ui/*.ts",

@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { Button } from "@vive/ui";
+import { Card, CardContent, Checkbox, Input } from "@vive/ui";
 import type { Todo, Priority } from "@vive/types";
 
 interface TodoItemProps {

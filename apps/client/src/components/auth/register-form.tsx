@@ -6,16 +6,17 @@
  */
 
 import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@vive/ui";
 import {
+  Input,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+  Alert,
+  AlertDescription,
+} from "@vive/ui";
 import {
   Eye,
   EyeOff,

@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@vive/ui";
 import type { TodoStats } from "@vive/types";
 
 interface TodoStatsProps {
