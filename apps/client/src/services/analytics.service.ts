@@ -106,8 +106,8 @@ export class AnalyticsService {
    * Analytics 엔드포인트 조회
    */
   private getAnalyticsEndpoint(): string {
-    const baseUrl =
-      import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+    if (!baseUrl) return "";
     return `${baseUrl}/analytics/events`;
   }
 
@@ -115,6 +115,10 @@ export class AnalyticsService {
    * Analytics 활성화 여부 결정
    */
   private shouldEnableAnalytics(): boolean {
+    // API URL이 없으면 Analytics 비활성화
+    const hasApiUrl = Boolean(import.meta.env.VITE_API_BASE_URL);
+    if (!hasApiUrl) return false;
+
     // 환경변수로 제어
     const isProduction = import.meta.env.MODE === "production";
     const isDebugMode = import.meta.env.VITE_DEBUG === "true";

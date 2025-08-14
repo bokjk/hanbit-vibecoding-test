@@ -17,8 +17,7 @@ export class AppConfig {
   // API 관련 설정
   get api() {
     return {
-      baseURL:
-        import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1",
+      baseURL: import.meta.env.VITE_API_BASE_URL || "",
       timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || "10000", 10),
       retryAttempts: parseInt(import.meta.env.VITE_RETRY_ATTEMPTS || "3", 10),
       retryDelay: parseInt(import.meta.env.VITE_RETRY_DELAY || "1000", 10),
@@ -64,9 +63,9 @@ export class AppConfig {
   validate(): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    // API 기본 URL 검증
-    if (!this.api.baseURL) {
-      errors.push("VITE_API_BASE_URL is required");
+    // API 기본 URL 검증 (API 모드일 때만)
+    if (this.features.apiMode && !this.api.baseURL) {
+      errors.push("VITE_API_BASE_URL is required when API mode is enabled");
     }
 
     // 인증 모드가 authenticated일 때 Cognito 설정 검증
