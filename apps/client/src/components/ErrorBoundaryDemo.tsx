@@ -11,6 +11,7 @@ import {
   throwError,
   handleAsyncError,
 } from "./ErrorBoundary";
+import styles from "./ErrorBoundaryDemo.module.scss";
 
 /**
  * 의도적으로 에러를 발생시키는 테스트 컴포넌트
@@ -21,7 +22,7 @@ function ErrorThrowingComponent({ shouldThrow }: { shouldThrow: boolean }) {
   }
 
   return (
-    <div className="p-4 bg-green-100 rounded-md">
+    <div className={styles.successBox}>
       ✅ 컴포넌트가 정상적으로 렌더링되었습니다.
     </div>
   );
@@ -50,7 +51,7 @@ function AsyncErrorComponent() {
   };
 
   return (
-    <div className="space-y-2">
+    <div className={styles.actionsContainer}>
       <Button
         onClick={handleAsyncOperation}
         disabled={isLoading}
@@ -59,7 +60,7 @@ function AsyncErrorComponent() {
         {isLoading ? "로딩 중..." : "비동기 에러 발생시키기"}
       </Button>
       {isLoading && (
-        <div className="text-sm text-gray-600">
+        <div className={styles.infoText}>
           비동기 작업 실행 중... (1초 후 에러 발생)
         </div>
       )}
@@ -81,7 +82,7 @@ function EffectErrorComponent({ shouldThrow }: { shouldThrow: boolean }) {
   }, [shouldThrow]);
 
   return (
-    <div className="p-4 bg-blue-100 rounded-md">
+    <div className={styles.infoBox}>
       useEffect 테스트 컴포넌트 (에러는 전역 핸들러가 처리)
     </div>
   );
@@ -96,7 +97,7 @@ const WrappedComponent = withErrorBoundary(
       throwError("HOC로 감싸진 컴포넌트에서 에러 발생!");
     }
     return (
-      <div className="p-4 bg-purple-100 rounded-md">
+      <div className={styles.hocBox}>
         ✅ HOC로 감싸진 컴포넌트가 정상 렌더링됨
       </div>
     );
@@ -113,11 +114,11 @@ const WrappedComponent = withErrorBoundary(
  */
 function CustomErrorUI(error: Error, _errorInfo: unknown, onRetry: () => void) {
   return (
-    <div className="p-6 border-2 border-red-300 rounded-lg bg-red-50">
-      <h3 className="text-lg font-semibold text-red-800 mb-2">
+    <div className={styles.customFallback}>
+      <h3 className={styles.customFallbackTitle}>
         커스텀 에러 UI
       </h3>
-      <p className="text-red-600 mb-4">{error.message}</p>
+      <p className={styles.customFallbackMessage}>{error.message}</p>
       <Button onClick={onRetry} variant="outline" size="sm">
         다시 시도
       </Button>
@@ -153,18 +154,18 @@ export function ErrorBoundaryDemo() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className={styles.demoContainer}>
       <Card>
         <CardHeader>
           <CardTitle>Error Boundary 데모</CardTitle>
         </CardHeader>
         <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div className="text-sm text-gray-600">
+          <div className={styles.infoText}>
             이 페이지는 Error Boundary의 다양한 기능을 테스트할 수 있습니다.
             개발 환경에서만 사용하세요.
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className={styles.buttonGroup}>
             <Button onClick={resetAll} variant="outline">
               전체 리셋
             </Button>
@@ -219,7 +220,7 @@ export function ErrorBoundaryDemo() {
           <CardTitle>3. 비동기 에러 (전역 핸들러가 처리)</CardTitle>
         </CardHeader>
         <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div className="text-sm text-yellow-600">
+          <div className={styles.warningText}>
             ⚠️ 비동기 에러는 Error Boundary로 잡히지 않고 전역 에러 핸들러가
             처리합니다.
           </div>
@@ -240,7 +241,7 @@ export function ErrorBoundaryDemo() {
             {testStates.effectError ? "에러 해제" : "useEffect 에러 발생"}
           </Button>
 
-          <div className="text-sm text-yellow-600">
+          <div className={styles.warningText}>
             ⚠️ useEffect 내부의 에러는 Error Boundary로 잡히지 않습니다.
           </div>
 
@@ -273,7 +274,7 @@ export function ErrorBoundaryDemo() {
           <CardTitle>6. 저장된 에러 로그</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-gray-600 mb-2">
+          <div className={styles.logInfo}>
             브라우저 개발자 도구의 콘솔과 Local Storage를 확인해보세요.
           </div>
           <Button

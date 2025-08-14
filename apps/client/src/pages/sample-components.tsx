@@ -10,6 +10,7 @@ import {
   LinearInput,
 } from "@vive/ui";
 import { MonitoringDemo } from "../components/MonitoringDemo";
+import styles from "./sample-components.module.scss";
 
 /**
  * Linear Design System 컴포넌트 데모 페이지
@@ -81,13 +82,13 @@ export function SampleComponents() {
   );
 
   return (
-    <div className="space-y-12">
+    <div className={styles.pageContainer}>
       {/* 페이지 헤더 */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-[#f7f8f8]">
+      <div className={styles.header}>
+        <h1 className={styles.title}>
           Linear Design System
         </h1>
-        <p className="text-lg text-white/70 max-w-2xl mx-auto">
+        <p className={styles.description}>
           프로젝트 전반에서 사용할 수 있는 재사용 가능한 컴포넌트
           라이브러리입니다. 글래스모피즘 효과와 Linear.app에서 영감을 받은
           디자인을 적용했습니다.
@@ -102,13 +103,13 @@ export function SampleComponents() {
             다양한 변형과 상태를 지원하는 버튼 컴포넌트입니다.
           </LinearCardDescription>
         </LinearCardHeader>
-        <LinearCardContent className="space-y-6">
+        <LinearCardContent className={styles.cardContent}>
           {/* 기본 변형들 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">
+            <h4 className={styles.subheading}>
               Variants
             </h4>
-            <div className="flex flex-wrap gap-3">
+            <div className={styles.buttonGroup}>
               <LinearButton variant="primary">Primary</LinearButton>
               <LinearButton variant="secondary">Secondary</LinearButton>
               <LinearButton variant="ghost">Ghost</LinearButton>
@@ -121,8 +122,8 @@ export function SampleComponents() {
 
           {/* 크기 변형들 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">Sizes</h4>
-            <div className="flex flex-wrap items-center gap-3">
+            <h4 className={styles.subheading}>Sizes</h4>
+            <div className={styles.buttonGroupVertical}>
               <LinearButton size="sm">Small</LinearButton>
               <LinearButton size="default">Default</LinearButton>
               <LinearButton size="lg">Large</LinearButton>
@@ -131,10 +132,10 @@ export function SampleComponents() {
 
           {/* 아이콘과 상태 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">
+            <h4 className={styles.subheading}>
               With Icons & States
             </h4>
-            <div className="flex flex-wrap gap-3">
+            <div className={styles.buttonGroup}>
               <LinearButton icon={<PlusIcon />} iconPosition="left">
                 Add Item
               </LinearButton>
@@ -170,7 +171,7 @@ export function SampleComponents() {
           </LinearCardDescription>
         </LinearCardHeader>
         <LinearCardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={styles.cardGrid}>
             {/* Default Card */}
             <LinearCard variant="default" padding="default">
               <LinearCardHeader>
@@ -180,7 +181,7 @@ export function SampleComponents() {
                 </LinearCardDescription>
               </LinearCardHeader>
               <LinearCardContent>
-                <p className="text-sm text-white/70">
+                <p className={styles.cardText}>
                   이 카드는 기본적인 글래스모피즘 효과를 적용했습니다.
                 </p>
               </LinearCardContent>
@@ -195,7 +196,7 @@ export function SampleComponents() {
                 </LinearCardDescription>
               </LinearCardHeader>
               <LinearCardContent>
-                <p className="text-sm text-white/70">
+                <p className={styles.cardText}>
                   마우스를 올리면 배경이 변경됩니다.
                 </p>
               </LinearCardContent>
@@ -210,7 +211,7 @@ export function SampleComponents() {
                 </LinearCardDescription>
               </LinearCardHeader>
               <LinearCardContent>
-                <p className="text-sm text-white/70">
+                <p className={styles.cardText}>
                   클릭하면 약간 위로 올라갑니다.
                 </p>
               </LinearCardContent>
@@ -230,7 +231,7 @@ export function SampleComponents() {
                 </LinearCardDescription>
               </LinearCardHeader>
               <LinearCardContent>
-                <p className="text-sm text-white/70">
+                <p className={styles.cardText}>
                   불투명한 배경을 사용합니다.
                 </p>
               </LinearCardContent>
@@ -245,7 +246,7 @@ export function SampleComponents() {
                 </LinearCardDescription>
               </LinearCardHeader>
               <LinearCardContent>
-                <p className="text-sm text-white/70">
+                <p className={styles.cardText}>
                   최소한의 배경을 사용합니다.
                 </p>
               </LinearCardContent>
@@ -260,7 +261,7 @@ export function SampleComponents() {
                 </LinearCardDescription>
               </LinearCardHeader>
               <LinearCardContent>
-                <p className="text-sm text-white/70">
+                <p className={styles.cardText}>
                   더 넓은 공간을 제공합니다.
                 </p>
               </LinearCardContent>
@@ -277,13 +278,13 @@ export function SampleComponents() {
             다양한 상태와 스타일을 지원하는 입력 컴포넌트입니다.
           </LinearCardDescription>
         </LinearCardHeader>
-        <LinearCardContent className="space-y-6">
+        <LinearCardContent className={styles.cardContent}>
           {/* 기본 변형들 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">
+            <h4 className={styles.subheading}>
               Variants
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className={styles.inputGrid}>
               <LinearInput placeholder="Default input" variant="default" />
               <LinearInput placeholder="Ghost input" variant="ghost" />
               <LinearInput placeholder="Solid input" variant="solid" />
@@ -292,8 +293,8 @@ export function SampleComponents() {
 
           {/* 크기들 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">Sizes</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h4 className={styles.subheading}>Sizes</h4>
+            <div className={styles.inputGrid}>
               <LinearInput placeholder="Small input" size="sm" />
               <LinearInput placeholder="Default input" size="default" />
               <LinearInput placeholder="Large input" size="lg" />
@@ -302,8 +303,8 @@ export function SampleComponents() {
 
           {/* 상태들 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">States</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h4 className={styles.subheading}>States</h4>
+            <div className={styles.inputGrid2Cols}>
               <LinearInput
                 label="성공 상태"
                 placeholder="입력해주세요"
@@ -331,10 +332,10 @@ export function SampleComponents() {
 
           {/* 아이콘과 기능들 */}
           <div>
-            <h4 className="text-sm font-medium text-[#f7f8f8] mb-3">
+            <h4 className={styles.subheading}>
               With Icons
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={styles.inputGrid2Cols}>
               <LinearInput
                 label="검색"
                 placeholder="검색어를 입력하세요"
@@ -377,8 +378,8 @@ export function SampleComponents() {
           </LinearCardDescription>
         </LinearCardHeader>
         <LinearCardContent>
-          <div className="max-w-md mx-auto">
-            <form className="space-y-4">
+          <div className={styles.formContainer}>
+            <form className={styles.form}>
               <LinearInput
                 label="이메일"
                 type="email"
@@ -391,7 +392,7 @@ export function SampleComponents() {
                 placeholder="••••••••"
                 required
               />
-              <div className="flex gap-3">
+              <div className={styles.formActions}>
                 <LinearButton type="submit" fullWidth>
                   로그인
                 </LinearButton>

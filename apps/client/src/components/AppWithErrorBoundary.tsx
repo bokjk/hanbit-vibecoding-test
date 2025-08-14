@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { initializeGlobalErrorHandler } from "../utils/global-error-handler";
 import "../App.css";
+import styles from "./AppWithErrorBoundary.module.scss";
 
 /**
  * 앱 초기화 상태 관리 컴포넌트
@@ -89,21 +90,21 @@ function AppContent() {
   // 앱 초기화 중 로딩 표시
   if (isInitializing) {
     return (
-      <main className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          <p className="text-sm text-gray-600">앱을 초기화하고 있습니다...</p>
+      <main className={styles.loadingWrapper}>
+        <div className={styles.loadingContent}>
+          <Loader2 className={styles.spinner} />
+          <p className={styles.loadingText}>앱을 초기화하고 있습니다...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className={styles.main}>
       {/* 인증 유도 배너 */}
       {showAuthBanner && (
         <ErrorBoundary>
-          <div className="sticky top-0 z-10 p-4">
+          <div className={styles.bannerContainer}>
             <AuthPromptBanner
               onPromptOpen={() => {
                 // TODO: AuthPrompt 다이얼로그 열기 (향후 구현)
@@ -204,30 +205,30 @@ function AppWithErrorBoundary() {
       }}
       fallback={(error, errorInfo, onRetry) => (
         // 앱 전체 레벨 에러 시 표시할 최소한의 UI
-        <div className="min-h-screen flex items-center justify-center p-4 bg-red-50">
-          <div className="max-w-md text-center space-y-4">
-            <div className="text-red-600 text-6xl mb-4">😵</div>
-            <h1 className="text-xl font-semibold text-red-800">
+        <div className={styles.fallbackWrapper}>
+          <div className={styles.fallbackContent}>
+            <div className={styles.fallbackIcon}>😵</div>
+            <h1 className={styles.fallbackTitle}>
               애플리케이션 오류
             </h1>
-            <p className="text-red-600">
+            <p className={styles.fallbackMessage}>
               예상치 못한 오류로 인해 애플리케이션을 실행할 수 없습니다.
             </p>
-            <div className="space-y-2">
+            <div className={styles.fallbackActions}>
               <button
                 onClick={onRetry}
-                className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                className={styles.retryButton}
               >
                 다시 시도
               </button>
               <button
                 onClick={() => window.location.reload()}
-                className="w-full px-4 py-2 border border-red-300 text-red-600 rounded-md hover:bg-red-50 transition-colors"
+                className={styles.reloadButton}
               >
                 페이지 새로고침
               </button>
             </div>
-            <div className="text-xs text-red-500">
+            <div className={styles.fallbackHint}>
               문제가 지속되면 브라우저 캐시를 삭제해 보세요.
             </div>
           </div>

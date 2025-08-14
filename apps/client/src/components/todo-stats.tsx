@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "@vive/ui";
 import type { TodoStats } from "@vive/types";
+import styles from "./todo-stats.module.scss";
 
 interface TodoStatsProps {
   stats: TodoStats;
@@ -9,38 +10,20 @@ interface TodoStatsProps {
 
 export function TodoStatsComponent({ stats, className = "" }: TodoStatsProps) {
   return (
-    <div style={{ 
-      display: 'grid', 
-      gridTemplateColumns: 'repeat(2, 1fr)', 
-      gap: '1rem'
-    }}>
+    <div className={`${styles.statsGrid} ${className}`}>
       {/* 전체 할 일 */}
-      <Card style={{
-        background: 'linear-gradient(to bottom right, rgb(239 246 255), rgb(219 234 254))',
-        borderColor: 'rgb(191 219 254)',
-        transition: 'all 200ms ease',
-        cursor: 'pointer'
-      }} onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-      }} onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '';
-      }}>
-        <CardContent style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Card className={`${styles.statCard} ${styles.totalCard}`}>
+        <CardContent className={styles.cardContent}>
+          <div className={styles.cardInner}>
             <div>
-              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'rgb(37 99 235)', marginBottom: '0.25rem' }}>
-                전체 할 일
-              </p>
-              <p
-                data-testid="stats-total"
-                style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'rgb(29 78 216)' }}
-              >
+              <p className={styles.statLabel}>전체 할 일</p>
+              <p data-testid="stats-total" className={styles.statValue}>
                 {stats.total}
               </p>
             </div>
-            <div style={{ width: '3rem', height: '3rem', backgroundColor: 'rgb(59 130 246)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className={`${styles.iconWrapper} ${styles.totalIconWrapper}`}>
               <svg
-                style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
+                className={styles.icon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -58,32 +41,22 @@ export function TodoStatsComponent({ stats, className = "" }: TodoStatsProps) {
       </Card>
 
       {/* 진행 중 */}
-      <Card style={{
-        background: 'linear-gradient(to bottom right, rgb(255 247 237), rgb(254 215 170))',
-        borderColor: 'rgb(253 186 116)',
-        transition: 'all 200ms ease',
-        cursor: 'pointer'
-      }} onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-      }} onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '';
-      }}>
-        <CardContent style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Card className={`${styles.statCard} ${styles.activeCard}`}>
+        <CardContent className={styles.cardContent}>
+          <div className={styles.cardInner}>
             <div>
-              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'rgb(234 88 12)', marginBottom: '0.25rem' }}>
+              <p className={`${styles.statLabel} ${styles.activeLabel}`}>
                 진행 중
               </p>
               <p
                 data-testid="stats-active"
-                style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'rgb(194 65 12)' }}
-              >
+                className={`${styles.statValue} ${styles.activeValue}`}>
                 {stats.active}
               </p>
             </div>
-            <div style={{ width: '3rem', height: '3rem', backgroundColor: 'rgb(249 115 22)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className={`${styles.iconWrapper} ${styles.activeIconWrapper}`}>
               <svg
-                style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
+                className={styles.icon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -101,30 +74,20 @@ export function TodoStatsComponent({ stats, className = "" }: TodoStatsProps) {
       </Card>
 
       {/* 완료됨 */}
-      <Card style={{
-        background: 'linear-gradient(to bottom right, rgb(240 253 244), rgb(187 247 208))',
-        borderColor: 'rgb(134 239 172)',
-        transition: 'all 200ms ease',
-        cursor: 'pointer'
-      }} onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-      }} onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '';
-      }}>
-        <CardContent style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Card className={`${styles.statCard} ${styles.completedCard}`}>
+        <CardContent className={styles.cardContent}>
+          <div className={styles.cardInner}>
             <div>
-              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'rgb(22 163 74)', marginBottom: '0.25rem' }}>완료됨</p>
+              <p className={`${styles.statLabel} ${styles.completedLabel}`}>완료됨</p>
               <p
                 data-testid="stats-completed"
-                style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'rgb(21 128 61)' }}
-              >
+                className={`${styles.statValue} ${styles.completedValue}`}>
                 {stats.completed}
               </p>
             </div>
-            <div style={{ width: '3rem', height: '3rem', backgroundColor: 'rgb(34 197 94)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className={`${styles.iconWrapper} ${styles.completedIconWrapper}`}>
               <svg
-                style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
+                className={styles.icon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -142,30 +105,20 @@ export function TodoStatsComponent({ stats, className = "" }: TodoStatsProps) {
       </Card>
 
       {/* 완료율 */}
-      <Card style={{
-        background: 'linear-gradient(to bottom right, rgb(250 245 255), rgb(221 214 254))',
-        borderColor: 'rgb(196 181 253)',
-        transition: 'all 200ms ease',
-        cursor: 'pointer'
-      }} onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-      }} onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '';
-      }}>
-        <CardContent style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Card className={`${styles.statCard} ${styles.rateCard}`}>
+        <CardContent className={styles.cardContent}>
+          <div className={styles.cardInner}>
             <div>
-              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'rgb(147 51 234)', marginBottom: '0.25rem' }}>완료율</p>
+              <p className={`${styles.statLabel} ${styles.rateLabel}`}>완료율</p>
               <p
                 data-testid="stats-completion-rate"
-                style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'rgb(126 34 206)' }}
-              >
+                className={`${styles.statValue} ${styles.rateValue}`}>
                 {stats.completionRate}%
               </p>
             </div>
-            <div style={{ width: '3rem', height: '3rem', backgroundColor: 'rgb(168 85 247)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className={`${styles.iconWrapper} ${styles.rateIconWrapper}`}>
               <svg
-                style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
+                className={styles.icon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -188,44 +141,37 @@ export function TodoStatsComponent({ stats, className = "" }: TodoStatsProps) {
 /* 프로그레스 바 컴포넌트 */
 export function TodoProgressBar({ stats, className = "" }: TodoStatsProps) {
   return (
-    <Card style={{ 
-      background: 'linear-gradient(to right, rgb(249 250 251), rgb(243 244 246))',
-      // className prop removed
-    }}>
-      <CardContent style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: 'rgb(31 41 55)' }}>
+    <Card className={`${styles.progressBarCard} ${className}`}>
+      <CardContent className={styles.cardContent}>
+        <div className={styles.progressHeader}>
+          <h3 className={styles.progressTitle}>
             전체 진행 상황
           </h3>
-          <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'rgb(55 65 81)' }}>
+          <span className={styles.progressValue}>
             {stats.completionRate}%
           </span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div className={styles.progressContainer}>
           {/* 메인 프로그레스 바 */}
-          <div style={{ position: 'relative', width: '100%', height: '1.5rem', backgroundColor: 'rgb(229 231 235)', borderRadius: '9999px', overflow: 'hidden', boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)' }}>
+          <div className={styles.progressBarWrapper}>
             <div
-              style={{ 
-                height: '100%', 
-                background: 'linear-gradient(to right, rgb(59 130 246), rgb(168 85 247), rgb(34 197 94))', 
-                borderRadius: '9999px', 
-                transition: 'all 1000ms ease-out', 
-                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+              className={styles.progressBar}
+              style={{
                 width: `${stats.completionRate}%`
               }}
             />
-            <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent)', borderRadius: '9999px' }}></div>
+            <div className={styles.progressBarOverlay}></div>
           </div>
 
           {/* 상세 진행률 표시 */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'rgb(75 85 99)' }}>
-            <span style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: 'rgb(251 146 60)', borderRadius: '50%', marginRight: '0.5rem' }}></div>
+          <div className={styles.progressDetails}>
+            <span className={styles.progressDetailItem}>
+              <div className={`${styles.progressDot} ${styles.activeDot}`}></div>
               진행중 {stats.active}개
             </span>
-            <span style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: 'rgb(74 222 128)', borderRadius: '50%', marginRight: '0.5rem' }}></div>
+            <span className={styles.progressDetailItem}>
+              <div className={`${styles.progressDot} ${styles.completedDot}`}></div>
               완료 {stats.completed}개
             </span>
           </div>
@@ -238,56 +184,44 @@ export function TodoProgressBar({ stats, className = "" }: TodoStatsProps) {
 /* 모바일용 간단한 통계 */
 export function TodoStatsCard({ stats, className = "" }: TodoStatsProps) {
   return (
-    <Card style={{ display: 'none' }}>
-      <style>
-        {`
-          @media (min-width: 768px) {
-            .mobile-stats { display: none !important; }
-          }
-        `}
-      </style>
-      <div className="mobile-stats">
-      <CardContent style={{ padding: '1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.875rem' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'rgb(37 99 235)' }}>{stats.total}</div>
-            <div style={{ color: 'rgb(75 85 99)' }}>전체</div>
+    <Card className={`${styles.mobileStatsCard} ${className}`}>
+      <CardContent className={styles.mobileStatsContent}>
+        <div className={styles.mobileStatsGrid}>
+          <div className={styles.mobileStatItem}>
+            <div className={`${styles.mobileStatValue} ${styles.totalValue}`}>{stats.total}</div>
+            <div className={styles.mobileStatLabel}>전체</div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'rgb(234 88 12)' }}>
+          <div className={styles.mobileStatItem}>
+            <div className={`${styles.mobileStatValue} ${styles.activeValue}`}>
               {stats.active}
             </div>
-            <div style={{ color: 'rgb(75 85 99)' }}>진행중</div>
+            <div className={styles.mobileStatLabel}>진행중</div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'rgb(22 163 74)' }}>
+          <div className={styles.mobileStatItem}>
+            <div className={`${styles.mobileStatValue} ${styles.completedValue}`}>
               {stats.completed}
             </div>
-            <div style={{ color: 'rgb(75 85 99)' }}>완료</div>
+            <div className={styles.mobileStatLabel}>완료</div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'rgb(147 51 234)' }}>
+          <div className={styles.mobileStatItem}>
+            <div className={`${styles.mobileStatValue} ${styles.rateValue}`}>
               {stats.completionRate}%
             </div>
-            <div style={{ color: 'rgb(75 85 99)' }}>완료율</div>
+            <div className={styles.mobileStatLabel}>완료율</div>
           </div>
         </div>
 
-        <div style={{ marginTop: '1rem' }}>
-          <div style={{ width: '100%', backgroundColor: 'rgb(229 231 235)', borderRadius: '9999px', height: '0.5rem' }}>
+        <div className={styles.mobileProgressBarContainer}>
+          <div className={styles.mobileProgressBarWrapper}>
             <div
-              style={{ 
-                background: 'linear-gradient(to right, rgb(59 130 246), rgb(34 197 94))', 
-                height: '0.5rem', 
-                borderRadius: '9999px', 
-                transition: 'all 500ms ease',
+              className={styles.mobileProgressBar}
+              style={{
                 width: `${stats.completionRate}%`
               }}
             />
           </div>
         </div>
       </CardContent>
-      </div>
     </Card>
   );
 }

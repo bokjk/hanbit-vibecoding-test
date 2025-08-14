@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@vive/ui";
 import { Button } from "@vive/ui";
 import useMonitoring from "../hooks/use-monitoring";
 import type { MonitoringStats } from "../hooks/use-monitoring";
+import styles from "./MonitoringDemo.module.scss";
 
 export function MonitoringDemo() {
   const {
@@ -160,9 +161,9 @@ export function MonitoringDemo() {
 
   if (!isEnabled) {
     return (
-      <Card className="w-full max-w-4xl mx-auto m-4">
+      <Card className={styles.cardWrapper}>
         <CardHeader>
-          <CardTitle className="text-amber-600">
+          <CardTitle className={styles.titleWarning}>
             모니터링 시스템 비활성화
           </CardTitle>
         </CardHeader>
@@ -175,44 +176,44 @@ export function MonitoringDemo() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 space-y-6">
+    <div className={styles.demoContainer}>
       {/* 상태 정보 */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className={styles.titleContainer}>
             <span
-              className={`w-3 h-3 rounded-full ${isInitialized ? "bg-green-500" : "bg-red-500"}`}
+              className={`${styles.statusDot} ${isInitialized ? styles.statusGreen : styles.statusRed}`}
             />
             모니터링 시스템 상태
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className={styles.statsGrid}>
             <div>
-              <span className="font-medium">활성화:</span>
-              <span className={isEnabled ? "text-green-600" : "text-red-600"}>
+              <span className={styles.fontMedium}>활성화:</span>
+              <span className={isEnabled ? styles.textGreen : styles.textRed}>
                 {isEnabled ? "예" : "아니오"}
               </span>
             </div>
             <div>
-              <span className="font-medium">초기화:</span>
+              <span className={styles.fontMedium}>초기화:</span>
               <span
-                className={isInitialized ? "text-green-600" : "text-amber-600"}
+                className={isInitialized ? styles.textGreen : styles.textAmber}
               >
                 {isInitialized ? "완료" : "진행중"}
               </span>
             </div>
             <div>
-              <span className="font-medium">환경:</span>
-              <span className="text-blue-600">{import.meta.env.MODE}</span>
+              <span className={styles.fontMedium}>환경:</span>
+              <span className={styles.textBlue}>{import.meta.env.MODE}</span>
             </div>
             <div>
-              <span className="font-medium">디버그:</span>
+              <span className={styles.fontMedium}>디버그:</span>
               <span
                 className={
                   import.meta.env.VITE_DEBUG === "true"
-                    ? "text-green-600"
-                    : "text-gray-600"
+                    ? styles.textGreen
+                    : styles.textGray
                 }
               >
                 {import.meta.env.VITE_DEBUG === "true" ? "활성화" : "비활성화"}
@@ -228,7 +229,7 @@ export function MonitoringDemo() {
           <CardTitle>모니터링 기능 테스트</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className={styles.buttonGrid}>
             <Button onClick={simulateClick} variant="outline">
               클릭 이벤트
             </Button>
@@ -253,7 +254,7 @@ export function MonitoringDemo() {
             <Button
               onClick={handleFlushNow}
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className={styles.primaryButton}
             >
               {isLoading ? "전송중..." : "즉시 전송"}
             </Button>
@@ -263,11 +264,11 @@ export function MonitoringDemo() {
 
       {/* 통계 정보 */}
       {stats && (
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className={styles.resultsGrid}>
           {/* 성능 통계 */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">성능 메트릭</CardTitle>
+              <CardTitle className={styles.textBase}>성능 메트릭</CardTitle>
             </CardHeader>
             <CardContent style={{
               display: 'flex',
@@ -276,29 +277,29 @@ export function MonitoringDemo() {
               fontSize: '0.875rem',
               lineHeight: '1.25rem'
             }}>
-              <div className="flex justify-between">
+              <div className={styles.flexBetween}>
                 <span>Web Vitals:</span>
-                <span className="font-medium">
+                <span className={styles.fontMedium}>
                   {Object.keys(stats.performance.webVitals).length}개
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className={styles.flexBetween}>
                 <span>상호작용:</span>
-                <span className="font-medium">
+                <span className={styles.fontMedium}>
                   {stats.performance.interactionCount}회
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className={styles.flexBetween}>
                 <span>네트워크 요청:</span>
-                <span className="font-medium">
+                <span className={styles.fontMedium}>
                   {stats.performance.networkRequestCount}개
                 </span>
               </div>
               {stats.performance.memoryUsage && (
-                <div className="pt-2 border-t">
-                  <div className="flex justify-between">
+                <div className={styles.borderTopPadding}>
+                  <div className={styles.flexBetween}>
                     <span>메모리 사용:</span>
-                    <span className="font-medium">
+                    <span className={styles.fontMedium}>
                       {(
                         stats.performance.memoryUsage.used /
                         1024 /
@@ -307,9 +308,9 @@ export function MonitoringDemo() {
                       MB
                     </span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className={styles.flexBetween}>
                     <span>총 메모리:</span>
-                    <span className="font-medium">
+                    <span className={styles.fontMedium}>
                       {(
                         stats.performance.memoryUsage.total /
                         1024 /
@@ -320,13 +321,13 @@ export function MonitoringDemo() {
                   </div>
                 </div>
               )}
-              <div className="space-y-1">
-                <div className="text-xs text-gray-600">Web Vitals 상세:</div>
+              <div className={styles.spaceY1}>
+                <div className={`${styles.textXs} ${styles.textGray}`}>Web Vitals 상세:</div>
                 {Object.entries(stats.performance.webVitals).map(
                   ([key, value]) => (
-                    <div key={key} className="flex justify-between text-xs">
-                      <span className="text-gray-600">{key}:</span>
-                      <span className="font-medium">{value?.toFixed(2)}ms</span>
+                    <div key={key} className={`${styles.flexBetween} ${styles.textXs}`}>
+                      <span className={styles.textGray}>{key}:</span>
+                      <span className={styles.fontMedium}>{value?.toFixed(2)}ms</span>
                     </div>
                   ),
                 )}
@@ -337,7 +338,7 @@ export function MonitoringDemo() {
           {/* 에러 통계 */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">에러 리포팅</CardTitle>
+              <CardTitle className={styles.textBase}>에러 리포팅</CardTitle>
             </CardHeader>
             <CardContent style={{
               display: 'flex',
@@ -346,23 +347,23 @@ export function MonitoringDemo() {
               fontSize: '0.875rem',
               lineHeight: '1.25rem'
             }}>
-              <div className="flex justify-between">
+              <div className={styles.flexBetween}>
                 <span>세션 ID:</span>
-                <span className="font-mono text-xs">
+                <span className={`${styles.fontMono} ${styles.textXs}`}>
                   {stats.errors.sessionId.substring(0, 12)}...
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className={styles.flexBetween}>
                 <span>에러 수:</span>
                 <span
-                  className={`font-medium ${stats.errors.errorCount > 0 ? "text-red-600" : "text-green-600"}`}
+                  className={`${styles.fontMedium} ${stats.errors.errorCount > 0 ? styles.textRed : styles.textGreen}`}
                 >
                   {stats.errors.errorCount}개
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className={styles.flexBetween}>
                 <span>세션 시간:</span>
-                <span className="font-medium">
+                <span className={styles.fontMedium}>
                   {Math.floor(stats.errors.sessionDuration / 1000 / 60)}분
                 </span>
               </div>
@@ -372,7 +373,7 @@ export function MonitoringDemo() {
           {/* Analytics 통계 */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Analytics</CardTitle>
+              <CardTitle className={styles.textBase}>Analytics</CardTitle>
             </CardHeader>
             <CardContent style={{
               display: 'flex',
@@ -381,31 +382,31 @@ export function MonitoringDemo() {
               fontSize: '0.875rem',
               lineHeight: '1.25rem'
             }}>
-              <div className="flex justify-between">
+              <div className={styles.flexBetween}>
                 <span>세션 ID:</span>
-                <span className="font-mono text-xs">
+                <span className={`${styles.fontMono} ${styles.textXs}`}>
                   {stats.analytics.sessionId.substring(0, 12)}...
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className={styles.flexBetween}>
                 <span>큐 크기:</span>
                 <span
-                  className={`font-medium ${stats.analytics.queueSize > 10 ? "text-amber-600" : "text-green-600"}`}
+                  className={`${styles.fontMedium} ${stats.analytics.queueSize > 10 ? styles.textAmber : styles.textGreen}`}
                 >
                   {stats.analytics.queueSize}개
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className={styles.flexBetween}>
                 <span>실패한 배치:</span>
                 <span
-                  className={`font-medium ${stats.analytics.failedBatchesCount > 0 ? "text-red-600" : "text-green-600"}`}
+                  className={`${styles.fontMedium} ${stats.analytics.failedBatchesCount > 0 ? styles.textRed : styles.textGreen}`}
                 >
                   {stats.analytics.failedBatchesCount}개
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className={styles.flexBetween}>
                 <span>마지막 전송:</span>
-                <span className="font-medium text-xs">
+                <span className={`${styles.fontMedium} ${styles.textXs}`}>
                   {stats.analytics.lastFlushTime > 0
                     ? new Date(
                         stats.analytics.lastFlushTime,
@@ -421,14 +422,14 @@ export function MonitoringDemo() {
       {/* 개발자 정보 */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">개발자 정보</CardTitle>
+          <CardTitle className={styles.textBase}>개발자 정보</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm space-y-2">
-          <p className="text-gray-600">
+        <CardContent className={styles.infoBox}>
+          <p className={styles.textGray}>
             이 데모는 개발 환경에서만 표시됩니다. 프로덕션에서는 모니터링이
             백그라운드에서 자동으로 실행됩니다.
           </p>
-          <div className="bg-gray-50 p-3 rounded text-xs space-y-1">
+          <div className={styles.codeBox}>
             <div>
               <strong>환경변수:</strong>
             </div>

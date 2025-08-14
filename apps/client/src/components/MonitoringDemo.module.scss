@@ -1,0 +1,155 @@
+.cardWrapper {
+  width: 100%;
+  max-width: 56rem; /* max-w-4xl */
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.titleWarning {
+  color: #d97706; /* text-amber-600 */
+}
+
+.demoContainer {
+  width: 100%;
+  max-width: 72rem; /* max-w-6xl */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+  & > *:not([hidden]) ~ *:not([hidden]) {
+    margin-top: 1.5rem; // space-y-6
+  }
+}
+
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.statusDot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+}
+
+.statusGreen {
+  background-color: #22c55e;
+}
+
+.statusRed {
+  background-color: #ef4444;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.textGreen {
+  color: #16a34a;
+}
+
+.textAmber {
+  color: #f59e0b;
+}
+
+.textBlue {
+  color: #3b82f6;
+}
+
+.textGray {
+  color: #4b5563;
+}
+
+.buttonGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.primaryButton {
+  background-color: #2563eb;
+  color: white;
+  &:hover {
+    background-color: #1d4ed8;
+  }
+}
+
+.resultsGrid {
+  display: grid;
+  gap: 1rem;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.textBase {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.flexBetween {
+  display: flex;
+  justify-content: space-between;
+}
+
+.fontMedium {
+  font-weight: 500;
+}
+
+.borderTopPadding {
+  border-top-width: 1px;
+  padding-top: 0.5rem;
+}
+
+.spaceY1 {
+  & > *:not([hidden]) ~ *:not([hidden]) {
+    margin-top: 0.25rem; // space-y-1
+  }
+}
+
+.textXs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.fontMono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.textRed {
+  color: #dc2626;
+}
+
+.infoBox {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  & > *:not([hidden]) ~ *:not([hidden]) {
+    margin-top: 0.5rem; // space-y-2
+  }
+}
+
+.codeBox {
+  background-color: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  & > *:not([hidden]) ~ *:not([hidden]) {
+    margin-top: 0.25rem; // space-y-1
+  }
+}

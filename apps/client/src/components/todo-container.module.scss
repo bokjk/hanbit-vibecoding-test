@@ -1,0 +1,245 @@
+.pageWrapper {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f9fafb, rgba(219, 234, 254, 0.3), rgba(237, 233, 254, 0.3));
+}
+
+.main {
+  padding: 2rem 1rem;
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.container {
+  max-width: 80rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.migrationStatus {
+  margin-bottom: 1rem;
+}
+
+.dashboardHeader {
+  margin-bottom: 1.5rem;
+}
+
+.dashboardTitle {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.dashboardDescription {
+  color: #4b5563;
+}
+
+.sectionGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.inputSection {
+  grid-column: span 1 / span 1;
+  @media (min-width: 1024px) {
+    grid-column: span 3 / span 3;
+  }
+}
+
+.filterSection {
+  grid-column: span 1 / span 1;
+  @media (min-width: 1024px) {
+    grid-column: span 1 / span 1;
+  }
+}
+
+.glassCard {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.cardContent {
+  padding: 1.5rem;
+}
+
+.inputCardHeader {
+  margin-bottom: 1rem;
+}
+
+.inputCardTitle {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.inputCardDescription {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #4b5563;
+}
+
+.filterHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.filterTitle {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.filterToggle {
+  display: none;
+  @media (max-width: 1023px) {
+    display: inline-flex;
+  }
+}
+
+.filterToggleIcon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.filterContent {
+  display: none;
+  &.show {
+    display: block;
+  }
+  @media (min-width: 1024px) {
+    display: block;
+  }
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.listTitle {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+.listDescription {
+  color: #4b5563;
+  margin-top: 0.25rem;
+}
+
+.searchQuery {
+  margin-left: 0.5rem;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.viewModeSelector {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  @media (min-width: 768px) {
+    display: flex;
+  }
+}
+
+.viewModeButton {
+  height: 2rem;
+  width: 2rem;
+  padding: 0;
+  &.active {
+    background-color: #dbeafe;
+    color: #2563eb;
+  }
+}
+
+.viewModeIcon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.emptyListCard {
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  border-style: dashed;
+  border-width: 2px;
+  border-color: #d1d5db;
+}
+
+.emptyListContent {
+  padding: 3rem;
+  text-align: center;
+}
+
+.emptyListIconContainer {
+  width: 5rem;
+  height: 5rem;
+  margin: 0 auto 1rem;
+  background: linear-gradient(to bottom right, #dbeafe, #e9d5ff);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyListIcon {
+  height: 2.5rem;
+  width: 2.5rem;
+  color: #9ca3af;
+}
+
+.emptyListTitle {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.emptyListDescription {
+  color: #4b5563;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.resetSearchButton {
+  margin-top: 1rem;
+}
+
+.todoGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

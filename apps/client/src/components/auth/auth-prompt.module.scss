@@ -1,0 +1,352 @@
+.urgencyHigh {
+  border-color: #fecaca; // border-red-200
+  background-color: #fef2f2; // bg-red-50
+}
+
+.urgencyMedium {
+  border-color: #fde68a; // border-yellow-200
+  background-color: #fefce8; // bg-yellow-50
+}
+
+.urgencyLow {
+  border-color: #bfdbfe; // border-blue-200
+  background-color: #eff6ff; // bg-blue-50
+}
+
+.benefitsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  @media (min-width: 640px) {
+    flex-direction: row;
+  }
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modalCard {
+  width: 100%;
+  max-width: 42rem;
+  margin: 0 1rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.titleIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #3b82f6;
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.alert {
+  border: 1px solid;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.alertIcon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.alertDescription {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.migrationCard {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  border: 1px solid;
+}
+
+.migrationCardContent {
+  padding-top: 1rem;
+}
+
+.migrationTitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.migrationIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #3b82f6;
+}
+
+.migrationTitle {
+  font-weight: 500;
+  color: #1e40af;
+}
+
+.migrationDescription {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #1d4ed8;
+}
+
+.tabContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tabList {
+  display: flex;
+  gap: 0.25rem;
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+}
+
+.tabButton {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transition: color 200ms ease, background-color 200ms ease;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  color: #6b7280;
+
+  &:hover {
+    color: #374151;
+  }
+
+  &.active {
+    background-color: white;
+    color: #111827;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+}
+
+.benefitCard {
+  position: relative;
+}
+
+.benefitContent {
+  padding: 1rem;
+}
+
+.benefitBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.benefitTitle {
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.benefitDescription {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #4b5563;
+}
+
+.benefitBadge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.limitationTitle {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.limitationIcon {
+  width: 1rem;
+  height: 1rem;
+  color: #ef4444;
+}
+
+.limitationDescription {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.limitationList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.limitationItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #4b5563;
+}
+
+.limitationItemIcon {
+  width: 1rem;
+  height: 1rem;
+  color: #f87171;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.statusAlert {
+  margin-left: 0.25rem;
+}
+
+.actionButtonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.actionButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actionIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.guestButtonContainer {
+  text-align: center;
+}
+
+.guestButton {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #6b7280;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  &:hover {
+    color: #374151;
+  }
+}
+
+.noticeContainer {
+  text-align: center;
+}
+
+.noticeText {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #9ca3af;
+}
+
+.bannerContainer {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  border: 1px solid;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.bannerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bannerTextContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.bannerIcon {
+  width: 1rem;
+  height: 1rem;
+  color: #3b82f6;
+}
+
+.bannerTitle {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: #1e40af;
+}
+
+.bannerDescription {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #1d4ed8;
+}
+
+.bannerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bannerButton {
+  background-color: #3b82f6;
+  &:hover {
+    background-color: #2563eb;
+  }
+}
+
+.bannerDismissButton {
+  color: #6b7280;
+  &:hover {
+    color: #374151;
+  }
+}

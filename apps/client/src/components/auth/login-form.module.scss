@@ -1,0 +1,186 @@
+.card {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.cardHeader {
+  text-align: center;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.titleIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #3b82f6;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.alertDescription {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.alertIcon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: #9ca3af;
+}
+
+.input {
+  padding-left: 2.5rem;
+  &.error {
+    border-color: #ef4444;
+  }
+}
+
+.passwordInput {
+  padding-right: 2.5rem;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  border: none;
+  background: none;
+  cursor: pointer;
+  &:hover {
+    color: #4b5563;
+  }
+}
+
+.toggleIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.errorMessage {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #ef4444;
+}
+
+.checkboxWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #2563eb;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+}
+
+.checkboxLabel {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #374151;
+}
+
+.submitButton {
+  width: 100%;
+}
+
+.loadingIcon {
+  margin-right: 0.5rem;
+  height: 1rem;
+  width: 1rem;
+  animation: spin 1s linear infinite;
+}
+
+.forgotPasswordContainer {
+  text-align: center;
+}
+
+.forgotPasswordButton {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #3b82f6;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  &:hover {
+    color: #1e40af;
+  }
+}
+
+.registerContainer {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.registerText {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #4b5563;
+}
+
+.registerButton {
+  color: #3b82f6;
+  text-decoration: underline;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  &:hover {
+    color: #1e40af;
+  }
+}
+
+.loginButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

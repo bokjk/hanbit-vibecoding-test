@@ -1,0 +1,51 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.desktopLayout {
+  display: none;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+  @media (min-width: 768px) {
+    display: flex;
+  }
+}
+
+.mobileLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  @media (min-width: 768px) {
+    display: none;
+  }
+}
+
+.input {
+  flex: 1;
+}
+
+.prioritySelect {
+  width: 8.75rem;
+}
+
+.mobilePrioritySelect {
+  width: 5rem;
+}
+
+.addButton {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.mobileInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobileAddButton {
+  width: 100%;
+}

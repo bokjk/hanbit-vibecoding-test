@@ -13,6 +13,7 @@ import type {
   SyncHelpers,
   TodoMetadata,
 } from "../hooks/use-todo";
+import styles from "./todo-filters.module.scss";
 
 interface TodoFiltersProps {
   filter: FilterHelpers | TodoFilter;
@@ -44,28 +45,12 @@ function FilterChip({
       data-testid={testId}
       variant={isActive ? "default" : "outline"}
       onClick={onClick}
-      style={{
-        height: '2.5rem',
-        padding: '0 1rem',
-        transition: 'all 200ms ease',
-        background: isActive 
-          ? 'linear-gradient(to right, rgb(59 130 246), rgb(147 51 234))' 
-          : 'white',
-        color: isActive ? 'white' : 'rgb(17 24 39)',
-        border: isActive ? 'none' : '1px solid rgb(229 231 235)',
-        boxShadow: isActive ? '0 10px 15px -3px rgba(0, 0, 0, 0.1)' : 'none'
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        {icon && <span style={{ width: '1rem', height: '1rem' }}>{icon}</span>}
-        <span style={{ fontWeight: '500' }}>{label}</span>
+      className={`${styles.filterChip} ${isActive ? styles.active : ''}`}>
+      <div className={styles.chipContent}>
+        {icon && <span className={styles.chipIcon}>{icon}</span>}
+        <span className={styles.chipLabel}>{label}</span>
         {count !== undefined && (
-          <span style={{
-            fontSize: '0.75rem',
-            padding: '0.25rem 0.5rem',
-            borderRadius: '9999px',
-            backgroundColor: isActive ? 'rgba(255, 255, 255, 0.2)' : 'rgb(243 244 246)'
-          }}>
+          <span className={`${styles.chipCount} ${isActive ? styles.active : styles.inactive}`}>
             {count}
           </span>
         )}
@@ -144,12 +129,12 @@ export function TodoFilters({
       };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className={`${styles.filterContainer} ${className}`}>
       {/* 스마트 필터 칩들 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: 'rgb(55 65 81)', display: 'flex', alignItems: 'center' }}>
+      <div className={styles.filterSection}>
+        <h3 className={styles.sectionTitle}>
           <svg
-            style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+            className={styles.titleIcon}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -164,12 +149,12 @@ export function TodoFilters({
           필터
         </h3>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className={styles.chipGroup}>
           <FilterChip
             label="전체"
             icon={
               <svg
-                style={{ width: '1rem', height: '1rem' }}
+                className={styles.titleIcon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -190,7 +175,7 @@ export function TodoFilters({
             label="진행 중"
             icon={
               <svg
-                style={{ width: '1rem', height: '1rem' }}
+                className={styles.titleIcon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -211,7 +196,7 @@ export function TodoFilters({
             label="완료됨"
             icon={
               <svg
-                style={{ width: '1rem', height: '1rem' }}
+                className={styles.titleIcon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -231,10 +216,10 @@ export function TodoFilters({
       </div>
 
       {/* 우선순위 필터 (새로운 기능) */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: 'rgb(55 65 81)', display: 'flex', alignItems: 'center' }}>
+      <div className={styles.filterSection}>
+        <h3 className={styles.sectionTitle}>
           <svg
-            style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+            className={styles.titleIcon}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -249,24 +234,24 @@ export function TodoFilters({
           우선순위
         </h3>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className={styles.chipGroup}>
           <FilterChip
             label="긴급"
-            icon={<div style={{ width: '0.75rem', height: '0.75rem', borderRadius: '50%', backgroundColor: 'rgb(239 68 68)' }}></div>}
+            icon={<div className={`${styles.priorityIcon} ${styles.high}`}></div>}
             isActive={false}
             onClick={() => {}}
           />
 
           <FilterChip
             label="보통"
-            icon={<div style={{ width: '0.75rem', height: '0.75rem', borderRadius: '50%', backgroundColor: 'rgb(245 158 11)' }}></div>}
+            icon={<div className={`${styles.priorityIcon} ${styles.medium}`}></div>}
             isActive={false}
             onClick={() => {}}
           />
 
           <FilterChip
             label="낮음"
-            icon={<div style={{ width: '0.75rem', height: '0.75rem', borderRadius: '50%', backgroundColor: 'rgb(34 197 94)' }}></div>}
+            icon={<div className={`${styles.priorityIcon} ${styles.low}`}></div>}
             isActive={false}
             onClick={() => {}}
           />
@@ -274,10 +259,10 @@ export function TodoFilters({
       </div>
 
       {/* 정렬 옵션 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: 'rgb(55 65 81)', display: 'flex', alignItems: 'center' }}>
+      <div className={styles.filterSection}>
+        <h3 className={styles.sectionTitle}>
           <svg
-            style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+            className={styles.titleIcon}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -292,27 +277,21 @@ export function TodoFilters({
           정렬
         </h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+        <div className={styles.sortGrid}>
           <Select
             value={currentFilter.sortBy}
             onValueChange={handleSortByChange}
           >
             <SelectTrigger
               data-testid="sort-by-select"
-              style={{
-                height: '2.5rem',
-                backgroundColor: 'white',
-                border: '1px solid rgb(229 231 235)',
-                transition: 'border-color 200ms ease'
-              }}
-            >
+              className={styles.selectTrigger}>
               <SelectValue placeholder="정렬 기준" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="createdAt" style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center' }}>
+              <SelectItem value="createdAt">
+                <span className={styles.selectItemContent}>
                   <svg
-                    style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+                    className={styles.titleIcon}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -327,10 +306,10 @@ export function TodoFilters({
                   생성일순
                 </span>
               </SelectItem>
-              <SelectItem value="priority" style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center' }}>
+              <SelectItem value="priority">
+                <span className={styles.selectItemContent}>
                   <svg
-                    style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+                    className={styles.titleIcon}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -345,10 +324,10 @@ export function TodoFilters({
                   우선순위순
                 </span>
               </SelectItem>
-              <SelectItem value="title" style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center' }}>
+              <SelectItem value="title">
+                <span className={styles.selectItemContent}>
                   <svg
-                    style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+                    className={styles.titleIcon}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -372,20 +351,14 @@ export function TodoFilters({
           >
             <SelectTrigger
               data-testid="sort-order-select"
-              style={{
-                height: '2.5rem',
-                backgroundColor: 'white',
-                border: '1px solid rgb(229 231 235)',
-                transition: 'border-color 200ms ease'
-              }}
-            >
+              className={styles.selectTrigger}>
               <SelectValue placeholder="정렬 순서" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="desc" style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center' }}>
+              <SelectItem value="desc">
+                <span className={styles.selectItemContent}>
                   <svg
-                    style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+                    className={styles.titleIcon}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -400,10 +373,10 @@ export function TodoFilters({
                   내림차순
                 </span>
               </SelectItem>
-              <SelectItem value="asc" style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center' }}>
+              <SelectItem value="asc">
+                <span className={styles.selectItemContent}>
                   <svg
-                    style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+                    className={styles.titleIcon}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -425,10 +398,10 @@ export function TodoFilters({
 
       {/* 동기화 상태 섹션 */}
       {syncHelpers && metadata && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: '1rem', borderTop: '1px solid rgb(229 231 235)' }}>
-          <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: 'rgb(55 65 81)', display: 'flex', alignItems: 'center' }}>
+        <div className={styles.syncSection}>
+          <h3 className={styles.sectionTitle}>
             <svg
-              style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+              className={styles.titleIcon}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -443,91 +416,56 @@ export function TodoFilters({
             동기화 상태
           </h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className={styles.syncStatusGrid}>
             {/* 연결 상태 */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-              <span style={{ color: 'rgb(75 85 99)' }}>연결 상태:</span>
-              <span style={{
-                padding: '0.25rem 0.5rem',
-                borderRadius: '9999px',
-                backgroundColor: metadata.isOnline ? 'rgb(220 252 231)' : 'rgb(254 226 226)',
-                color: metadata.isOnline ? 'rgb(21 128 61)' : 'rgb(185 28 28)'
-              }}>
+            <div className={styles.statusItem}>
+              <span className={styles.statusLabel}>연결 상태:</span>
+              <span className={`${styles.statusValue} ${metadata.isOnline ? styles.statusOnline : styles.statusOffline}`}>
                 {syncHelpers.getConnectionStatusText()}
               </span>
             </div>
 
             {/* 동기화 상태 */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-              <span style={{ color: 'rgb(75 85 99)' }}>동기화:</span>
-              <span style={{
-                padding: '0.25rem 0.5rem',
-                borderRadius: '9999px',
-                backgroundColor: metadata.isSyncing ? 'rgb(219 234 254)' : metadata.hasErrors ? 'rgb(254 226 226)' : 'rgb(243 244 246)',
-                color: metadata.isSyncing ? 'rgb(29 78 216)' : metadata.hasErrors ? 'rgb(185 28 28)' : 'rgb(55 65 81)'
-              }}>
+            <div className={styles.statusItem}>
+              <span className={styles.statusLabel}>동기화:</span>
+              <span className={`${styles.statusValue} ${metadata.isSyncing ? styles.statusSyncing : metadata.hasErrors ? styles.statusError : styles.statusIdle}`}>
                 {syncHelpers.getSyncStatusText()}
               </span>
             </div>
 
             {/* 대기 중인 작업 */}
             {metadata.pendingOperations > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                <span style={{ color: 'rgb(75 85 99)' }}>대기 중:</span>
-                <span style={{
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '9999px',
-                  backgroundColor: 'rgb(254 240 138)',
-                  color: 'rgb(180 83 9)'
-                }}>
+              <div className={styles.statusItem}>
+                <span className={styles.statusLabel}>대기 중:</span>
+                <span className={`${styles.statusValue} ${styles.statusPending}`}>
                   {metadata.pendingOperations}개 작업
                 </span>
               </div>
             )}
 
             {/* 마지막 동기화 시간 */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-              <span style={{ color: 'rgb(75 85 99)' }}>마지막 동기화:</span>
-              <span style={{
-                padding: '0.25rem 0.5rem',
-                borderRadius: '9999px',
-                backgroundColor: 'rgb(243 244 246)',
-                color: 'rgb(55 65 81)'
-              }}>
+            <div className={styles.statusItem}>
+              <span className={styles.statusLabel}>마지막 동기화:</span>
+              <span className={`${styles.statusValue} ${styles.statusIdle}`}>
                 {syncHelpers.getLastSyncText()}
               </span>
             </div>
           </div>
 
           {/* 동기화 액션 버튼 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className={styles.syncActions}>
             <Button
               size="sm"
               variant="outline"
               onClick={syncHelpers.triggerSync}
               disabled={metadata.isSyncing}
-              style={{
-                width: '100%',
-                height: '2rem',
-                fontSize: '0.75rem',
-                border: '1px solid rgb(229 231 235)',
-                backgroundColor: 'white',
-                borderRadius: '0.375rem',
-                cursor: metadata.isSyncing ? 'not-allowed' : 'pointer',
-                transition: 'all 200ms ease',
-                opacity: metadata.isSyncing ? 0.5 : 1
-              }}
+              className={styles.syncButton}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className={styles.syncButtonContent}>
                 {metadata.isSyncing ? (
                   <>
                     <svg
-                      style={{
-                        width: '0.75rem',
-                        height: '0.75rem',
-                        marginRight: '0.5rem',
-                        animation: 'spin 1s linear infinite'
-                      }}
+                      className={`${styles.syncButtonIcon} ${styles.spinning}`}
                       fill="none"
                       viewBox="0 0 24 24"
                     >
@@ -550,7 +488,7 @@ export function TodoFilters({
                 ) : (
                   <>
                     <svg
-                      style={{ width: '0.75rem', height: '0.75rem', marginRight: '0.5rem' }}
+                      className={styles.syncButtonIcon}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -573,23 +511,13 @@ export function TodoFilters({
               size="sm"
               variant={metadata.isOnline ? "outline" : "default"}
               onClick={syncHelpers.toggleOfflineMode}
-              style={{
-                width: '100%',
-                height: '2rem',
-                fontSize: '0.75rem',
-                border: '1px solid rgb(229 231 235)',
-                backgroundColor: metadata.isOnline ? 'white' : 'rgb(17 24 39)',
-                color: metadata.isOnline ? 'rgb(17 24 39)' : 'white',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                transition: 'all 200ms ease'
-              }}
+              className={styles.syncButton}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className={styles.syncButtonContent}>
                 {metadata.isOnline ? (
                   <>
                     <svg
-                      style={{ width: '0.75rem', height: '0.75rem', marginRight: '0.5rem' }}
+                      className={styles.syncButtonIcon}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -606,7 +534,7 @@ export function TodoFilters({
                 ) : (
                   <>
                     <svg
-                      style={{ width: '0.75rem', height: '0.75rem', marginRight: '0.5rem' }}
+                      className={styles.syncButtonIcon}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -630,21 +558,11 @@ export function TodoFilters({
                 size="sm"
                 variant="destructive"
                 onClick={syncHelpers.clearErrors}
-                style={{
-                  width: '100%',
-                  height: '2rem',
-                  fontSize: '0.75rem',
-                  border: '1px solid rgb(239 68 68)',
-                  backgroundColor: 'rgb(239 68 68)',
-                  color: 'white',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer',
-                  transition: 'all 200ms ease'
-                }}
+                className={`${styles.syncButton} ${styles.destructiveButton}`}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className={styles.syncButtonContent}>
                   <svg
-                    style={{ width: '0.75rem', height: '0.75rem', marginRight: '0.5rem' }}
+                    className={styles.syncButtonIcon}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

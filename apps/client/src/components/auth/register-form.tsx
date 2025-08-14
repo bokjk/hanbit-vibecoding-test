@@ -29,6 +29,7 @@ import {
   Check,
   X,
 } from "lucide-react";
+import styles from "./register-form.module.scss";
 
 /**
  * 회원가입 폼 데이터
@@ -257,19 +258,10 @@ export function RegisterForm({
   };
 
   return (
-    <>
-      <style>
-        {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}
-      </style>
-      <Card style={{ width: '100%', maxWidth: '28rem' }}>
-      <CardHeader style={{ textAlign: 'center' }}>
-        <CardTitle style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-          <User style={{ width: '1.25rem', height: '1.25rem', color: 'rgb(59 130 246)' }} />
+    <Card className={`${styles.card} ${className}`}>
+      <CardHeader className={styles.cardHeader}>
+        <CardTitle className={styles.cardTitle}>
+          <User className={styles.titleIcon} />
           회원가입
         </CardTitle>
         <CardDescription>
@@ -278,11 +270,11 @@ export function RegisterForm({
       </CardHeader>
 
       <CardContent>
-        <form ref={formRef} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form ref={formRef} onSubmit={handleSubmit} className={styles.form}>
           {/* 개발 중 안내 */}
           <Alert>
-            <Info style={{ height: '1rem', width: '1rem' }} />
-            <AlertDescription style={{ fontSize: '0.875rem', lineHeight: '1.25rem' }}>
+            <Info className={styles.alertIcon} />
+            <AlertDescription className={styles.alertDescription}>
               회원가입 기능은 현재 개발 중입니다. 게스트 계정으로 모든 기능을
               체험해보세요.
             </AlertDescription>
@@ -291,111 +283,110 @@ export function RegisterForm({
           {/* 전역 에러 메시지 */}
           {error && (
             <Alert variant="destructive">
-              <AlertCircle style={{ height: '1rem', width: '1rem' }} />
+              <AlertCircle className={styles.alertIcon} />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {/* 이름 필드 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label htmlFor="name" style={{ fontSize: '0.875rem', lineHeight: '1.25rem', fontWeight: '500' }}>
+          <div className={styles.field}>
+            <label htmlFor="name" className={styles.label}>
               이름
             </label>
-            <div style={{ position: 'relative' }}>
-              <User style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '1rem', height: '1rem', color: 'rgb(156 163 175)' }} />
+            <div className={styles.inputWrapper}>
+              <User className={styles.inputIcon} />
               <Input
                 id="name"
                 type="text"
                 placeholder="이름을 입력하세요"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
-style={{ paddingLeft: '2.5rem', ...(validationErrors.name && { borderColor: 'rgb(239 68 68)' }) }}
+                className={`${styles.input} ${validationErrors.name ? styles.error : ''}`}
                 disabled={isLoading}
                 autoComplete="name"
               />
             </div>
             {validationErrors.name && (
-              <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(239 68 68)' }}>{validationErrors.name}</p>
+              <p className={styles.errorMessage}>{validationErrors.name}</p>
             )}
           </div>
 
           {/* 이메일 필드 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label htmlFor="email" style={{ fontSize: '0.875rem', lineHeight: '1.25rem', fontWeight: '500' }}>
+          <div className={styles.field}>
+            <label htmlFor="email" className={styles.label}>
               이메일
             </label>
-            <div style={{ position: 'relative' }}>
-              <Mail style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '1rem', height: '1rem', color: 'rgb(156 163 175)' }} />
+            <div className={styles.inputWrapper}>
+              <Mail className={styles.inputIcon} />
               <Input
                 id="email"
                 type="email"
                 placeholder="your@email.com"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-style={{ paddingLeft: '2.5rem', ...(validationErrors.email && { borderColor: 'rgb(239 68 68)' }) }}
+                className={`${styles.input} ${validationErrors.email ? styles.error : ''}`}
                 disabled={isLoading}
                 autoComplete="email"
               />
             </div>
             {validationErrors.email && (
-              <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(239 68 68)' }}>{validationErrors.email}</p>
+              <p className={styles.errorMessage}>{validationErrors.email}</p>
             )}
           </div>
 
           {/* 비밀번호 필드 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label htmlFor="password" style={{ fontSize: '0.875rem', lineHeight: '1.25rem', fontWeight: '500' }}>
+          <div className={styles.field}>
+            <label htmlFor="password" className={styles.label}>
               비밀번호
             </label>
-            <div style={{ position: 'relative' }}>
-              <Lock style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '1rem', height: '1rem', color: 'rgb(156 163 175)' }} />
+            <div className={styles.inputWrapper}>
+              <Lock className={styles.inputIcon} />
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="비밀번호를 입력하세요"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
-                style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem', ...(validationErrors.password && { borderColor: 'rgb(239 68 68)' }) }}
+                className={`${styles.input} ${styles.passwordInput} ${validationErrors.password ? styles.error : ''}`}
                 disabled={isLoading}
                 autoComplete="new-password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'rgb(156 163 175)', border: 'none', background: 'none', cursor: 'pointer' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(75 85 99)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(156 163 175)'}
+                className={styles.passwordToggle}
                 disabled={isLoading}
               >
                 {showPassword ? (
-                  <EyeOff style={{ width: '1rem', height: '1rem' }} />
+                  <EyeOff className={styles.toggleIcon} />
                 ) : (
-                  <Eye style={{ width: '1rem', height: '1rem' }} />
+                  <Eye className={styles.toggleIcon} />
                 )}
               </button>
             </div>
 
             {/* 비밀번호 강도 표시 */}
             {formData.password && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div style={{ flex: '1', backgroundColor: 'rgb(229 231 235)', borderRadius: '9999px', height: '0.5rem' }}>
+              <div className={styles.passwordStrengthContainer}>
+                <div className={styles.passwordStrengthBarContainer}>
+                  <div className={styles.passwordStrengthBar}>
                     <div
-style={{ height: '0.5rem', borderRadius: '9999px', transition: 'all 300ms ease', ...getPasswordStrengthColor() }}
+                      className={styles.passwordStrengthIndicator}
                       style={{
-                        width: `${(passwordStrength.score / 4) * 100}%`,
+                        width: `${(passwordStrength.score / 5) * 100}%`,
+                        ...getPasswordStrengthColor(),
                       }}
                     />
                   </div>
-                  <span style={{ fontSize: '0.75rem', lineHeight: '1rem', color: 'rgb(75 85 99)' }}>
+                  <span className={styles.passwordStrengthText}>
                     {getPasswordStrengthText()}
                   </span>
                 </div>
-                {passwordStrength.feedback.length > 0 && (
-                  <ul style={{ fontSize: '0.75rem', lineHeight: '1rem', color: 'rgb(75 85 99)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                {passwordStrength.feedback.length > 0 && !passwordStrength.isValid && (
+                  <ul className={styles.passwordFeedbackList}>
                     {passwordStrength.feedback.map((item, index) => (
-                      <li key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <X style={{ width: '0.75rem', height: '0.75rem', color: 'rgb(248 113 113)' }} />
+                      <li key={index} className={styles.passwordFeedbackItem}>
+                        <X className={styles.passwordFeedbackIcon} />
                         {item}
                       </li>
                     ))}
@@ -405,19 +396,19 @@ style={{ height: '0.5rem', borderRadius: '9999px', transition: 'all 300ms ease',
             )}
 
             {validationErrors.password && (
-              <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(239 68 68)' }}>
+              <p className={styles.errorMessage}>
                 {validationErrors.password}
               </p>
             )}
           </div>
 
           {/* 비밀번호 확인 필드 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label htmlFor="confirmPassword" style={{ fontSize: '0.875rem', lineHeight: '1.25rem', fontWeight: '500' }}>
+          <div className={styles.field}>
+            <label htmlFor="confirmPassword" className={styles.label}>
               비밀번호 확인
             </label>
-            <div style={{ position: 'relative' }}>
-              <Lock style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '1rem', height: '1rem', color: 'rgb(156 163 175)' }} />
+            <div className={styles.inputWrapper}>
+              <Lock className={styles.inputIcon} />
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
@@ -426,40 +417,38 @@ style={{ height: '0.5rem', borderRadius: '9999px', transition: 'all 300ms ease',
                 onChange={(e) =>
                   handleInputChange("confirmPassword", e.target.value)
                 }
-                style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem', ...(validationErrors.confirmPassword && { borderColor: 'rgb(239 68 68)' }) }}
+                className={`${styles.input} ${styles.passwordInput} ${validationErrors.confirmPassword ? styles.error : ''}`}
                 disabled={isLoading}
                 autoComplete="new-password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'rgb(156 163 175)', border: 'none', background: 'none', cursor: 'pointer' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(75 85 99)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(156 163 175)'}
+                className={styles.passwordToggle}
                 disabled={isLoading}
               >
                 {showConfirmPassword ? (
-                  <EyeOff style={{ width: '1rem', height: '1rem' }} />
+                  <EyeOff className={styles.toggleIcon} />
                 ) : (
-                  <Eye style={{ width: '1rem', height: '1rem' }} />
+                  <Eye className={styles.toggleIcon} />
                 )}
               </button>
             </div>
 
             {/* 비밀번호 일치 표시 */}
             {formData.confirmPassword && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', lineHeight: '1rem' }}>
+              <div className={styles.passwordMatchContainer}>
                 {formData.password === formData.confirmPassword ? (
                   <>
-                    <Check style={{ width: '0.75rem', height: '0.75rem', color: 'rgb(34 197 94)' }} />
-                    <span style={{ color: 'rgb(22 163 74)' }}>
+                    <Check className={`${styles.passwordMatchIcon} ${styles.passwordMatchTextSuccess}`} />
+                    <span className={styles.passwordMatchTextSuccess}>
                       비밀번호가 일치합니다
                     </span>
                   </>
                 ) : (
                   <>
-                    <X style={{ width: '0.75rem', height: '0.75rem', color: 'rgb(239 68 68)' }} />
-                    <span style={{ color: 'rgb(220 38 38)' }}>
+                    <X className={`${styles.passwordMatchIcon} ${styles.passwordMatchTextError}`} />
+                    <span className={styles.passwordMatchTextError}>
                       비밀번호가 일치하지 않습니다
                     </span>
                   </>
@@ -468,15 +457,15 @@ style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'transla
             )}
 
             {validationErrors.confirmPassword && (
-              <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(239 68 68)' }}>
+              <p className={styles.errorMessage}>
                 {validationErrors.confirmPassword}
               </p>
             )}
           </div>
 
           {/* 약관 동의 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+          <div className={styles.termsContainer}>
+            <div className={styles.termsItem}>
               <input
                 id="agreeToTerms"
                 type="checkbox"
@@ -484,29 +473,26 @@ style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'transla
                 onChange={(e) =>
                   handleInputChange("agreeToTerms", e.target.checked)
                 }
-style={{ marginTop: '0.25rem', width: '1rem', height: '1rem', accentColor: 'rgb(37 99 235)', border: '1px solid rgb(209 213 219)', borderRadius: '0.25rem' }}
+                className={styles.checkbox}
                 disabled={isLoading}
               />
-              <label htmlFor="agreeToTerms" style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(55 65 81)' }}>
-                <span style={{ color: 'rgb(239 68 68)' }}>*</span> 서비스 이용약관에
+              <label htmlFor="agreeToTerms" className={styles.termsLabel}>
+                <span className={styles.termsRequired}>*</span> 서비스 이용약관에
                 동의합니다{" "}
                 <button
                   type="button"
-style={{ color: 'rgb(59 130 246)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(29 78 216)'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(59 130 246)'}
-                >
+                  className={styles.termsLink}>
                   (보기)
                 </button>
               </label>
             </div>
             {validationErrors.agreeToTerms && (
-              <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(239 68 68)', marginLeft: '1.5rem' }}>
+              <p className={styles.termsErrorMessage}>
                 {validationErrors.agreeToTerms}
               </p>
             )}
 
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+            <div className={styles.termsItem}>
               <input
                 id="agreeToPrivacy"
                 type="checkbox"
@@ -514,34 +500,31 @@ style={{ color: 'rgb(59 130 246)', textDecoration: 'underline', background: 'non
                 onChange={(e) =>
                   handleInputChange("agreeToPrivacy", e.target.checked)
                 }
-style={{ marginTop: '0.25rem', width: '1rem', height: '1rem', accentColor: 'rgb(37 99 235)', border: '1px solid rgb(209 213 219)', borderRadius: '0.25rem' }}
+                className={styles.checkbox}
                 disabled={isLoading}
               />
-              <label htmlFor="agreeToPrivacy" style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(55 65 81)' }}>
-                <span style={{ color: 'rgb(239 68 68)' }}>*</span> 개인정보 처리방침에
+              <label htmlFor="agreeToPrivacy" className={styles.termsLabel}>
+                <span className={styles.termsRequired}>*</span> 개인정보 처리방침에
                 동의합니다{" "}
                 <button
                   type="button"
-style={{ color: 'rgb(59 130 246)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(29 78 216)'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(59 130 246)'}
-                >
+                  className={styles.termsLink}>
                   (보기)
                 </button>
               </label>
             </div>
             {validationErrors.agreeToPrivacy && (
-              <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(239 68 68)', marginLeft: '1.5rem' }}>
+              <p className={styles.termsErrorMessage}>
                 {validationErrors.agreeToPrivacy}
               </p>
             )}
           </div>
 
           {/* 제출 버튼 */}
-          <Button type="submit" style={{ width: '100%' }} disabled={isLoading}>
+          <Button type="submit" className={styles.submitButton} disabled={isLoading}>
             {isLoading ? (
               <>
-                <Loader2 style={{ marginRight: '0.5rem', height: '1rem', width: '1rem', animation: 'spin 1s linear infinite' }} />
+                <Loader2 className={styles.loadingIcon} />
                 계정 생성 중...
               </>
             ) : (
@@ -550,15 +533,13 @@ style={{ color: 'rgb(59 130 246)', textDecoration: 'underline', background: 'non
           </Button>
 
           {/* 로그인 링크 */}
-          <div style={{ textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid rgb(229 231 235)' }}>
-            <p style={{ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'rgb(75 85 99)' }}>
+          <div className={styles.loginContainer}>
+            <p className={styles.loginText}>
               이미 계정이 있으신가요?{" "}
               <button
                 type="button"
                 onClick={onSwitchToLogin}
-style={{ color: 'rgb(59 130 246)', textDecoration: 'underline', fontWeight: '500', background: 'none', border: 'none', cursor: 'pointer' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'rgb(29 78 216)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(59 130 246)'}
+                className={styles.loginButton}
                 disabled={isLoading}
               >
                 로그인
@@ -568,6 +549,5 @@ style={{ color: 'rgb(59 130 246)', textDecoration: 'underline', fontWeight: '500
         </form>
       </CardContent>
     </Card>
-    </>
   );
 }

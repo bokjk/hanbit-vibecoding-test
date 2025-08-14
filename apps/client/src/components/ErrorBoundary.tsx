@@ -1,6 +1,7 @@
 import React, { Component, type ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@vive/ui";
 import { Button } from "@vive/ui";
+import styles from "./ErrorBoundary.module.scss";
 
 interface ErrorInfo {
   componentStack: string;
@@ -163,12 +164,12 @@ function DefaultErrorUI({
   const isDevelopment = process.env.NODE_ENV === "development";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <Card className="w-full max-w-2xl">
+    <div className={styles.wrapper}>
+      <Card className={styles.card}>
         <CardHeader>
-          <CardTitle className="text-red-600 flex items-center gap-2">
+          <CardTitle className={styles.cardTitle}>
             <svg
-              className="w-5 h-5"
+              className={styles.titleIcon}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -183,48 +184,48 @@ function DefaultErrorUI({
             문제가 발생했습니다
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-gray-600">
+        <CardContent className={styles.cardContent}>
+          <div className={styles.description}>
             <p>애플리케이션에서 예상치 못한 오류가 발생했습니다.</p>
             <p>잠시 후 다시 시도하시거나 페이지를 새로고침해 주세요.</p>
           </div>
 
           {eventId && (
-            <div className="bg-gray-100 p-3 rounded-md text-sm">
+            <div className={styles.errorIdBox}>
               <strong>오류 ID:</strong> {eventId}
               <br />
-              <span className="text-gray-500">
+              <span className={styles.errorIdLabel}>
                 문의 시 이 ID를 함께 전달해 주세요.
               </span>
             </div>
           )}
 
           {isDevelopment && (
-            <div className="border-t pt-4 space-y-3">
+            <div className={styles.devInfoWrapper}>
               <details className="group">
-                <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+                <summary className={styles.devInfoSummary}>
                   개발자 정보 (개발 환경에서만 표시)
                 </summary>
-                <div className="mt-2 space-y-2">
-                  <div className="bg-red-50 p-3 rounded-md">
-                    <strong className="text-red-800">에러 메시지:</strong>
-                    <pre className="text-sm text-red-700 mt-1 whitespace-pre-wrap">
+                <div className={styles.devInfoDetails}>
+                  <div className={styles.errorMessageBox}>
+                    <strong className={styles.errorMessageLabel}>에러 메시지:</strong>
+                    <pre className={styles.errorMessageText}>
                       {error.message}
                     </pre>
                   </div>
 
                   {error.stack && (
-                    <div className="bg-gray-50 p-3 rounded-md">
-                      <strong className="text-gray-800">스택 추적:</strong>
-                      <pre className="text-xs text-gray-600 mt-1 overflow-x-auto whitespace-pre-wrap">
+                    <div className={styles.stackTraceBox}>
+                      <strong className={styles.stackTraceLabel}>스택 추적:</strong>
+                      <pre className={styles.stackTraceText}>
                         {error.stack}
                       </pre>
                     </div>
                   )}
 
-                  <div className="bg-blue-50 p-3 rounded-md">
-                    <strong className="text-blue-800">컴포넌트 스택:</strong>
-                    <pre className="text-xs text-blue-600 mt-1 overflow-x-auto whitespace-pre-wrap">
+                  <div className={styles.componentStackBox}>
+                    <strong className={styles.componentStackLabel}>컴포넌트 스택:</strong>
+                    <pre className={styles.componentStackText}>
                       {errorInfo.componentStack}
                     </pre>
                   </div>
@@ -233,8 +234,8 @@ function DefaultErrorUI({
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2 pt-4 border-t">
-            <Button onClick={onRetry} className="flex-1 sm:flex-none">
+          <div className={styles.actionsWrapper}>
+            <Button onClick={onRetry} className={styles.actionButton}>
               <svg
                 style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
                 fill="none"
@@ -254,7 +255,7 @@ function DefaultErrorUI({
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
-              className="flex-1 sm:flex-none"
+              className={styles.actionButton}
             >
               <svg
                 style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
@@ -276,14 +277,14 @@ function DefaultErrorUI({
               <Button
                 variant="outline"
                 onClick={onClearLogs}
-                className="flex-1 sm:flex-none text-sm"
+                className={styles.actionButtonSmallText}
               >
                 로그 삭제 ({storedErrorCount})
               </Button>
             )}
           </div>
 
-          <div className="text-xs text-gray-500 pt-2 border-t">
+          <div className={styles.footerText}>
             이 문제가 계속 발생하면 브라우저의 캐시와 쿠키를 삭제하거나 다른
             브라우저를 사용해 보세요.
           </div>

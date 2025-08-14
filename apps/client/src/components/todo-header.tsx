@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button, Input } from "@vive/ui";
+import styles from "./todo-header.module.scss";
 
 interface TodoHeaderProps {
   onSearch?: (query: string) => void;
@@ -17,40 +18,15 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
   return (
     <header
       data-testid="todo-header"
-      style={{
-        background: 'linear-gradient(to right, rgb(147 51 234), rgb(37 99 235), rgb(67 56 202))',
-        color: 'white',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-      }}
-    >
-      <div style={{
-        maxWidth: '80rem',
-        margin: '0 auto',
-        padding: '0 1rem'
-      }}>
-        <style>
-          {`
-            @media (min-width: 640px) {
-              .header-main { padding-left: 1.5rem; padding-right: 1.5rem; }
-            }
-            @media (min-width: 1024px) {
-              .header-main { padding-left: 2rem; padding-right: 2rem; }
-            }
-          `}
-        </style>
-        <div className="header-main" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '5rem', paddingLeft: '1rem', paddingRight: '1rem' }}>
+      className={styles.header}>
+      <div className={styles.container}>
+        <div className={styles.main}>
           {/* 왼쪽: 로고와 제목 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(4px)',
-                padding: '0.75rem',
-                borderRadius: '0.75rem',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-              }}>
+          <div className={styles.logoContainer}>
+            <div className={styles.logoWrapper}>
+              <div className={styles.logoIconWrapper}>
                 <svg
-                  style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
+                  className={styles.logoIcon}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -64,24 +40,10 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
                 </svg>
               </div>
               <div>
-                <h1 style={{
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  background: 'linear-gradient(to right, white, rgb(219 234 254))',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>
+                <h1 className={styles.title}>
                   TaskFlow
                 </h1>
-                <p style={{
-                  fontSize: '0.875rem',
-                  color: 'rgb(219 234 254)',
-                  display: 'none',
-                  '@media (min-width: 640px)': {
-                    display: 'block'
-                  }
-                }}>
+                <p className={styles.subtitle}>
                   생산성을 위한 스마트 할 일 관리
                 </p>
               </div>
@@ -89,33 +51,11 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
           </div>
 
           {/* 가운데: 검색 */}
-          <div style={{
-            display: 'none',
-            flex: '1',
-            maxWidth: '28rem',
-            margin: '0 2rem'
-          }} style={{ display: 'none', flex: '1', maxWidth: '28rem', margin: '0 2rem' }}>
-            <style>
-              {`
-                @media (min-width: 768px) {
-                  .search-container { display: flex !important; }
-                }
-              `}
-            </style>
-            <div className="search-container">
-            <div style={{ position: 'relative', width: '100%' }}>
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                left: 0,
-                paddingLeft: '0.75rem',
-                display: 'flex',
-                alignItems: 'center',
-                pointerEvents: 'none'
-              }}>
+          <div className={styles.searchContainer}>
+            <div className={styles.searchInputWrapper}>
+              <div className={styles.searchInputIcon}>
                 <svg
-                  style={{ height: '1.25rem', width: '1.25rem', color: 'rgb(191 219 254)' }}
+                  className={styles.searchIcon}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -134,34 +74,20 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
                 placeholder="할 일 검색..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                style={{
-                  paddingLeft: '2.5rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  borderColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white'
-                }}
+                className={styles.searchInput}
               />
-            </div>
             </div>
           </div>
 
           {/* 오른쪽: 액션 버튼들과 프로필 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className={styles.actionsContainer}>
             {/* 테마 토글 */}
             <Button
               variant="ghost"
               size="sm"
-              style={{
-                color: 'white',
-                padding: '0.5rem',
-                borderRadius: '0.5rem',
-                transition: 'background-color 200ms ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
-            >
+              className={styles.actionButton}>
               <svg
-                style={{ height: '1.25rem', width: '1.25rem' }}
+                className={styles.actionIcon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -179,18 +105,9 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              style={{
-                color: 'white',
-                padding: '0.5rem',
-                borderRadius: '0.5rem',
-                position: 'relative',
-                transition: 'background-color 200ms ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
-            >
+              className={`${styles.actionButton} ${styles.notificationButton}`}>
               <svg
-                style={{ height: '1.25rem', width: '1.25rem' }}
+                className={styles.actionIcon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -202,57 +119,20 @@ export function TodoHeader({ onSearch }: TodoHeaderProps) {
                   d="M15 17h5l-5 5v-5zM11 19H6a2 2 0 01-2-2V7a2 2 0 012-2h5m-1 11a4 4 0 01-4-4V7a4 4 0 014-4h5a4 4 0 014 4v1"
                 />
               </svg>
-              <div style={{
-                position: 'absolute',
-                top: '-0.25rem',
-                right: '-0.25rem',
-                height: '0.75rem',
-                width: '0.75rem',
-                backgroundColor: 'rgb(248 113 113)',
-                borderRadius: '50%'
-              }}></div>
+              <div className={styles.notificationDot}></div>
             </Button>
 
             {/* 프로필 드롭다운 */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '0.5rem',
-              padding: '0.5rem 0.75rem',
-              cursor: 'pointer',
-              transition: 'background-color 200ms ease'
-            }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}>
-              <div style={{
-                width: '2rem',
-                height: '2rem',
-                background: 'linear-gradient(to right, rgb(244 114 182), rgb(168 85 247))',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '0.875rem',
-                fontWeight: 'bold',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-              }}>
+            <div className={styles.profileContainer}>
+              <div className={styles.profileAvatar}>
                 K
               </div>
-              <div style={{ display: 'none', textAlign: 'left' }}>
-                <style>
-                  {`
-                    @media (min-width: 640px) {
-                      .profile-info { display: block !important; }
-                    }
-                  `}
-                </style>
-                <div className="profile-info">
-                <p style={{ fontSize: '0.875rem', fontWeight: '500' }}>김사용자</p>
-                <p style={{ fontSize: '0.75rem', color: 'rgb(191 219 254)' }}>관리자</p>
-                </div>
+              <div className={styles.profileInfo}>
+                <p className={styles.profileName}>김사용자</p>
+                <p className={styles.profileRole}>관리자</p>
               </div>
               <svg
-                style={{ height: '1rem', width: '1rem', color: 'rgb(191 219 254)' }}
+                className={styles.profileDropdownIcon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

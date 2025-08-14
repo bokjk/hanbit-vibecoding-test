@@ -11,6 +11,7 @@ import {
 import type { Priority } from "@vive/types";
 import { useTodoForm } from "../hooks/use-todo";
 import { useSafeInput, logSecurityWarning } from "../utils/client-security";
+import styles from "./todo-input.module.scss";
 
 interface TodoInputProps {
   // Props는 선택적이며, 커스텀 처리를 원할 경우 사용
@@ -26,6 +27,7 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
   const { sanitizeInput } = useSafeInput();
 
   const handleAddClick = async () => {
+    console.log(`--------------------------`);
     if (!title.trim() || isSubmitting) return;
 
     try {
@@ -87,17 +89,44 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div className={styles.container}>
       {/* 데스크톱 레이아웃 */}
-      <div style={{ display: 'none', '@media (min-width: 768px)': { display: 'flex' }, width: '100%', alignItems: 'center', gap: '0.75rem' }}>
-        <style>
-          {`
-            @media (min-width: 768px) {
-              .desktop-layout { display: flex !important; }
-            }
-          `}
-        </style>
-        <div className="desktop-layout" style={{ display: 'none', width: '100%', alignItems: 'center', gap: '0.75rem' }}>
+      <div className={styles.desktopLayout}>
+        <Input
+          data-testid="todo-input"
+          type="text"
+          placeholder="새로운 할 일을 입력하세요..."
+          value={title}
+          onChange={handleTitleChange}
+          onKeyDown={handleKeyDown}
+          className={styles.input}
+        />
+        <Select
+          value={priority}
+          onValueChange={(value: Priority) => setPriority(value)}
+        >
+          <SelectTrigger data-testid="priority-select" className={styles.prioritySelect}>
+            <SelectValue placeholder="우선순위" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="high">높음</SelectItem>
+            <SelectItem value="medium">보통</SelectItem>
+            <SelectItem value="low">낮음</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          data-testid="add-todo-button"
+          onClick={handleAddClick}
+          className={styles.addButton}
+          disabled={!canCreate || isSubmitting || loading || !title.trim()}
+        >
+          {isSubmitting || loading ? "추가 중..." : "할 일 추가"}
+        </Button>
+      </div>
+
+      {/* 모바일 레이아웃 */}
+      <div className={styles.mobileLayout}>
+        <div className={styles.mobileInputWrapper}>
           <Input
             data-testid="todo-input"
             type="text"
@@ -105,14 +134,14 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
             value={title}
             onChange={handleTitleChange}
             onKeyDown={handleKeyDown}
-            style={{ flex: 1 }}
+            className={styles.input}
           />
           <Select
             value={priority}
             onValueChange={(value: Priority) => setPriority(value)}
           >
-            <SelectTrigger data-testid="priority-select" style={{ width: '8.75rem' }}>
-              <SelectValue placeholder="우선순위" />
+            <SelectTrigger className={styles.mobilePrioritySelect}>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="high">높음</SelectItem>
@@ -120,60 +149,15 @@ export function TodoInput({ onAddTodo }: TodoInputProps) {
               <SelectItem value="low">낮음</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            data-testid="add-todo-button"
-            onClick={handleAddClick}
-            style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}
-            disabled={!canCreate || isSubmitting || loading || !title.trim()}
-          >
-            {isSubmitting || loading ? "추가 중..." : "할 일 추가"}
-          </Button>
         </div>
-      </div>
-
-      {/* 모바일 레이아웃 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', '@media (min-width: 768px)': { display: 'none' } }}>
-        <style>
-          {`
-            @media (min-width: 768px) {
-              .mobile-layout { display: none !important; }
-            }
-          `}
-        </style>
-        <div className="mobile-layout" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Input
-              data-testid="todo-input"
-              type="text"
-              placeholder="새로운 할 일을 입력하세요..."
-              value={title}
-              onChange={handleTitleChange}
-              onKeyDown={handleKeyDown}
-              style={{ flex: 1 }}
-            />
-            <Select
-              value={priority}
-              onValueChange={(value: Priority) => setPriority(value)}
-            >
-              <SelectTrigger style={{ width: '5rem' }}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="high">높음</SelectItem>
-                <SelectItem value="medium">보통</SelectItem>
-                <SelectItem value="low">낮음</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button
-            data-testid="add-todo-button"
-            onClick={handleAddClick}
-            style={{ width: '100%' }}
-            disabled={!canCreate || isSubmitting || loading || !title.trim()}
-          >
-            {isSubmitting || loading ? "추가 중..." : "추가"}
-          </Button>
-        </div>
+        <Button
+          data-testid="add-todo-button"
+          onClick={handleAddClick}
+          className={styles.mobileAddButton}
+          disabled={!canCreate || isSubmitting || loading || !title.trim()}
+        >
+          {isSubmitting || loading ? "추가 중..." : "추가"}
+        </Button>
       </div>
     </div>
   );

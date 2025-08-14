@@ -1,6 +1,8 @@
 // SCSS 기본 스타일 및 변수
 // ================================
 
+@use 'sass:map';
+
 // 색상 변수
 $colors: (
   // 기본 색상
@@ -114,7 +116,7 @@ $breakpoints: (
 
 // 기본 스타일
 * {
-  border-color: map-get($colors, border);
+  border-color: map.get($colors, border);
   box-sizing: border-box;
 }
 
@@ -136,26 +138,26 @@ html {
 body {
   margin: 0;
   line-height: inherit;
-  background-color: map-get($colors, background);
-  color: map-get($colors, foreground);
+  background-color: map.get($colors, background);
+  color: map.get($colors, foreground);
 }
 
 // 유틸리티 함수
 @function color($name) {
-  @return map-get($colors, $name);
+  @return map.get($colors, $name);
 }
 
 @function spacing($size) {
-  @return map-get($spacing, $size);
+  @return map.get($spacing, $size);
 }
 
 @function font-size($size) {
-  @return map-get($font-sizes, $size);
+  @return map.get($font-sizes, $size);
 }
 
 // 반응형 믹스인
 @mixin responsive($breakpoint) {
-  @media (min-width: map-get($breakpoints, $breakpoint)) {
+  @media (min-width: map.get($breakpoints, $breakpoint)) {
     @content;
   }
 }
@@ -172,7 +174,7 @@ $shadows: (
 );
 
 @function shadow($size) {
-  @return map-get($shadows, $size);
+  @return map.get($shadows, $size);
 }
 
 // 기본 글로벌 스타일
@@ -312,7 +314,7 @@ textarea {
 input::placeholder,
 textarea::placeholder {
   opacity: 1;
-  color: map-get($colors, muted-foreground);
+  color: map.get($colors, muted-foreground);
 }
 
 button, [role="button"] {

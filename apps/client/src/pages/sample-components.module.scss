@@ -1,0 +1,108 @@
+.pageContainer {
+  & > *:not([hidden]) ~ *:not([hidden]) {
+    margin-top: 3rem; // space-y-12
+  }
+}
+
+.header {
+  text-align: center;
+  & > *:not([hidden]) ~ *:not([hidden]) {
+    margin-top: 1rem; // space-y-4
+  }
+}
+
+.title {
+  font-size: 2.25rem; /* text-4xl */
+  line-height: 2.5rem;
+  font-weight: 700;
+  color: #f7f8f8;
+}
+
+.description {
+  font-size: 1.125rem; /* text-lg */
+  line-height: 1.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 42rem; /* max-w-2xl */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cardContent {
+  & > *:not([hidden]) ~ *:not([hidden]) {
+    margin-top: 1.5rem; // space-y-6
+  }
+}
+
+.subheading {
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: #f7f8f8;
+  margin-bottom: 0.75rem;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.buttonGroupVertical {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.cardText {
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.inputGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.inputGrid2Cols {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.formContainer {
+  max-width: 28rem; /* max-w-md */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.form {
+  & > *:not([hidden]) ~ *:not([hidden]) {
+    margin-top: 1rem; // space-y-4
+  }
+}
+
+.formActions {
+  display: flex;
+  gap: 0.75rem;
+}
